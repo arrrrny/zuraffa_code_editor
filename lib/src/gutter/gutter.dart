@@ -17,6 +17,7 @@ const _foldingColumn = 2;
 
 class GutterWidget extends StatelessWidget {
   const GutterWidget({
+    super.key,
     required this.codeController,
     required this.style,
     required this.scrollController,

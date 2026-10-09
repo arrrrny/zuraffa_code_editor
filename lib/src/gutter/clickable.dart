@@ -6,6 +6,7 @@ class ClickableWidget extends StatelessWidget {
   final VoidCallback? onTap;
 
   const ClickableWidget({
+    super.key,
     required this.child,
     required this.onTap,
   });

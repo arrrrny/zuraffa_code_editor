@@ -86,7 +86,8 @@ final config = ScraperConfig();
 
       controller.foldAt(2);
       controller.foldAt(3);
-      expect(controller.code.text, config, reason: 'full text survives folding');
+      expect(controller.code.text, config,
+          reason: 'full text survives folding');
 
       controller.unfoldAt(2);
       controller.unfoldAt(3);
@@ -110,7 +111,8 @@ final config = ScraperConfig(
   parsers: [  ],
 );
 ''');
-      expect(controller.code.text, config, reason: 'full text survives folding');
+      expect(controller.code.text, config,
+          reason: 'full text survives folding');
 
       controller.unfoldAt(2);
       controller.unfoldAt(3);
@@ -181,8 +183,7 @@ class C {
             '// second line\n'
             '// third line\n',
         language: java,
-      )
-        ..foldAt(0);
+      )..foldAt(0);
 
       // The hidden range must resolve to the block's last line — that is what
       // keeps the gutter numbering and the fold-toggle row stable.

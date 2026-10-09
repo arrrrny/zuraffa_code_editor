@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 import 'code_line.dart';
 
 @immutable
-class CodeLines with EquatableMixin {
+class CodeLines with Equatable {
   final List<CodeLine> lines;
 
   const CodeLines(this.lines);

@@ -8,6 +8,7 @@ class DropdownSelector<T> extends StatelessWidget {
   final String Function(T item)? itemToString;
 
   const DropdownSelector({
+    super.key,
     required this.icon,
     required this.onChanged,
     required this.value,

@@ -482,8 +482,8 @@ class _CodeFieldState extends State<CodeField> {
 
   Widget _buildGutter() {
     final lineNumberSize = textStyle.fontSize;
-    final lineNumberColor =
-        widget.gutterStyle.textStyle?.color ?? textStyle.color?.withOpacity(.5);
+    final lineNumberColor = widget.gutterStyle.textStyle?.color ??
+        textStyle.color?.withValues(alpha: .5);
 
     final lineNumberTextStyle =
         (widget.gutterStyle.textStyle ?? textStyle).copyWith(
@@ -547,11 +547,11 @@ class _CodeFieldState extends State<CodeField> {
   }
 
   double _getCaretHeight(TextPainter textPainter) {
-    final double? caretFullHeight = textPainter.getFullHeightForCaret(
+    final double caretFullHeight = textPainter.getFullHeightForCaret(
       widget.controller.selection.base,
       Rect.zero,
     );
-    return caretFullHeight ?? 0;
+    return caretFullHeight;
   }
 
   double _getPopupLeftOffset(TextPainter textPainter) {
@@ -610,7 +610,7 @@ class _CodeFieldState extends State<CodeField> {
 
   OverlayEntry _buildSearchOverlay() {
     final colorScheme = Theme.of(context).colorScheme;
-    final borderColor = _getTextColorFromTheme() ?? colorScheme.onBackground;
+    final borderColor = _getTextColorFromTheme() ?? colorScheme.onSurface;
     return OverlayEntry(
       builder: (context) {
         return Positioned(

@@ -18,8 +18,9 @@ class GutterErrorWidget extends StatefulWidget {
 
   const GutterErrorWidget(
     this.issue,
-    this.popupTextStyle,
-  );
+    this.popupTextStyle, {
+    super.key,
+  });
 
   @override
   State<GutterErrorWidget> createState() => _GutterErrorWidgetState();

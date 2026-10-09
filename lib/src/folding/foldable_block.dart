@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 import '../util/inclusive_range.dart';
 import 'foldable_block_type.dart';
 
-class FoldableBlock extends InclusiveRange with EquatableMixin {
+class FoldableBlock extends InclusiveRange with Equatable {
   final int firstLine;
   final int lastLine;
   final FoldableBlockType type;
