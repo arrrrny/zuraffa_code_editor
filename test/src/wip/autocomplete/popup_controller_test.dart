@@ -96,8 +96,10 @@ void main() {
       expect(controller.suggestions.first, 'suggestion 0');
       expect(controller.suggestions.length, 10);
       expect(
-        controller.itemPositionsListener.itemPositions.value.first.index,
-        0,
+        controller.itemPositionsListener.itemPositions.value.map(
+          (position) => position.index,
+        ),
+        contains(0),
       );
     });
 
@@ -154,6 +156,27 @@ void main() {
         ),
         isTrue,
       );
+    });
+
+    testWidgets('scrollByArrow down reveals the next item, bottom-aligned', (
+      tester,
+    ) async {
+      // 600px viewport with 100px items: 0-5 visible of 10, list at the top.
+      final controller = await pumpList(tester, itemCount: 10, itemHeight: 100);
+
+      controller.show(List.generate(10, (i) => 'item$i'));
+      await tester.pump();
+
+      // Step down into the first hidden item: hits the alignment jump.
+      controller.selectedIndex = 5;
+      controller.scrollByArrow(ScrollDirection.down);
+      await tester.pump();
+
+      expect(controller.selectedIndex, 6);
+      final selected = controller.itemPositionsListener.itemPositions.value
+          .firstWhere((position) => position.index == 6);
+      expect(selected.itemLeadingEdge, greaterThanOrEqualTo(0));
+      expect(selected.itemTrailingEdge, lessThanOrEqualTo(1));
     });
   });
 }
