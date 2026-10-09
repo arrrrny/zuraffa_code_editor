@@ -8,15 +8,21 @@
 ## Summary
 
 Bumped the remaining outdated dependencies (equatable 2.1.0 → 3.0.0,
-url_launcher 6.3.2 → 6.3.3), dropped the Flutter < 3.10 floor (sdk → Dart 3.0),
-and resolved the equatable 3 fallout. Closes upstream reports 314/303/253/245.
+url_launcher 6.3.2 → 6.3.3), dropped the Flutter < 3.10 floor, and resolved
+the equatable 3 fallout. Closes upstream reports 314/303/253/245.
+
+The declared floor is the *effective* one: `url_launcher 6.3.3` requires
+Dart ^3.11.0 / Flutter >=3.41.0, so `environment` declares
+`sdk >=3.11.0 <4.0.0` and `flutter >=3.41.0` — anything lower cannot resolve.
 
 ## Changes
 
 | File | Change | Notes |
 |------|--------|-------|
-| `pubspec.yaml` | modified | equatable ^3.0.0, url_launcher ^6.3.3, sdk ">=3.0.0 <4.0.0", flutter ">=3.10.0" |
-| `example/pubspec.yaml` | modified | sdk floor aligned to >=3.0.0 <4.0.0 |
+| `pubspec.yaml` | modified | equatable ^3.0.0, url_launcher ^6.3.3, sdk ">=3.11.0 <4.0.0", flutter ">=3.41.0" |
+| `example/pubspec.yaml` | modified | sdk floor aligned to >=3.11.0 <4.0.0, flutter ">=3.41.0" |
+| `lib/src/gutter/gutter.dart` | modified | removed dead Flutter < 3.10 compat header and `children!` assertions |
+| `.github/workflows/dart.yaml` | modified | CI `flutter_version` 3.19.6 → 3.47.5 so `flutter pub get` resolves |
 | `lib/src/folding/foldable_block.dart` | modified | EquatableMixin → Equatable; two enum switches → equality expressions |
 | `lib/src/folding/invalid_foldable_block.dart` | modified | EquatableMixin → Equatable |
 | `lib/src/code/code_lines.dart` | modified | EquatableMixin → Equatable |
@@ -43,12 +49,16 @@ bool get isImports => type == FoldableBlockType.imports;
 Behavior identical; the `// ignore` comments and dead trailing `return false`
 blocks are gone.
 
-`lib/src/gutter/gutter.dart`'s Flutter < 3.10 compat header was **kept**: the
-`children!` assertions it silences are required on older supported Flutters
-(TableRow.children only became non-nullable in newer framework versions), so
-removing it would break the 3.10–3.18 range the floor now declares.
+`lib/src/gutter/gutter.dart`'s Flutter < 3.10 compat header is **removed**:
+with the floor at Flutter ≥ 3.41, `TableRow.children` is non-nullable on
+every supported framework, so the header's own TODO ("remove when dropping
+support for Flutter < 3.10") is satisfied and the `children!` assertions it
+silenced are gone with it.
 
 ## Verification
+
+Toolchain: **Flutter 3.47.5 stable / Dart 3.13.4** (the version pinned in
+`.github/workflows/dart.yaml`).
 
 - `dart analyze --fatal-infos` → no errors, no warnings. 16 info-level
   deprecations remain, all pre-existing on master (withOpacity/onBackground/
@@ -59,14 +69,14 @@ removing it would break the 3.10–3.18 range the floor now declares.
   verified identical drift on master — pre-existing, left for the CI-alignment
   chore.
 - `flutter pub get` → resolves cleanly in both package and example.
-- `flutter test` → running at time of writing (see PR checks).
+- `flutter test` → all 295 tests pass on Flutter 3.47.5.
 
 ## Deviations from Assessment
 
-- The assessment proposed removing the `gutter.dart` compat header; analysis
-  showed the `!` assertions are load-bearing for Flutter < the version where
-  `TableRow.children` became non-nullable, so the header stays. Deviation
-  recorded rather than silently changing the plan.
+- The assessment proposed removing the `gutter.dart` compat header; the
+  initial pass kept it out of caution. Review confirmed it is dead code once
+  the floor reflects the real (3.41+) effective floor, so it is removed after
+  all — matching the assessment.
 - `foldable_block.dart` switch rewrite was not foreseen in the assessment; it is
   fallout the equatable/modern-SDK analysis surfaced and is included here
   because it is the same file family the bump touched.

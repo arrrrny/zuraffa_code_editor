@@ -14,8 +14,8 @@ topics:
   - zuraffa
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-  flutter: ">=3.10.0"
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: ">=3.41.0"
 
 dependencies:
   autotrie: ^2.0.0

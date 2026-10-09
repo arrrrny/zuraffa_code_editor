@@ -1,6 +1,3 @@
-// TODO(alexeyinkin): Remove when dropping support for Flutter < 3.10, https://github.com/akvelon/flutter-code-editor/issues/245
-// ignore_for_file: unnecessary_non_null_assertion
-
 import 'package:flutter/material.dart';
 
 import '../code_field/code_controller.dart';
@@ -98,7 +95,7 @@ class GutterWidget extends StatelessWidget {
         continue;
       }
 
-      tableRows[lineIndex].children![_lineNumberColumn] = Text(
+      tableRows[lineIndex].children[_lineNumberColumn] = Text(
         style.showLineNumbers ? '${i + 1}' : ' ',
         style: style.textStyle,
         textAlign: style.textAlign,
@@ -116,7 +113,7 @@ class GutterWidget extends StatelessWidget {
       if (lineIndex == null || lineIndex >= tableRows.length) {
         continue;
       }
-      tableRows[lineIndex].children![_issueColumn] = GutterErrorWidget(
+      tableRows[lineIndex].children[_issueColumn] = GutterErrorWidget(
         issue,
         style.errorPopupTextStyle ??
             (throw Exception('Error popup style should never be null')),
@@ -135,7 +132,7 @@ class GutterWidget extends StatelessWidget {
 
       final isFolded = code.foldedBlocks.contains(block);
 
-      tableRows[lineIndex].children![_foldingColumn] = FoldToggle(
+      tableRows[lineIndex].children[_foldingColumn] = FoldToggle(
         color: style.textStyle?.color,
         isFolded: isFolded,
         onTap: isFolded
@@ -152,7 +149,7 @@ class GutterWidget extends StatelessWidget {
         continue;
       }
 
-      tableRows[lineIndex].children![_foldingColumn] = FoldToggle(
+      tableRows[lineIndex].children[_foldingColumn] = FoldToggle(
         color: style.textStyle?.color,
         isFolded: true,
         onTap: () => codeController.unfoldAt(block.firstLine),
