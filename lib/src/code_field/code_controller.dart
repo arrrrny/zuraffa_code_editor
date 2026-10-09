@@ -540,7 +540,13 @@ class CodeController extends TextEditingController {
       _updateCodeIfChanged(editResult.fullTextAfter);
 
       if (newValue.text != _code.visibleText) {
-        if (newValue.text.length > _code.visibleText.length) {
+        if (newValue.selection.isCollapsed &&
+            newValue.text.length > _code.visibleText.length) {
+          newValue = TextEditingValue(
+            text: _code.visibleText,
+            selection: _code.hiddenRanges.cutSelection(selectionSnapshot),
+          );
+        } else if (newValue.text.length > _code.visibleText.length) {
           // Manually typed in a text that has become a hidden range.
           newValue = newValue.replacedText(_code.visibleText);
         } else {
