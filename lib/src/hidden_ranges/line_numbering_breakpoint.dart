@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 /// Describes a break in continuous line numbers.
-class LineNumberingBreakpoint with EquatableMixin {
+class LineNumberingBreakpoint with Equatable {
   /// The full line index.
   final int full;
 

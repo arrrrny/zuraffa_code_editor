@@ -7,7 +7,7 @@ import 'foldable_block_type.dart';
 
 /// Anything that failed to be a [FoldableBlock] due to missing
 /// the opposite pair character.
-class InvalidFoldableBlock with EquatableMixin {
+class InvalidFoldableBlock with Equatable {
   final int? startLine;
   final int? endLine;
   final Issue issue;

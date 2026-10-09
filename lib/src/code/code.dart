@@ -467,9 +467,7 @@ class Code {
   /// [foldableBlockToHiddenRange]), but it must hide content lines whole.
   static bool _isClosingLine(CodeLine line) {
     final text = line.text.trimLeft();
-    return text.startsWith(')') ||
-        text.startsWith(']') ||
-        text.startsWith('}');
+    return text.startsWith(')') || text.startsWith(']') || text.startsWith('}');
   }
 
   HiddenRange foldableBlockToHiddenRange(FoldableBlock block) {

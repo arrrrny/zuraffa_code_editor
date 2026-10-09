@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../code/text_range.dart';
 
-class HiddenRange extends NormalizedTextRange with EquatableMixin {
+class HiddenRange extends NormalizedTextRange with Equatable {
   final int firstLine;
   final int lastLine;
 

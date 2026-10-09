@@ -19,10 +19,10 @@ extension TextStyleExtension on TextStyle {
 
     return copyWith(
       color: Color.fromARGB(
-        clr.alpha ~/ 2,
-        clr.red,
-        clr.green,
-        clr.blue,
+        (clr.a * 255.0).round() ~/ 2,
+        (clr.r * 255.0).round(),
+        (clr.g * 255.0).round(),
+        (clr.b * 255.0).round(),
       ),
     );
   }
