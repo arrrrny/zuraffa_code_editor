@@ -2,7 +2,7 @@ name: zuraffa_code_editor
 description: >-
   A customizable Flutter code field supporting syntax highlighting, code
   folding with visible closing lines, autocompletion and themes.
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/arrrrny/zuraffa_code_editor
 homepage: https://zuraffa.com
 issue_tracker: https://github.com/arrrrny/zuraffa_code_editor/issues
