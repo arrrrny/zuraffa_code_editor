@@ -6,8 +6,7 @@ import 'package:zuraffa_code_editor/src/code/code.dart';
 import 'package:zuraffa_code_editor/src/code/code_line.dart';
 import 'package:zuraffa_code_editor/src/named_sections/parsers/brackets_start_end.dart';
 
-CodeLine _line(String text, {int start = 0}) =>
-    CodeLine.fromTextAndStart(text, start);
+CodeLine _line(String text) => CodeLine.fromTextAndStart(text, 0);
 
 void main() {
   group('CodeLine.copyWith', () {
@@ -65,6 +64,10 @@ def outer():
       final lines = code.lines.lines;
       final lockedLine = lines.firstWhere(
         (l) => l.isReadOnly && l.text.contains('def locked():'),
+        orElse: () => throw StateError(
+          'no read-only line matching "def locked():" — '
+          'named read-only section marking regressed',
+        ),
       );
 
       expect(lockedLine.text.trim(), 'def locked():');
