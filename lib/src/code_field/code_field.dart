@@ -309,6 +309,16 @@ class _CodeFieldState extends State<CodeField> {
     widget.controller.searchController.addListener(_onSearchControllerChange);
   }
 
+  /// The old `_codeScroll != null` half of this guard was dead weight:
+  /// `_codeScroll` and `_horizontalCodeScroll` are assigned unconditionally in
+  /// [initState] and only listeners attached after that can fire, so a
+  /// laid-out editor box implies both are non-null for the `!` unwraps in
+  /// `_onTextChanged`, `_getPopupLeftOffset` and `_getPopupTopOffset`.
+  bool get _isEditorBoxLaidOut {
+    final box = _editorKey.currentContext?.findRenderObject() as RenderBox?;
+    return box != null && box.hasSize;
+  }
+
   void rebuild() {
     setState(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -342,17 +352,20 @@ class _CodeFieldState extends State<CodeField> {
       if (line.length > longestLine.length) longestLine = line;
     });
 
-    if (_codeScroll != null && _editorKey.currentContext != null) {
-      final box = _editorKey.currentContext!.findRenderObject() as RenderBox?;
-      _editorOffset = box?.localToGlobal(Offset.zero);
+    if (_isEditorBoxLaidOut) {
+      final box = _editorKey.currentContext!.findRenderObject() as RenderBox;
+      _editorOffset = box.localToGlobal(Offset.zero);
       if (_editorOffset != null) {
         var fixedOffset = _editorOffset!;
         fixedOffset += Offset(0, scrollOffsetOrZero(_codeScroll!));
         _editorOffset = fixedOffset;
       }
-    }
 
-    rebuild();
+      // While the editor box has no size the frame is still being built or
+      // laid out (e.g. an analyzeCode() notification landing there): both the
+      // offset read above and setState below would throw.
+      rebuild();
+    }
   }
 
   // Wrap the codeField in a horizontal scrollView
@@ -514,6 +527,12 @@ class _CodeFieldState extends State<CodeField> {
   }
 
   void _updatePopupOffset() {
+    if (!_isEditorBoxLaidOut) {
+      // Same mid-frame window as in _onTextChanged: without a laid-out editor
+      // box the offsets cannot be positioned and setState would throw.
+      return;
+    }
+
     final textPainter = _getTextPainter(widget.controller.text);
     final caretHeight = _getCaretHeight(textPainter);
 
