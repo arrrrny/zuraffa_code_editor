@@ -57,11 +57,13 @@ extension TextEditingValueExtension on TextEditingValue {
     }
 
     final text = this.text;
-    final boundary = wordSplitPatternForScan();
     final start = cursorPosition > 0
-        ? text.lastIndexOf(boundary, cursorPosition - 1) + 1
+        ? text.lastIndexOf(wordSplitPatternForScan(), cursorPosition - 1) + 1
         : 0;
-    final firstNonWord = text.indexOf(boundary, cursorPosition);
+    final firstNonWord = text.indexOf(
+      wordSplitPatternForScan(),
+      cursorPosition,
+    );
     final end = firstNonWord == -1 ? text.length : firstNonWord;
 
     return [start, end];

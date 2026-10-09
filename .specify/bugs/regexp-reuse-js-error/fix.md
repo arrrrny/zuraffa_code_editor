@@ -24,8 +24,9 @@
 
 ## Verification limits
 
-The hazard is dart2js-specific; the VM caches `RegExp` objects by pattern, so
-the shared-instance mutation cannot be observed by a VM test. The VM-side
+The hazard is dart2js-specific; the VM caches the compiled pattern and a
+freshly constructed instance behaves identically, so the shared-instance
+mutation cannot be observed by a VM test. The VM-side
 pins are the seam's contract and behavioral determinism; the web-specific
 value rests on matching the form upstream confirmed fixed
 (akvelon/flutter-code-editor#61).

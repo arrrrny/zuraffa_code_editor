@@ -21,4 +21,4 @@ and routed `_getWordAtCursorStartEnd()` through it. All tests pass.
 
 ## Full suite
 
-328 tests (existing suite unchanged) pass with the fix in place.
+298 tests (existing suite unchanged) pass with the fix in place.

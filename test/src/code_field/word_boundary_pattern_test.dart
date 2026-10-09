@@ -9,9 +9,10 @@ void main() {
   // between calls on a reused RegExp, which upstream corrupted editing state
   // with (akvelon/flutter-code-editor#61). The word-boundary scan therefore
   // goes through wordSplitPatternForScan() instead of handing RegExps.wordSplit
-  // to the engine directly. (On the VM Dart caches RegExp objects by pattern,
-  // so the hazard and the seam are both invisible here — the VM-side pin is
-  // the seam's contract plus deterministic results.)
+  // to the engine directly. (On the VM the compiled pattern is cached, so a
+  // fresh instance behaves identically and the hazard and the seam are both
+  // invisible here — the VM-side pin is the seam's contract plus
+  // deterministic results.)
   group('word boundary scanning', () {
     test('the scan pattern matches RegExps.wordSplit', () {
       expect(wordSplitPatternForScan().pattern, RegExps.wordSplit.pattern);

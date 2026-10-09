@@ -20,7 +20,8 @@
 
 ## Caveat (honest)
 
-The defect itself is dart2js-only and the VM caches `RegExp` by pattern, so
-the "revert to the shared instance" mutation cannot fail any VM test. Same
+The defect itself is dart2js-only and the VM caches the compiled pattern (a
+fresh instance behaves identically), so the "revert to the shared instance"
+mutation cannot fail any VM test. Same
 honesty standard as the mounted/disposed bug's verification: record the gap
 rather than claim full mutation coverage.

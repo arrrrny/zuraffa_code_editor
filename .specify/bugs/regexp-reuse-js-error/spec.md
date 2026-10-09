@@ -31,9 +31,10 @@ Route both engine calls through a documented seam:
 RegExp wordSplitPatternForScan() => RegExp(RegExps.wordSplit.pattern);
 ```
 
-Behavior on the VM is unchanged (Dart caches `RegExp` objects by pattern, so
-the constructed instance may even be the same object — the hazard only exists
-on dart2js, which has no such cache).
+Behavior on the VM is unchanged (the VM caches the compiled pattern and a
+freshly constructed instance behaves identically — the hazard only exists on
+dart2js, which has no such cache and can carry `lastIndex` state on a reused
+instance).
 
 ## Out of scope
 
