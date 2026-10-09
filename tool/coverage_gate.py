@@ -31,9 +31,21 @@ DEFAULT_LCOV = os.path.join(REPO_ROOT, "coverage", "lcov.info")
 EXEMPT_FILES = {
     # Reaches the DartPad service over HTTP; there is no network in CI.
     "lib/src/analyzer/dartpad_analyzer.dart",
-    # Web-only spellcheck workaround; the non-web stub is the other half of
-    # the conditional import and is exercised instead.
-    "lib/src/code_field/js_workarounds/js_workarounds_web.dart",
+    # The eight entries below are unreachable from the package's public API:
+    # they are not exported by `zuraffa_code_editor.dart` and no file under
+    # `lib/` imports them. They only show up in `coverage/lcov.info` because
+    # the CI helper test imports every file under `lib/` to force coverage
+    # collection. Heavily-used wip modules (`wip/autocomplete/*`) are wired
+    # into `code_field.dart` / `code_controller.dart` and stay inside the
+    # gate — close their gaps with tests, not exemptions.
+    "lib/src/code/text_span.dart",
+    "lib/src/wip/TooltipTextSpan.dart",
+    "lib/src/wip/getErrorsMap.dart",
+    "lib/src/wip/language_syntax/brackets_counting.dart",
+    "lib/src/wip/language_syntax/golang_syntax.dart",
+    "lib/src/wip/language_syntax/java_dart_syntax.dart",
+    "lib/src/wip/language_syntax/python_syntax.dart",
+    "lib/src/wip/language_syntax/scala_syntax.dart",
 }
 
 
@@ -111,6 +123,14 @@ def main() -> int:
     if not stats:
         sys.stderr.write("No instrumented lines found in %s.\n" % args.lcov)
         return 2
+
+    matched = {relative(p) for p in stats}
+    stale = sorted(EXEMPT_FILES - matched)
+    if stale:
+        print(
+            "stale exemptions (matched nothing in %s): %s"
+            % (os.path.basename(args.lcov), ", ".join(stale))
+        )
 
     counted = {
         path: (cov, tot)

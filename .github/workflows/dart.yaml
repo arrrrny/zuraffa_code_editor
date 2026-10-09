@@ -59,7 +59,16 @@ jobs:
       - name: Test
         run: flutter test --coverage
 
-      # As we don't use file generation, it is fine to include everything.
+      # Ratchet, not a wall: the number only ever rises, and only in the PR
+      # that adds the tests behind it. Baseline on this branch with the
+      # unreachable files exempted (see EXEMPT_FILES in tool/coverage_gate.py):
+      # the CI helper imports every file under lib/, so dead/wip modules the
+      # package never references would otherwise drag the number down. The
+      # gate sits at 88.0 so master is green and every coverage PR raises it.
+      - name: Coverage gate
+        run: python3 tool/coverage_gate.py --min 88.0
+
+      # As we don't use file generation, it's fine to include everything.
       # - name: Install lcov
       #   run: sudo apt-get install -y lcov
       #
