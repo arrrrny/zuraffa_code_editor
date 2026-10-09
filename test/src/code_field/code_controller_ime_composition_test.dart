@@ -52,6 +52,75 @@ void main() {
       controller.dispose();
     });
 
+    test(
+      'Typing with an IME while a block is folded keeps the folded code',
+      () {
+        final controller = createController(
+          '// a\n// b\nint x = 1;\nvoid main() {}\n',
+        );
+        controller.foldCommentAtLineZero();
+
+        final visible = controller.text;
+        expect(
+          visible.contains('// b'),
+          false,
+          reason: 'Precondition: the block is folded',
+        );
+        controller.selection = TextSelection.collapsed(offset: visible.length);
+
+        controller.value = TextEditingValue(
+          text: '${visible}ni',
+          selection: TextSelection.collapsed(offset: visible.length + 2),
+          composing: TextRange(start: visible.length, end: visible.length + 2),
+        );
+
+        controller.value = TextEditingValue(
+          text: '$visible 你',
+          selection: TextSelection.collapsed(offset: visible.length + 2),
+          composing: TextRange.empty,
+        );
+
+        expect(
+          controller.fullText,
+          '// a\n// b\nint x = 1;\nvoid main() {}\n',
+          reason: 'Folded content must not be dropped by IME input',
+        );
+        expect(controller.text, '$visible 你');
+        controller.dispose();
+      },
+    );
+
+    test('The autocomplete popup is hidden when a composition commits', () {
+      final controller = createController('');
+      controller.popupController.show(['one', 'two']);
+
+      controller.value = const TextEditingValue(
+        text: 'ni',
+        selection: TextSelection.collapsed(offset: 2),
+        composing: TextRange(start: 0, end: 2),
+      );
+
+      expect(
+        controller.popupController.shouldShow,
+        true,
+        reason: 'Precondition: the popup is open during composition',
+      );
+
+      controller.value = const TextEditingValue(
+        text: '你',
+        selection: TextSelection.collapsed(offset: 1),
+        composing: TextRange.empty,
+      );
+
+      expect(
+        controller.popupController.shouldShow,
+        false,
+        reason:
+            'The commit must drop suggestions computed before the composition',
+      );
+      controller.dispose();
+    });
+
     test('Modifiers do not fire while composing', () {
       final controller = createController('a');
       controller.selection = const TextSelection.collapsed(offset: 1);

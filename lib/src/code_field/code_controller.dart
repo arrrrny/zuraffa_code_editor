@@ -328,9 +328,12 @@ class CodeController extends TextEditingController {
   /// While composing, the code text and the selection are owned by the
   /// platform: applying diff-based transforms or shortcuts on top of it
   /// corrupts the composition commit.
-  bool get hasActiveComposition {
-    final composing = value.composing;
+  static bool _hasActiveComposing(TextRange composing) {
     return composing.isValid && !composing.isCollapsed;
+  }
+
+  bool get hasActiveComposition {
+    return _hasActiveComposing(value.composing);
   }
 
   KeyEventResult _onKeyDownRepeat(KeyEvent event) {
@@ -461,8 +464,9 @@ class CodeController extends TextEditingController {
     final hasTextChanged = newValue.text != super.value.text;
     final hasSelectionChanged = newValue.selection != super.value.selection;
     final hasComposingChanged = newValue.composing != super.value.composing;
-    final hasActiveComposingInNewValue =
-        newValue.composing.isValid && !newValue.composing.isCollapsed;
+    final hasActiveComposingInNewValue = _hasActiveComposing(
+      newValue.composing,
+    );
 
     if (!hasTextChanged && !hasSelectionChanged && !hasComposingChanged) {
       return;
@@ -473,12 +477,32 @@ class CodeController extends TextEditingController {
         return;
       }
 
+      // Rebuilding the full text from the visible text would silently drop
+      // folded content; the diff path maps the edit into the full text.
+      if (hasTextChanged && code.hiddenRanges.ranges.isNotEmpty) {
+        historyController.beforeCodeControllerValueChanged(
+          code: _code,
+          selection: newValue.selection,
+          isTextChanging: true,
+        );
+        super.value = newValue;
+        return;
+      }
+
       // During IME composition, preserve platform-provided editing state
       // and avoid applying editor transforms that may break composition commit.
       // Keep internal code state in sync so highlighted rendering doesn't drift.
       if (hasTextChanged) {
         _updateCodeIfChanged(newValue.text);
       }
+
+      // The update that ends a composition is a commit: the popup's
+      // suggestions were computed from the pre-composition text and must
+      // not survive it.
+      if (hadActiveCompositionInOldValue && !hasActiveComposingInNewValue) {
+        popupController.hide();
+      }
+
       super.value = newValue;
       return;
     }
