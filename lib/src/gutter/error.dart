@@ -46,20 +46,17 @@ class _GutterErrorWidgetState extends State<GutterErrorWidget> {
       onExit: (event) {
         // Delay event here to keep overlay
         // if mouse has exited the icon and entered popup.
-        Future.delayed(
-          const Duration(milliseconds: 50),
-          () {
-            if (!mounted) {
-              return;
+        Future.delayed(const Duration(milliseconds: 50), () {
+          if (!mounted) {
+            return;
+          }
+          setState(() {
+            if (!_mouseEnteredPopup) {
+              _entry?.remove();
+              _entry = null;
             }
-            setState(() {
-              if (!_mouseEnteredPopup) {
-                _entry?.remove();
-                _entry = null;
-              }
-            });
-          },
-        );
+          });
+        });
       },
       child: errorIcon,
     );

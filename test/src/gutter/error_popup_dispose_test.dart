@@ -73,9 +73,7 @@ void main() {
     await wt.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: const Center(
-            child: GutterErrorWidget(issue, TextStyle()),
-          ),
+          body: const Center(child: GutterErrorWidget(issue, TextStyle())),
         ),
       ),
     );

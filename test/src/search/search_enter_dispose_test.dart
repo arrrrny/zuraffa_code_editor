@@ -23,9 +23,7 @@ void main() {
 
     await wt.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          body: CodeField(controller: controller),
-        ),
+        home: Scaffold(body: CodeField(controller: controller)),
       ),
     );
 
@@ -59,9 +57,7 @@ void main() {
 
     await wt.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          body: CodeField(controller: controller),
-        ),
+        home: Scaffold(body: CodeField(controller: controller)),
       ),
     );
 
