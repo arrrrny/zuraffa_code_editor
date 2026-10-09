@@ -311,11 +311,26 @@ class CodeController extends TextEditingController {
   }
 
   KeyEventResult onKey(KeyEvent event) {
+    if (hasActiveComposition) {
+      return KeyEventResult.ignored;
+    }
+
     if (event is KeyDownEvent || event is KeyRepeatEvent) {
       return _onKeyDownRepeat(event);
     }
 
     return KeyEventResult.ignored; // The framework will handle.
+  }
+
+  /// Whether the platform reports an in-progress IME composition,
+  /// e.g. Chinese pinyin or Japanese kana input.
+  ///
+  /// While composing, the code text and the selection are owned by the
+  /// platform: applying diff-based transforms or shortcuts on top of it
+  /// corrupts the composition commit.
+  bool get hasActiveComposition {
+    final composing = value.composing;
+    return composing.isValid && !composing.isCollapsed;
   }
 
   KeyEventResult _onKeyDownRepeat(KeyEvent event) {
@@ -339,6 +354,10 @@ class CodeController extends TextEditingController {
   }
 
   void onEnterKeyAction() {
+    if (hasActiveComposition) {
+      return;
+    }
+
     if (popupController.shouldShow) {
       insertSelectedWord();
       return;
@@ -362,6 +381,10 @@ class CodeController extends TextEditingController {
   }
 
   void onTabKeyAction() {
+    if (hasActiveComposition) {
+      return;
+    }
+
     if (popupController.shouldShow) {
       insertSelectedWord();
       return;
@@ -434,10 +457,29 @@ class CodeController extends TextEditingController {
 
   @override
   set value(TextEditingValue newValue) {
+    final hadActiveCompositionInOldValue = hasActiveComposition;
     final hasTextChanged = newValue.text != super.value.text;
     final hasSelectionChanged = newValue.selection != super.value.selection;
+    final hasComposingChanged = newValue.composing != super.value.composing;
+    final hasActiveComposingInNewValue =
+        newValue.composing.isValid && !newValue.composing.isCollapsed;
 
-    if (!hasTextChanged && !hasSelectionChanged) {
+    if (!hasTextChanged && !hasSelectionChanged && !hasComposingChanged) {
+      return;
+    }
+
+    if (hasActiveComposingInNewValue || hadActiveCompositionInOldValue) {
+      if (readOnly && hasTextChanged) {
+        return;
+      }
+
+      // During IME composition, preserve platform-provided editing state
+      // and avoid applying editor transforms that may break composition commit.
+      // Keep internal code state in sync so highlighted rendering doesn't drift.
+      if (hasTextChanged) {
+        _updateCodeIfChanged(newValue.text);
+      }
+      super.value = newValue;
       return;
     }
 
@@ -905,6 +947,17 @@ class CodeController extends TextEditingController {
     TextStyle? style,
     bool? withComposing,
   }) {
+    // IME composition (e.g. pinyin) depends on composing-aware rendering.
+    // When composing is active, delegate to Flutter's default implementation
+    // so the composing range is preserved and rendered correctly.
+    if (hasActiveComposition) {
+      return super.buildTextSpan(
+        context: context,
+        style: style,
+        withComposing: withComposing ?? true,
+      );
+    }
+
     final spanBeforeSearch = _createTextSpan(context: context, style: style);
 
     final visibleSearchResult = _code.hiddenRanges.cutSearchResult(

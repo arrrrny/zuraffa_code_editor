@@ -319,11 +319,24 @@ class Code {
     TextSelection oldSelection,
     TextEditingValue visibleAfter,
   ) {
+    // An IME may report selections that are out of range for the text
+    // they are applied to while a composition is being replaced.
+    final clampedOldSelection = _clampSelection(
+      oldSelection,
+      visibleText.length,
+    );
+    final clampedVisibleAfter = visibleAfter.copyWith(
+      selection: _clampSelection(
+        visibleAfter.selection,
+        visibleAfter.text.length,
+      ),
+    );
+
     final visibleRangeAfter =
-        visibleAfter.getChangedRange(
-          TextEditingValue(text: visibleText, selection: oldSelection),
+        clampedVisibleAfter.getChangedRange(
+          TextEditingValue(text: visibleText, selection: clampedOldSelection),
         ) ??
-        visibleAfter.text.getChangedRange(
+        clampedVisibleAfter.text.getChangedRange(
           visibleText,
           attributeChangeTo: TextAffinity.upstream,
         );
@@ -387,7 +400,7 @@ class Code {
 
     final fullTextAfter =
         rangeBefore.textBefore(text) +
-        visibleRangeAfter.textInside(visibleAfter.text) +
+        visibleRangeAfter.textInside(clampedVisibleAfter.text) +
         rangeBefore.textAfter(text);
 
     // The line at [start] has changed for sure.
@@ -561,6 +574,26 @@ class Code {
           ?.splitLines(),
       visibleText: hiddenRanges.cutString(text),
       visibleSectionNames: visibleSectionNames,
+    );
+  }
+
+  static TextSelection _clampSelection(
+    TextSelection selection,
+    int textLength,
+  ) {
+    int clampOffset(int offset) {
+      if (offset < 0) {
+        return 0;
+      }
+      if (offset > textLength) {
+        return textLength;
+      }
+      return offset;
+    }
+
+    return selection.copyWith(
+      baseOffset: clampOffset(selection.baseOffset),
+      extentOffset: clampOffset(selection.extentOffset),
     );
   }
 }
