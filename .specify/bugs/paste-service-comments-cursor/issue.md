@@ -1,36 +1,69 @@
-# Bug Issue: Cursor moves incorrectly when pasting code with service comments
+# Issue: Cursor moves incorrectly when pasting code with service comments
 
 - **Slug**: paste-service-comments-cursor
-- **Fetched**: 2026-10-09
+- **Fetched**: 2026-10-09 (re-assessed 2026-10-10)
 - **Issue**: 43
 - **URL**: https://github.com/arrrrny/zuraffa_code_editor/issues/43
-- **State**: open
-- **Severity**: unknown
-- **Author**: arrrrny
+- **Synced from**: `akvelon/flutter-code-editor#88`
+- **Severity**: medium
 - **Labels**: bug
 
-## Body
+## Body (upstream verbatim)
 
-Upstream body verbatim:
+> ### Steps to Reproduce:
+>
+> 1. Use Java.
+> 2. Use the source code:
+>
+> ```java
+> // [START section2]
+> void method() {
+> }
+> ```
+>
+> 3. Paste this code in the end:
+>
+> ```java
+> class MyClass {
+> 	void readOnlyMethod() {// [START section3]
+> 	}// [END section3]
+> 	// [START section4]
+> 	void method() {
+> 	}// [END section4]
+> }
+> ```
+>
+> **Expected:** Cursor is in the end of the text.
+> **Actual:** Cursor is in somewhere near the insertion point.
 
+Upstream maintainer note (same issue):
+
+> With Flutter 3.3.5 upgrade, the cursor no longer freezes when pasting text
+> with service comments but still is placed incorrectly in some cases.
+>
+> Moving to backlog due to lesser severity.
+
+## Reproduction on this fork
+
+Verified on master `8fc9fc6`, Flutter 3.47.5, via `CodeController.value`
+(what the framework delivers on paste):
+
+```dart
+final controller = CodeController(
+  text: '// [START section2]\nvoid method() {\n}\n',
+  language: java,
+  namedSectionParser: const BracketsStartEndNamedSectionParser(),
+);
+// The framework rebuilds the *visible* text and puts the caret at the end
+// of the inserted run.
+final visible = controller.text;                       // 19 chars
+controller.value = TextEditingValue(
+  text: '$visible$pasted',                           // 164 chars, caret at 164
+  selection: TextSelection.collapsed(offset: 164),
+);
+// Visible text collapses to 92 chars (3 service comments became hidden
+// ranges) — the caret should be 92.
+// Master: 60.
 ```
-(No description was provided on the upstream issue.)
-```
 
-Synced from upstream `akvelon/flutter-code-editor#88 — "Cursor moves incorrectly when pasting code with service comments"`.
-
-## Why it matters
-
-Pasting a block containing service comments (which become hidden ranges)
-leaves the caret in the wrong place — a silent corruption of the next edit's
-target.
-
-## Acceptance criteria
-
-- [ ] Reproduce: paste text with a service comment, caret ends at the end of the pasted block
-- [ ] Root cause identified in the paste / hidden-range path
-- [ ] A regression test pins the caret position after paste
-
-## Comments
-
-None.
+So the bug is **reproducible and reproducible in the exact reported form**.
