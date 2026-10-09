@@ -18,6 +18,8 @@ const toggleButtonActiveColor = Colors.white;
 final _analyzers = [_defaultAnalyzer, _dartAnalyzer];
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
