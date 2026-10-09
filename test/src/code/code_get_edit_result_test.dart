@@ -313,6 +313,49 @@ public class MyClass {
       expect(result, example.expected, reason: example.name);
     }
   });
+
+  test('Code. getEditResult keeps text on backspace into a folded block', () {
+    const fullTextBefore = '''
+public class MyClass {
+  public void main() {
+  }
+}
+''';
+    final unfolded = Code(
+      text: fullTextBefore,
+      highlighted: highlight.parse(fullTextBefore, language: _languageName),
+      language: _language,
+      namedSectionParser: const BracketsStartEndNamedSectionParser(),
+    );
+    final code = unfolded.foldedAt(1);
+
+    final visibleText = code.visibleText;
+    // visibleText(51) = `public class MyClass {\n  public void main() {  }\n}\n`
+    // The folded block spans lines 1..2, so a caret at offset 48 (the `}` that
+    // closes it) is the last position inside its line range — that is where
+    // backspace would otherwise eat the opening brace of the folded body.
+    const caret = 48;
+    final selection = code.hiddenRanges.recoverSelection(
+      const TextSelection.collapsed(offset: caret),
+    );
+
+    final result = code.getEditResult(
+      selection,
+      TextEditingValue(
+        text:
+            '${visibleText.substring(0, caret)}'
+            '${visibleText.substring(caret + 1)}',
+        selection: TextSelection.collapsed(offset: caret),
+      ),
+    );
+
+    expect(
+      result.fullTextAfter,
+      fullTextBefore,
+      reason: 'backspace into a folded block must not modify the text',
+    );
+    expect(result.linesChanged, const TextRange(start: 0, end: 0));
+  });
 }
 
 class _Example {
