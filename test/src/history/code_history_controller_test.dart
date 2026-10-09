@@ -17,15 +17,12 @@ void main() {
       testWidgets('Initial record', (WidgetTester wt) async {
         final controller = await pumpController(wt, MethodSnippet.full);
 
-        expect(
-          controller.historyController.stack,
-          [
-            CodeHistoryRecord(
-              code: controller.code,
-              selection: const TextSelection.collapsed(offset: -1),
-            ),
-          ],
-        );
+        expect(controller.historyController.stack, [
+          CodeHistoryRecord(
+            code: controller.code,
+            selection: const TextSelection.collapsed(offset: -1),
+          ),
+        ]);
       });
 
       testWidgets('Only selection change', (wt) async {
@@ -70,26 +67,21 @@ void main() {
         );
       });
 
-      testWidgets(
-        'Typing, Same value, Folding/Unfolding do not create',
-        (WidgetTester wt) async {
-          final controller = await pumpController(wt, MethodSnippet.full);
-          await wt.cursorEnd();
+      testWidgets('Typing, Same value, Folding/Unfolding do not create', (
+        WidgetTester wt,
+      ) async {
+        final controller = await pumpController(wt, MethodSnippet.full);
+        await wt.cursorEnd();
 
-          controller.value = controller.value.replacedText(
-            controller.value.text,
-          );
-          controller.value = controller.value.typed('a');
-          controller.value = controller.value.typed('b');
-          controller.value = controller.value.replacedText(
-            controller.value.text,
-          );
-          controller.foldAt(0);
-          controller.unfoldAt(0);
+        controller.value = controller.value.replacedText(controller.value.text);
+        controller.value = controller.value.typed('a');
+        controller.value = controller.value.typed('b');
+        controller.value = controller.value.replacedText(controller.value.text);
+        controller.foldAt(0);
+        controller.unfoldAt(0);
 
-          expect(controller.historyController.stack.length, 1);
-        },
-      );
+        expect(controller.historyController.stack.length, 1);
+      });
 
       testWidgets('Typing + Selection change', (WidgetTester wt) async {
         final controller = await pumpController(wt, MethodSnippet.full);
@@ -124,8 +116,9 @@ void main() {
         expect(controller.historyController.stack[4].selection, selection4);
       });
 
-      testWidgets('Line count change after text change',
-          (WidgetTester wt) async {
+      testWidgets('Line count change after text change', (
+        WidgetTester wt,
+      ) async {
         final controller = await pumpController(wt, MethodSnippet.full);
 
         final manualHistoryRecords = <CodeHistoryRecord>[];
@@ -260,9 +253,7 @@ void main() {
         expect(controller.fullText, MethodSnippet.full);
         expect(
           controller.selection,
-          const TextSelection.collapsed(
-            offset: MethodSnippet.visible.length,
-          ),
+          const TextSelection.collapsed(offset: MethodSnippet.visible.length),
         );
 
         await wt.sendRedo(); // No effect.
@@ -270,9 +261,7 @@ void main() {
         expect(controller.fullText, MethodSnippet.full);
         expect(
           controller.selection,
-          const TextSelection.collapsed(
-            offset: MethodSnippet.visible.length,
-          ),
+          const TextSelection.collapsed(offset: MethodSnippet.visible.length),
         );
       });
 
@@ -395,8 +384,9 @@ void main() {
         expect(controller.historyController.stack.last.selection, selection2);
       });
 
-      testWidgets('Start typing -> Fold -> Continue -> Undo -> Still folded',
-          (wt) async {
+      testWidgets('Start typing -> Fold -> Continue -> Undo -> Still folded', (
+        wt,
+      ) async {
         const example = 'a\n// comment 1\n// comment2\n a';
         const visible = 'a\n// comment 1\n a';
         final controller = await pumpController(wt, example);
@@ -436,10 +426,7 @@ void main() {
         await wt.sendUndo();
         expect(controller.value.text, visible);
         //                                   \ selection
-        expect(
-          controller.value.selection.start,
-          controller.value.text.length,
-        );
+        expect(controller.value.selection.start, controller.value.text.length);
 
         expect(controller.code.foldedBlocks.length, 1);
 
@@ -531,9 +518,7 @@ void main() {
       );
       expect(
         controller.historyController.stack[0].selection,
-        const TextSelection.collapsed(
-          offset: MethodSnippet.visible.length,
-        ),
+        const TextSelection.collapsed(offset: MethodSnippet.visible.length),
       );
     });
   });

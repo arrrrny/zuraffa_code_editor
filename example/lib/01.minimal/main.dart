@@ -12,10 +12,7 @@ void main() {
   runApp(const CodeEditor());
 }
 
-final controller = CodeController(
-  text: javaFactorialSnippet,
-  language: java,
-);
+final controller = CodeController(text: javaFactorialSnippet, language: java);
 
 class CodeEditor extends StatelessWidget {
   const CodeEditor({super.key});
@@ -28,10 +25,7 @@ class CodeEditor extends StatelessWidget {
         body: CodeTheme(
           data: CodeThemeData(styles: monokaiSublimeTheme),
           child: SingleChildScrollView(
-            child: TextField(
-              controller: controller,
-              maxLines: null,
-            ),
+            child: TextField(controller: controller, maxLines: null),
           ),
         ),
       ),

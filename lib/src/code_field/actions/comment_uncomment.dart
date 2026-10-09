@@ -9,9 +9,7 @@ class CommentUncommentIntent extends Intent {
 class CommentUncommentAction extends Action<CommentUncommentIntent> {
   final CodeController controller;
 
-  CommentUncommentAction({
-    required this.controller,
-  });
+  CommentUncommentAction({required this.controller});
 
   @override
   Object? invoke(CommentUncommentIntent intent) {

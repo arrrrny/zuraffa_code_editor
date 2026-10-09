@@ -11,8 +11,8 @@ Map<int, String> findJavaDartErrors(String text) {
       continue;
     }
     if (lines[i].startsWith(RegExp("\\s*/\\*"))) {
-      while (
-          (!lines[i].contains(RegExp("\\*/\\s*"))) && (i < lines.length - 1)) {
+      while ((!lines[i].contains(RegExp("\\*/\\s*"))) &&
+          (i < lines.length - 1)) {
         i++;
       }
     }
@@ -29,8 +29,8 @@ Map<int, String> findJavaDartErrors(String text) {
       do {
         if (lines[i].contains(RegExp("\"\"\".*\"\"\""))) break;
         i++;
-      } while (
-          (!lines[i].contains(RegExp("\"\"\""))) && (i < lines.length - 1));
+      } while ((!lines[i].contains(RegExp("\"\"\""))) &&
+          (i < lines.length - 1));
     }
 
     // errors with identifier and missing semicolon

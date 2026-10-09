@@ -26,12 +26,9 @@ void main() {
         };
         final builder = HiddenRangesBuilder.fromMaps(ranges, textLength: 10);
 
-        expect(
-          builder.ranges.ranges,
-          const [
-            HiddenRange(0, 3, firstLine: 0, lastLine: 2, wholeFirstLine: false),
-          ],
-        );
+        expect(builder.ranges.ranges, const [
+          HiddenRange(0, 3, firstLine: 0, lastLine: 2, wholeFirstLine: false),
+        ]);
       });
 
       test('Touching', () {
@@ -64,12 +61,9 @@ void main() {
         };
         final builder = HiddenRangesBuilder.fromMaps(ranges, textLength: 10);
 
-        expect(
-          builder.ranges.ranges,
-          const [
-            HiddenRange(1, 5, firstLine: 1, lastLine: 10, wholeFirstLine: true),
-          ],
-        );
+        expect(builder.ranges.ranges, const [
+          HiddenRange(1, 5, firstLine: 1, lastLine: 10, wholeFirstLine: true),
+        ]);
       });
 
       test('Nesting', () {
@@ -102,25 +96,10 @@ void main() {
         };
         final builder = HiddenRangesBuilder.fromMaps(ranges, textLength: 10);
 
-        expect(
-          builder.ranges.ranges,
-          const [
-            HiddenRange(
-              1,
-              2,
-              firstLine: -10,
-              lastLine: -5,
-              wholeFirstLine: true,
-            ),
-            HiddenRange(
-              5,
-              9,
-              firstLine: 5,
-              lastLine: 15,
-              wholeFirstLine: false,
-            ),
-          ],
-        );
+        expect(builder.ranges.ranges, const [
+          HiddenRange(1, 2, firstLine: -10, lastLine: -5, wholeFirstLine: true),
+          HiddenRange(5, 9, firstLine: 5, lastLine: 15, wholeFirstLine: false),
+        ]);
       });
 
       test('Preserves separate', () {
@@ -154,14 +133,11 @@ void main() {
         };
         final builder = HiddenRangesBuilder.fromMaps(ranges, textLength: 10);
 
-        expect(
-          builder.ranges.ranges,
-          const [
-            HiddenRange(1, 2, firstLine: 3, lastLine: 4, wholeFirstLine: false),
-            HiddenRange(4, 6, firstLine: 5, lastLine: 6, wholeFirstLine: true),
-            HiddenRange(7, 9, firstLine: 1, lastLine: 2, wholeFirstLine: true),
-          ],
-        );
+        expect(builder.ranges.ranges, const [
+          HiddenRange(1, 2, firstLine: 3, lastLine: 4, wholeFirstLine: false),
+          HiddenRange(4, 6, firstLine: 5, lastLine: 6, wholeFirstLine: true),
+          HiddenRange(7, 9, firstLine: 1, lastLine: 2, wholeFirstLine: true),
+        ]);
       });
     });
 
@@ -198,20 +174,14 @@ void main() {
       );
       final resultWithout = builder.copyWithoutRange('key');
 
-      expect(
-        resultWith.ranges.ranges,
-        const [
-          HiddenRange(1, 3, firstLine: 3, lastLine: 4, wholeFirstLine: false),
-          HiddenRange(5, 9, firstLine: 1, lastLine: 6, wholeFirstLine: true),
-        ],
-      );
-      expect(
-        resultWithout.ranges.ranges,
-        const [
-          HiddenRange(1, 3, firstLine: 3, lastLine: 4, wholeFirstLine: false),
-          HiddenRange(5, 7, firstLine: 1, lastLine: 2, wholeFirstLine: true),
-        ],
-      );
+      expect(resultWith.ranges.ranges, const [
+        HiddenRange(1, 3, firstLine: 3, lastLine: 4, wholeFirstLine: false),
+        HiddenRange(5, 9, firstLine: 1, lastLine: 6, wholeFirstLine: true),
+      ]);
+      expect(resultWithout.ranges.ranges, const [
+        HiddenRange(1, 3, firstLine: 3, lastLine: 4, wholeFirstLine: false),
+        HiddenRange(5, 7, firstLine: 1, lastLine: 2, wholeFirstLine: true),
+      ]);
     });
   });
 }

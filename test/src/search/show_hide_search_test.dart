@@ -11,9 +11,7 @@ import '../common/create_app.dart';
 void main() {
   group('CodeSearchController', () {
     test('showSearch(), hideSearch()', () {
-      final controller = CodeSearchController(
-        codeController: CodeController(),
-      );
+      final controller = CodeSearchController(codeController: CodeController());
 
       expect(controller.shouldShow, false);
       controller.showSearch();
@@ -23,9 +21,7 @@ void main() {
     });
 
     test('Disabled controller returns empty result on search()', () {
-      final controller = CodeSearchController(
-        codeController: CodeController(),
-      );
+      final controller = CodeSearchController(codeController: CodeController());
 
       final result = controller.search(
         Code(text: 'aaa'),
@@ -53,19 +49,13 @@ void main() {
       await wt.pumpAndSettle();
 
       expect(controller.searchController.shouldShow, true);
-      expect(
-        find.byType(SearchWidget),
-        findsOneWidget,
-      );
+      expect(find.byType(SearchWidget), findsOneWidget);
 
       controller.dismiss();
       await wt.pumpAndSettle();
 
       expect(controller.searchController.shouldShow, false);
-      expect(
-        find.byType(SearchWidget),
-        findsNothing,
-      );
+      expect(find.byType(SearchWidget), findsNothing);
     });
   });
 }

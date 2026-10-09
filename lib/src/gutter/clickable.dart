@@ -5,11 +5,7 @@ class ClickableWidget extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
 
-  const ClickableWidget({
-    super.key,
-    required this.child,
-    required this.onTap,
-  });
+  const ClickableWidget({super.key, required this.child, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +13,7 @@ class ClickableWidget extends StatelessWidget {
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onTap,
-        child: child,
-      ),
+      child: GestureDetector(onTap: onTap, child: child),
     );
   }
 }

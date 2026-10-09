@@ -32,10 +32,9 @@ class SearchNavigationController extends ValueNotifier<SearchNavigationState> {
 
   FocusNode? codeFieldFocusNode;
 
-  SearchNavigationController({
-    required this.codeController,
-  })  : _lastText = '',
-        super(SearchNavigationState.noMatches) {
+  SearchNavigationController({required this.codeController})
+    : _lastText = '',
+      super(SearchNavigationState.noMatches) {
     codeController.addListener(_updateState);
     _lastText = codeController.code.text;
   }
@@ -55,7 +54,8 @@ class SearchNavigationController extends ValueNotifier<SearchNavigationState> {
       return;
     }
 
-    final currentIndex = value.currentMatchIndex ??
+    final currentIndex =
+        value.currentMatchIndex ??
         _getNextOrFirstMatchIndex() ??
         (throw Exception('Empty result must have been checked above.'));
 
@@ -158,10 +158,7 @@ class SearchNavigationController extends ValueNotifier<SearchNavigationState> {
 
   TextSelection _matchToSelection(SearchMatch match) {
     return codeController.code.hiddenRanges.cutSelection(
-      TextSelection(
-        baseOffset: match.start,
-        extentOffset: match.end,
-      ),
+      TextSelection(baseOffset: match.start, extentOffset: match.end),
     );
   }
 

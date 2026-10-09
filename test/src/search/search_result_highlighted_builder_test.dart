@@ -22,14 +22,8 @@ void main() {
               TextSpan(text: 'Aa', style: _default),
               TextSpan(
                 children: [
-                  TextSpan(
-                    text: 'Bb',
-                    style: _keyword,
-                  ),
-                  TextSpan(
-                    text: 'Cc',
-                    style: _keyword,
-                  ),
+                  TextSpan(text: 'Bb', style: _keyword),
+                  TextSpan(text: 'Cc', style: _keyword),
                 ],
               ),
             ],
@@ -39,14 +33,8 @@ void main() {
               TextSpan(text: 'Aa', style: _default),
               TextSpan(
                 children: [
-                  TextSpan(
-                    text: 'Bb',
-                    style: _keyword,
-                  ),
-                  TextSpan(
-                    text: 'Cc',
-                    style: _keyword,
-                  ),
+                  TextSpan(text: 'Bb', style: _keyword),
+                  TextSpan(text: 'Cc', style: _keyword),
                 ],
               ),
             ],
@@ -56,9 +44,7 @@ void main() {
         _Example(
           'Within 1 textSpan',
           visibleSearchResult: const SearchResult(
-            matches: [
-              SearchMatch(start: 0, end: 1),
-            ],
+            matches: [SearchMatch(start: 0, end: 1)],
           ),
           navigationState: const SearchNavigationState(totalMatchCount: 1),
           visibleTextSpan: const TextSpan(
@@ -66,14 +52,8 @@ void main() {
               TextSpan(text: 'Aa', style: _default),
               TextSpan(
                 children: [
-                  TextSpan(
-                    text: 'Bb',
-                    style: _keyword,
-                  ),
-                  TextSpan(
-                    text: 'Cc',
-                    style: _keyword,
-                  ),
+                  TextSpan(text: 'Bb', style: _keyword),
+                  TextSpan(text: 'Cc', style: _keyword),
                 ],
               ),
             ],
@@ -98,9 +78,7 @@ void main() {
         _Example(
           '1 whole textSpan',
           visibleSearchResult: const SearchResult(
-            matches: [
-              SearchMatch(start: 0, end: 2),
-            ],
+            matches: [SearchMatch(start: 0, end: 2)],
           ),
           navigationState: const SearchNavigationState(totalMatchCount: 1),
           visibleTextSpan: const TextSpan(
@@ -108,14 +86,8 @@ void main() {
               TextSpan(text: 'Aa', style: _default),
               TextSpan(
                 children: [
-                  TextSpan(
-                    text: 'Bb',
-                    style: _keyword,
-                  ),
-                  TextSpan(
-                    text: 'Cc',
-                    style: _keyword,
-                  ),
+                  TextSpan(text: 'Bb', style: _keyword),
+                  TextSpan(text: 'Cc', style: _keyword),
                 ],
               ),
             ],
@@ -139,9 +111,7 @@ void main() {
         _Example(
           'Within 2 textSpans',
           visibleSearchResult: const SearchResult(
-            matches: [
-              SearchMatch(start: 1, end: 3),
-            ],
+            matches: [SearchMatch(start: 1, end: 3)],
           ),
           navigationState: const SearchNavigationState(totalMatchCount: 1),
           visibleTextSpan: const TextSpan(
@@ -149,14 +119,8 @@ void main() {
               TextSpan(text: 'Aa', style: _default),
               TextSpan(
                 children: [
-                  TextSpan(
-                    text: 'Bb',
-                    style: _keyword,
-                  ),
-                  TextSpan(
-                    text: 'Cc',
-                    style: _keyword,
-                  ),
+                  TextSpan(text: 'Bb', style: _keyword),
+                  TextSpan(text: 'Cc', style: _keyword),
                 ],
               ),
             ],
@@ -164,10 +128,7 @@ void main() {
           expectedResult: TextSpan(
             style: _default,
             children: [
-              const TextSpan(
-                text: 'A',
-                style: _default,
-              ),
+              const TextSpan(text: 'A', style: _default),
               TextSpan(
                 text: 'a',
                 style: _default.copyWith(
@@ -191,9 +152,7 @@ void main() {
         _Example(
           '2 whole textSpans',
           visibleSearchResult: const SearchResult(
-            matches: [
-              SearchMatch(start: 0, end: 4),
-            ],
+            matches: [SearchMatch(start: 0, end: 4)],
           ),
           navigationState: const SearchNavigationState(totalMatchCount: 1),
           visibleTextSpan: const TextSpan(
@@ -201,14 +160,8 @@ void main() {
               TextSpan(text: 'Aa', style: _default),
               TextSpan(
                 children: [
-                  TextSpan(
-                    text: 'Bb',
-                    style: _keyword,
-                  ),
-                  TextSpan(
-                    text: 'Cc',
-                    style: _keyword,
-                  ),
+                  TextSpan(text: 'Bb', style: _keyword),
+                  TextSpan(text: 'Cc', style: _keyword),
                 ],
               ),
             ],
@@ -238,9 +191,7 @@ void main() {
         _Example(
           'Through 3 texpans',
           visibleSearchResult: const SearchResult(
-            matches: [
-              SearchMatch(start: 1, end: 5),
-            ],
+            matches: [SearchMatch(start: 1, end: 5)],
           ),
           navigationState: const SearchNavigationState(totalMatchCount: 1),
           visibleTextSpan: const TextSpan(
@@ -248,14 +199,8 @@ void main() {
               TextSpan(text: 'Aa', style: _default),
               TextSpan(
                 children: [
-                  TextSpan(
-                    text: 'Bb',
-                    style: _keyword,
-                  ),
-                  TextSpan(
-                    text: 'Cc',
-                    style: _keyword,
-                  ),
+                  TextSpan(text: 'Bb', style: _keyword),
+                  TextSpan(text: 'Cc', style: _keyword),
                 ],
               ),
             ],
@@ -263,10 +208,7 @@ void main() {
           expectedResult: TextSpan(
             style: _default,
             children: [
-              const TextSpan(
-                text: 'A',
-                style: _default,
-              ),
+              const TextSpan(text: 'A', style: _default),
               TextSpan(
                 text: 'a',
                 style: _default.copyWith(
@@ -296,9 +238,7 @@ void main() {
         _Example(
           'Inside a textSpan',
           visibleSearchResult: const SearchResult(
-            matches: [
-              SearchMatch(start: 1, end: 2),
-            ],
+            matches: [SearchMatch(start: 1, end: 2)],
           ),
           navigationState: const SearchNavigationState(totalMatchCount: 1),
           visibleTextSpan: const TextSpan(
@@ -306,14 +246,8 @@ void main() {
               TextSpan(text: 'Aaa', style: _default),
               TextSpan(
                 children: [
-                  TextSpan(
-                    text: 'Bb',
-                    style: _keyword,
-                  ),
-                  TextSpan(
-                    text: 'Cc',
-                    style: _keyword,
-                  ),
+                  TextSpan(text: 'Bb', style: _keyword),
+                  TextSpan(text: 'Cc', style: _keyword),
                 ],
               ),
             ],
@@ -321,10 +255,7 @@ void main() {
           expectedResult: TextSpan(
             style: _default,
             children: [
-              const TextSpan(
-                text: 'A',
-                style: _default,
-              ),
+              const TextSpan(text: 'A', style: _default),
               TextSpan(
                 text: 'a',
                 style: _default.copyWith(
@@ -332,18 +263,9 @@ void main() {
                   color: searchTextColor,
                 ),
               ),
-              const TextSpan(
-                text: 'a',
-                style: _default,
-              ),
-              const TextSpan(
-                text: 'Bb',
-                style: _keyword,
-              ),
-              const TextSpan(
-                text: 'Cc',
-                style: _keyword,
-              ),
+              const TextSpan(text: 'a', style: _default),
+              const TextSpan(text: 'Bb', style: _keyword),
+              const TextSpan(text: 'Cc', style: _keyword),
             ],
           ),
         ),
@@ -359,9 +281,7 @@ void main() {
           ),
           navigationState: const SearchNavigationState(totalMatchCount: 3),
           visibleTextSpan: const TextSpan(
-            children: [
-              TextSpan(text: 'Aaaaa', style: _default),
-            ],
+            children: [TextSpan(text: 'Aaaaa', style: _default)],
           ),
           expectedResult: TextSpan(
             style: _default,
@@ -427,14 +347,8 @@ void main() {
               TextSpan(text: 'Aa', style: _default),
               TextSpan(
                 children: [
-                  TextSpan(
-                    text: 'Bb',
-                    style: _keyword,
-                  ),
-                  TextSpan(
-                    text: 'Cc',
-                    style: _keyword,
-                  ),
+                  TextSpan(text: 'Bb', style: _keyword),
+                  TextSpan(text: 'Cc', style: _keyword),
                 ],
               ),
             ],

@@ -9,8 +9,7 @@ import 'package:highlight/languages/php.dart';
 void main() {
   group('Comment Out / Uncomment', () {
     group('Language: java', () {
-      test(
-          'WHEN selection is collapsed '
+      test('WHEN selection is collapsed '
           'SHOULD comment out the selected line if it is not a comment '
           'and uncomment otherwise '
           'AND select whole lines', () {

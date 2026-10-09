@@ -18,9 +18,7 @@ abstract class AbstractNamedSectionParser {
   List<NamedSection> parse({
     required List<SingleLineComment> singleLineComments,
   }) {
-    final unsorted = parseUnsorted(
-      singleLineComments: singleLineComments,
-    );
+    final unsorted = parseUnsorted(singleLineComments: singleLineComments);
 
     return unsorted.where(_isValid).toList(growable: false)
       ..sort((a, b) => a.firstLine - b.firstLine);

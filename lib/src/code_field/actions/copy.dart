@@ -7,9 +7,7 @@ import '../text_editing_value.dart';
 class CopyAction extends Action<CopySelectionTextIntent> {
   final CodeController controller;
 
-  CopyAction({
-    required this.controller,
-  });
+  CopyAction({required this.controller});
 
   @override
   Future<void> invoke(CopySelectionTextIntent intent) async {

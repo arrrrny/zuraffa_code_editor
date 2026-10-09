@@ -24,22 +24,15 @@ class CodeLine {
     this.isReadOnly = false,
   }) : indent = _calculateIndent(text);
 
-  CodeLine.fromTextAndStart(
-    this.text,
-    int start, {
-    this.isReadOnly = false,
-  })  : textRange = TextRange(start: start, end: start + text.length),
-        indent = _calculateIndent(text);
+  CodeLine.fromTextAndStart(this.text, int start, {this.isReadOnly = false})
+    : textRange = TextRange(start: start, end: start + text.length),
+      indent = _calculateIndent(text);
 
   @override
   String toString() =>
       'CodeLine(ro: $isReadOnly, textRange: $textRange, text: "$text")';
 
-  CodeLine copyWith({
-    String? text,
-    TextRange? textRange,
-    bool? isReadOnly,
-  }) =>
+  CodeLine copyWith({String? text, TextRange? textRange, bool? isReadOnly}) =>
       CodeLine(
         text: text ?? this.text,
         textRange: textRange ?? this.textRange,
@@ -56,11 +49,7 @@ class CodeLine {
   }
 
   @override
-  int get hashCode => Object.hash(
-        text,
-        textRange,
-        isReadOnly,
-      );
+  int get hashCode => Object.hash(text, textRange, isReadOnly);
 
   static int _calculateIndent(String text) {
     int indentation = 0;

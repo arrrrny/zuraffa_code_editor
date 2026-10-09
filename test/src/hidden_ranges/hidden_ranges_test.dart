@@ -50,10 +50,7 @@ void main() {
           ).hiddenCharactersBeforeRanges,
           const [0],
         );
-        expect(
-          HiddenRanges.empty.hiddenCharactersBeforeRanges,
-          const [0],
-        );
+        expect(HiddenRanges.empty.hiddenCharactersBeforeRanges, const [0]);
       });
 
       test('Valid array if has ranges', () {

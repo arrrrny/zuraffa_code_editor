@@ -52,8 +52,8 @@ class HiddenLineRanges with Equatable {
     required this.fullLineCount,
     required List<int?> fullToVisible,
     required List<int> visibleToFull,
-  })  : _fullToVisible = fullToVisible,
-        _visibleToFull = visibleToFull;
+  }) : _fullToVisible = fullToVisible,
+       _visibleToFull = visibleToFull;
 
   static const empty = HiddenLineRanges._(
     breakpoints: [],
@@ -73,7 +73,5 @@ class HiddenLineRanges with Equatable {
   Iterable<int> get visibleLineNumbers => _visibleToFull;
 
   @override
-  List<Object> get props => [
-        breakpoints,
-      ];
+  List<Object> get props => [breakpoints];
 }

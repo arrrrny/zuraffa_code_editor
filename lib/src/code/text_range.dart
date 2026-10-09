@@ -10,10 +10,10 @@ extension MyTextRange on TextRange {
 
 class NormalizedTextRange extends TextRange {
   const NormalizedTextRange({required super.start, required super.end})
-      : assert(
-          end >= start,
-          'End should be >= start, given end = $end, start = $start',
-        );
+    : assert(
+        end >= start,
+        'End should be >= start, given end = $end, start = $start',
+      );
 
   /// Returns 1 if the [position] is before the range,
   /// -1 if the [position] is after the range,

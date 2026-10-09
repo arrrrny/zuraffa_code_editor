@@ -64,11 +64,7 @@ class BracketsStartEndNamedSectionParser extends AbstractNamedSectionParser {
       final last = entry.value;
 
       sections.add(
-        NamedSection(
-          firstLine: firsts[name] ?? 0,
-          lastLine: last,
-          name: name,
-        ),
+        NamedSection(firstLine: firsts[name] ?? 0, lastLine: last, name: name),
       );
 
       firsts.remove(name);
@@ -79,11 +75,7 @@ class BracketsStartEndNamedSectionParser extends AbstractNamedSectionParser {
       final first = entry.value;
 
       sections.add(
-        NamedSection(
-          firstLine: first,
-          lastLine: lasts[name],
-          name: name,
-        ),
+        NamedSection(firstLine: first, lastLine: lasts[name], name: name),
       );
     }
 

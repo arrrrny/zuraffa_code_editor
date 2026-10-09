@@ -10,7 +10,8 @@ import 'package:highlight/languages/java.dart';
 /// the closing line stays visible, the gutter line numbering is untouched,
 /// and folding is lossless.
 void main() {
-  const config = 'final config = ScraperConfig(\n'
+  const config =
+      'final config = ScraperConfig(\n'
       '  clientType: HttpClientType.crawler,\n'
       '  parsers: [\n'
       '    ParserConfig(\n'
@@ -86,8 +87,11 @@ final config = ScraperConfig();
 
       controller.foldAt(2);
       controller.foldAt(3);
-      expect(controller.code.text, config,
-          reason: 'full text survives folding');
+      expect(
+        controller.code.text,
+        config,
+        reason: 'full text survives folding',
+      );
 
       controller.unfoldAt(2);
       controller.unfoldAt(3);
@@ -111,8 +115,11 @@ final config = ScraperConfig(
   parsers: [  ],
 );
 ''');
-      expect(controller.code.text, config,
-          reason: 'full text survives folding');
+      expect(
+        controller.code.text,
+        config,
+        reason: 'full text survives folding',
+      );
 
       controller.unfoldAt(2);
       controller.unfoldAt(3);
@@ -132,7 +139,8 @@ final config = ScraperConfig(
   group('Non-closing blocks still hide their last line whole.', () {
     test('A comment block folds without gluing its lines together', () {
       final controller = CodeController(
-        text: 'class C {\n'
+        text:
+            'class C {\n'
             '  // write the body\n'
             '  // of the method here\n'
             '  int x = 1;\n'
@@ -161,7 +169,8 @@ class C {
 
     test('A single-line comment block hides only its tail', () {
       final controller = CodeController(
-        text: '// first line\n'
+        text:
+            '// first line\n'
             '// second line\n'
             '// third line\n',
         language: java,
@@ -179,7 +188,8 @@ class C {
 
     test('A comment block still reports a real line range when folded', () {
       final controller = CodeController(
-        text: '// first line\n'
+        text:
+            '// first line\n'
             '// second line\n'
             '// third line\n',
         language: java,
@@ -191,13 +201,15 @@ class C {
       expect(range.cutLineIndexIfVisible(0), 0, reason: 'opener stays visible');
       expect(range.cutLineIndexIfVisible(1), isNull, reason: 'tail is hidden');
       expect(range.cutLineIndexIfVisible(2), isNull, reason: 'tail is hidden');
-      expect(controller.code.lines.length, 4,
-          reason: 'three comment lines plus the trailing empty line');
       expect(
-        range.visibleLineNumbers,
-        [0, 3],
-        reason: 'only the opener and the trailing empty line stay visible',
+        controller.code.lines.length,
+        4,
+        reason: 'three comment lines plus the trailing empty line',
       );
+      expect(range.visibleLineNumbers, [
+        0,
+        3,
+      ], reason: 'only the opener and the trailing empty line stay visible');
     });
   });
 }

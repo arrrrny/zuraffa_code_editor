@@ -24,24 +24,16 @@ class SearchNavigationWidget extends StatelessWidget {
               InkWell(
                 hoverColor: Colors.transparent,
                 onTap: searchNavigationController.movePrevious,
-                child: const Icon(
-                  Icons.arrow_upward,
-                  size: _iconSize,
-                ),
+                child: const Icon(Icons.arrow_upward, size: _iconSize),
               ),
               InkWell(
                 hoverColor: Colors.transparent,
                 onTap: searchNavigationController.moveNext,
-                child: const Icon(
-                  Icons.arrow_downward,
-                  size: _iconSize,
-                ),
+                child: const Icon(Icons.arrow_downward, size: _iconSize),
               ),
             ],
             const SizedBox(width: 10),
-            Expanded(
-              child: Text(_getText()),
-            ),
+            Expanded(child: Text(_getText())),
           ],
         );
       },

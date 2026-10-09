@@ -67,8 +67,9 @@ public class MyClass {
             );
           });
 
-          testWidgets('the first line of a folded block',
-              (WidgetTester wt) async {
+          testWidgets('the first line of a folded block', (
+            WidgetTester wt,
+          ) async {
             final controller = await pumpController(wt, TwoMethodsSnippet.full);
             controller.foldAt(0);
             await wt.selectFromHome(0, offset: 7);
@@ -156,8 +157,9 @@ int n;
             );
           });
 
-          testWidgets('Add multiline text before and after a folded block',
-              (wt) async {
+          testWidgets('Add multiline text before and after a folded block', (
+            wt,
+          ) async {
             const visibleText = '\nmethod1(){}\n';
             const example = '\nmethod1(){\n  if (true) return;\n}\n';
             const insertedText = 'a\na\na\n';
@@ -204,8 +206,9 @@ int n;
             expect(controller.value, expected);
           });
 
-          testWidgets('Adding an import after folded imports -> Unfold',
-              (wt) async {
+          testWidgets('Adding an import after folded imports -> Unfold', (
+            wt,
+          ) async {
             const example = 'package example;\nimport java.util.Date;\n';
             const inserted = 'import java.util.ArrayList;';
             final controller = await pumpController(wt, example);
@@ -224,25 +227,27 @@ int n;
           });
 
           testWidgets(
-              'Adding non-import after folded imports -> Does not unfold',
-              (wt) async {
-            const example = 'package example;\nimport java.util.Date;\n';
-            const visible = 'package example;\n';
-            const inserted = 'a';
-            final controller = await pumpController(wt, example);
+            'Adding non-import after folded imports -> Does not unfold',
+            (wt) async {
+              const example = 'package example;\nimport java.util.Date;\n';
+              const visible = 'package example;\n';
+              const inserted = 'a';
+              final controller = await pumpController(wt, example);
 
-            controller.foldImports();
-            expect(controller.code.foldedBlocks.length, 1);
+              controller.foldImports();
+              expect(controller.code.foldedBlocks.length, 1);
 
-            await wt.cursorEnd();
-            controller.value = controller.value.replacedSelection(inserted);
+              await wt.cursorEnd();
+              controller.value = controller.value.replacedSelection(inserted);
 
-            expect(controller.value.text, visible + inserted);
-            expect(controller.code.foldedBlocks.length, 1);
-          });
+              expect(controller.value.text, visible + inserted);
+              expect(controller.code.foldedBlocks.length, 1);
+            },
+          );
 
-          testWidgets('Add comment after folded comments block -> Unfold',
-              (wt) async {
+          testWidgets('Add comment after folded comments block -> Unfold', (
+            wt,
+          ) async {
             const example = '// comment 1\n// comment 2\n';
             const inserted = '// comment 3';
             final controller = await pumpController(wt, example);
@@ -261,28 +266,29 @@ int n;
           });
 
           testWidgets(
-              'Add non-comment after folded comments -> Does not unfold',
-              (wt) async {
-            const example = '// comment 1\n// comment 2\n';
-            const visible = '// comment 1\n';
-            const inserted = 'a';
-            final controller = await pumpController(wt, example);
+            'Add non-comment after folded comments -> Does not unfold',
+            (wt) async {
+              const example = '// comment 1\n// comment 2\n';
+              const visible = '// comment 1\n';
+              const inserted = 'a';
+              final controller = await pumpController(wt, example);
 
-            controller.foldAt(0);
-            expect(controller.code.foldedBlocks.length, 1);
+              controller.foldAt(0);
+              expect(controller.code.foldedBlocks.length, 1);
 
-            await wt.cursorEnd();
-            controller.value = controller.value.replacedSelection(inserted);
-            expect(controller.value.text, visible + inserted);
-            expect(controller.code.foldedBlocks.length, 1);
-          });
+              await wt.cursorEnd();
+              controller.value = controller.value.replacedSelection(inserted);
+              expect(controller.value.text, visible + inserted);
+              expect(controller.code.foldedBlocks.length, 1);
+            },
+          );
         });
 
         group('Python', () {
-          testWidgets(
-              'Indent block is opened '
-              'if the next line is being edited to be a part of this block',
-              (wt) async {
+          testWidgets('Indent block is opened '
+              'if the next line is being edited to be a part of this block', (
+            wt,
+          ) async {
             const example = 'a:\n  aaaa\n';
             final controller = await pumpController(
               wt,
@@ -306,8 +312,7 @@ int n;
             expect(controller.code.foldedBlocks.length, 0);
           });
 
-          testWidgets(
-              'Indent block is not opened if the next line is edited '
+          testWidgets('Indent block is not opened if the next line is edited '
               'but it is not part of the block yet', (wt) async {
             const example = 'a:\n  aaaa\n';
             final controller = await pumpController(
@@ -333,8 +338,7 @@ int n;
             expect(controller.code.foldedBlocks.length, 0);
           });
 
-          testWidgets(
-              'Indent block is not opened '
+          testWidgets('Indent block is not opened '
               'if the newline char was inserted to the next line', (wt) async {
             const example = 'a:\n  aaaa\n\n';
             final controller = await pumpController(

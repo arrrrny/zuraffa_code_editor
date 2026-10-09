@@ -9,9 +9,9 @@ extension KeyEventExtension on KeyEvent {
 
     final isMetaOrControlPressed =
         logicalKeysPressed.contains(LogicalKeyboardKey.metaLeft) ||
-            logicalKeysPressed.contains(LogicalKeyboardKey.metaRight) ||
-            logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft) ||
-            logicalKeysPressed.contains(LogicalKeyboardKey.controlRight);
+        logicalKeysPressed.contains(LogicalKeyboardKey.metaRight) ||
+        logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft) ||
+        logicalKeysPressed.contains(LogicalKeyboardKey.controlRight);
 
     return isMetaOrControlPressed;
   }

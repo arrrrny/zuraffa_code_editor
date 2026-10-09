@@ -4,8 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../common/create_app.dart';
 
 void main() {
-  testWidgets(
-      'Backspace or delete at a folded block collapse point '
+  testWidgets('Backspace or delete at a folded block collapse point '
       '=> Do nothing.', (wt) async {
     final examples = [
       //

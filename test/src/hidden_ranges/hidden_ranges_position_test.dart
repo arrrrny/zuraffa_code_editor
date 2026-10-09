@@ -11,10 +11,7 @@ const affinities = [TextAffinity.upstream, TextAffinity.downstream];
 void main() {
   group('HiddenRanges. cutPosition', () {
     test('No ranges - No changes', () {
-      expect(
-        HiddenRanges.empty.cutPosition(7),
-        7,
-      );
+      expect(HiddenRanges.empty.cutPosition(7), 7);
     });
 
     void testCut(HiddenRanges hiddenRanges, Map<int, int> examples) {

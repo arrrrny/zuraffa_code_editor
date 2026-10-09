@@ -111,9 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
               controller: _codeController,
               textStyle: const TextStyle(fontFamily: 'SourceCode'),
               gutterStyle: GutterStyle(
-                textStyle: const TextStyle(
-                  color: Colors.purple,
-                ),
+                textStyle: const TextStyle(color: Colors.purple),
                 showLineNumbers: _showNumbers,
                 showErrors: _showErrors,
                 showFoldingHandles: _showFoldingHandles,

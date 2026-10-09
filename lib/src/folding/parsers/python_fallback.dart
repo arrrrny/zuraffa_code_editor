@@ -5,8 +5,8 @@ import 'fallback.dart';
 
 class PythonFallbackFoldableBlockParser extends FallbackFoldableBlockParser {
   PythonFallbackFoldableBlockParser()
-      : super(
-          singleLineCommentSequences: SingleLineComments.byMode[python] ?? [],
-          importPrefixes: ['import ', 'from '],
-        );
+    : super(
+        singleLineCommentSequences: SingleLineComments.byMode[python] ?? [],
+        importPrefixes: ['import ', 'from '],
+      );
 }

@@ -106,11 +106,7 @@ void main() {
         example.inputChar,
       );
 
-      expect(
-        controller.value,
-        example.expected,
-        reason: example.name,
-      );
+      expect(controller.value, example.expected, reason: example.name);
     }
   });
 }
@@ -122,15 +118,14 @@ TextEditingValue _addCharToSelectedPosition(
   final selection = value.selection;
   final text = value.text;
 
-  final newText = text.substring(0, selection.start) +
+  final newText =
+      text.substring(0, selection.start) +
       char +
       text.substring(selection.start);
 
   return TextEditingValue(
     text: newText,
-    selection: TextSelection.collapsed(
-      offset: selection.start + char.length,
-    ),
+    selection: TextSelection.collapsed(offset: selection.start + char.length),
   );
 }
 

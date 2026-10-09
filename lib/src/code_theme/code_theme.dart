@@ -3,11 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'code_theme_data.dart';
 
 class CodeTheme extends InheritedWidget {
-  const CodeTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const CodeTheme({super.key, required this.data, required super.child});
 
   final CodeThemeData? data;
 

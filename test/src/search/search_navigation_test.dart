@@ -6,8 +6,7 @@ import '../common/create_app.dart';
 
 void main() {
   group('SearchNavigationController', () {
-    group(
-        'Search advances the current match index '
+    group('Search advances the current match index '
         'to the first one that is after the selection '
         'and changes selection of a codeController.', () {
       const examples = [
@@ -70,7 +69,10 @@ void main() {
 
           expect(
             codeController
-                .searchController.navigationController.value.currentMatchIndex,
+                .searchController
+                .navigationController
+                .value
+                .currentMatchIndex,
             example.expectedCurrentMatchIndex,
             reason: example.name,
           );
@@ -80,8 +82,7 @@ void main() {
       }
     });
 
-    testWidgets(
-        'Navigation to a match that is inside of a folded block '
+    testWidgets('Navigation to a match that is inside of a folded block '
         'unfolds the block', (wt) async {
       const text = '''
 {
@@ -103,10 +104,10 @@ d
 
       codeController.searchController.settingsController.value =
           const SearchSettings(
-        isCaseSensitive: false,
-        isRegExp: false,
-        pattern: 'c',
-      );
+            isCaseSensitive: false,
+            isRegExp: false,
+            pattern: 'c',
+          );
 
       final foldedBlocks = codeController.code.foldedBlocks.map(
         (block) => block.first,
@@ -131,10 +132,10 @@ d
 
       codeController.searchController.settingsController.value =
           const SearchSettings(
-        isCaseSensitive: false,
-        isRegExp: false,
-        pattern: 'a',
-      );
+            isCaseSensitive: false,
+            isRegExp: false,
+            pattern: 'a',
+          );
 
       expect(navigationController.value.currentMatchIndex, 0);
       expect(navigationController.value.totalMatchCount, 3);
@@ -185,10 +186,10 @@ d
 
       codeController.searchController.settingsController.value =
           const SearchSettings(
-        isCaseSensitive: false,
-        isRegExp: false,
-        pattern: 'a',
-      );
+            isCaseSensitive: false,
+            isRegExp: false,
+            pattern: 'a',
+          );
 
       expect(navigationController.value.currentMatchIndex, 0);
       expect(navigationController.value.totalMatchCount, 3);
@@ -227,8 +228,7 @@ d
       await wt.pumpAndSettle();
     });
 
-    testWidgets(
-        'Changing CodeController with '
+    testWidgets('Changing CodeController with '
         'non-null current match', (wt) async {
       const text = 'Aa';
       final controller = await pumpController(wt, text);
@@ -238,66 +238,83 @@ d
 
       controller.searchController.settingsController.value =
           const SearchSettings(
-        isCaseSensitive: false,
-        isRegExp: false,
-        pattern: 'a',
-      );
+            isCaseSensitive: false,
+            isRegExp: false,
+            pattern: 'a',
+          );
       expect(
         controller
-            .searchController.navigationController.value.currentMatchIndex,
+            .searchController
+            .navigationController
+            .value
+            .currentMatchIndex,
         0,
       );
 
       controller.selection = const TextSelection.collapsed(offset: 1);
       expect(
         controller
-            .searchController.navigationController.value.currentMatchIndex,
+            .searchController
+            .navigationController
+            .value
+            .currentMatchIndex,
         0,
       );
 
       controller.insertStr('a');
       expect(
         controller
-            .searchController.navigationController.value.currentMatchIndex,
+            .searchController
+            .navigationController
+            .value
+            .currentMatchIndex,
         null,
       );
     });
 
     testWidgets(
-        'Search selection should stay at current match when search pattern '
-        'changes with match at current', (wt) async {
-      const text = 'abcabc';
-      final controller = await pumpController(wt, text);
-      controller.selection = const TextSelection.collapsed(offset: 0);
+      'Search selection should stay at current match when search pattern '
+      'changes with match at current',
+      (wt) async {
+        const text = 'abcabc';
+        final controller = await pumpController(wt, text);
+        controller.selection = const TextSelection.collapsed(offset: 0);
 
-      controller.showSearch();
+        controller.showSearch();
 
-      controller.searchController.settingsController.value =
-          const SearchSettings(
-        isCaseSensitive: false,
-        isRegExp: false,
-        pattern: 'a',
-      );
+        controller.searchController.settingsController.value =
+            const SearchSettings(
+              isCaseSensitive: false,
+              isRegExp: false,
+              pattern: 'a',
+            );
 
-      expect(
-        controller
-            .searchController.navigationController.value.currentMatchIndex,
-        0,
-      );
+        expect(
+          controller
+              .searchController
+              .navigationController
+              .value
+              .currentMatchIndex,
+          0,
+        );
 
-      controller.searchController.settingsController.value =
-          const SearchSettings(
-        isCaseSensitive: false,
-        isRegExp: false,
-        pattern: 'ab',
-      );
+        controller.searchController.settingsController.value =
+            const SearchSettings(
+              isCaseSensitive: false,
+              isRegExp: false,
+              pattern: 'ab',
+            );
 
-      expect(
-        controller
-            .searchController.navigationController.value.currentMatchIndex,
-        0,
-      );
-    });
+        expect(
+          controller
+              .searchController
+              .navigationController
+              .value
+              .currentMatchIndex,
+          0,
+        );
+      },
+    );
   });
 }
 

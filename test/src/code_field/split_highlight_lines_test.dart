@@ -128,11 +128,7 @@ void main() {
             ?.map((element) => element.toStringRecursive())
             .join();
 
-        expect(
-          stringResult,
-          example.expected,
-          reason: name,
-        );
+        expect(stringResult, example.expected, reason: name);
       });
     });
   });

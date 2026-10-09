@@ -92,13 +92,14 @@ Map<int, String> countingBrackets(String text) {
         }
       } else if (char != brackets[stackBrackets[stackBrackets.length - 1]]) {
         if (errors.containsKey(lineNumber)) {
-          errors[lineNumber] = errors[lineNumber]! +
+          errors[lineNumber] =
+              errors[lineNumber]! +
               "\n" +
               "Expected to find '${brackets[stackBrackets[stackBrackets.length - 1]]}', but founded $char";
         } else {
           errors.addAll({
             lineNumber:
-                "Expected to find '${brackets[stackBrackets[stackBrackets.length - 1]]}', but founded $char"
+                "Expected to find '${brackets[stackBrackets[stackBrackets.length - 1]]}', but founded $char",
           });
         }
       } else {
@@ -112,11 +113,12 @@ Map<int, String> countingBrackets(String text) {
     if (errors.containsKey(errorsLocations[errorsLocations.length - 1])) {
       errors[errorsLocations[errorsLocations.length - 1]] =
           errors[errorsLocations[errorsLocations.length - 1]]! +
-              "\n" +
-              "Missing bracket";
+          "\n" +
+          "Missing bracket";
     } else {
-      errors.addAll(
-          {errorsLocations[errorsLocations.length - 1]: "Missing bracket"});
+      errors.addAll({
+        errorsLocations[errorsLocations.length - 1]: "Missing bracket",
+      });
     }
   }
 

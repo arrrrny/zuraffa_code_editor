@@ -69,11 +69,7 @@ void main() {
         if (example.throws) {
           expect(call, throwsAssertionError);
         } else {
-          expect(
-            call(),
-            example.expected,
-            reason: example.name,
-          );
+          expect(call(), example.expected, reason: example.name);
         }
       }
     });

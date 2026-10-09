@@ -26,10 +26,7 @@ void main() {
 
       expect(
         builder.hiddenLineRanges,
-        HiddenLineRanges(
-          breakpoints: [],
-          fullLineCount: 1,
-        ),
+        HiddenLineRanges(breakpoints: [], fullLineCount: 1),
       );
     });
 
@@ -41,10 +38,7 @@ void main() {
 
       expect(
         builder.hiddenLineRanges,
-        HiddenLineRanges(
-          breakpoints: [],
-          fullLineCount: 15,
-        ),
+        HiddenLineRanges(breakpoints: [], fullLineCount: 15),
       );
     });
 
@@ -81,10 +75,7 @@ void main() {
 
       expect(
         builder.hiddenLineRanges,
-        HiddenLineRanges(
-          breakpoints: [],
-          fullLineCount: 15,
-        ),
+        HiddenLineRanges(breakpoints: [], fullLineCount: 15),
       );
     });
 
@@ -136,13 +127,7 @@ void main() {
         codeLines: codeLines,
         hiddenRanges: HiddenRanges(
           ranges: const [
-            HiddenRange(
-              0,
-              80,
-              firstLine: 0,
-              lastLine: 2,
-              wholeFirstLine: true,
-            ),
+            HiddenRange(0, 80, firstLine: 0, lastLine: 2, wholeFirstLine: true),
             HiddenRange(
               230,
               240,

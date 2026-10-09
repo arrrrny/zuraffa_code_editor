@@ -9,9 +9,7 @@ class SearchIntent extends Intent {
 class SearchAction extends Action<SearchIntent> {
   final CodeController controller;
 
-  SearchAction({
-    required this.controller,
-  });
+  SearchAction({required this.controller});
 
   @override
   Object? invoke(SearchIntent intent) {

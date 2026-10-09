@@ -28,9 +28,7 @@ class FoldableBlockMatcher {
     }
 
     for (final block in newBlocks) {
-      newFoldableBlocksMap.addAll({
-        block.firstLine: block,
-      });
+      newFoldableBlocksMap.addAll({block.firstLine: block});
     }
 
     var firstDiffLineIndex = 0;

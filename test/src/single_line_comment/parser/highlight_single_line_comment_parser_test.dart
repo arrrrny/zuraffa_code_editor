@@ -108,7 +108,6 @@ text # not a comment
       // ==================================
       //                Go
       // ==================================
-
       _Example(
         'Go. Parses unquoted sequences',
         language: go,
@@ -165,7 +164,6 @@ public class MyClass { // comment
       // ==================================
       //                Python
       // ==================================
-
       _Example(
         'Python. Parses unquoted sequences',
         language: python,
@@ -226,7 +224,6 @@ def fn() # comment
       // ==================================
       //                Scala
       // ==================================
-
       _Example(
         'Scala. Parses unquoted sequences',
         language: scala,
