@@ -41,6 +41,7 @@ class CodeSearchController extends ChangeNotifier {
   late final FocusNode patternFocusNode = FocusNode(onKeyEvent: _onkey);
 
   int _focusChangesWithinTimeFrame = 0;
+  bool _disposed = false;
   Timer? _hidingTimer;
 
   CodeSearchController({
@@ -140,6 +141,9 @@ class CodeSearchController extends ChangeNotifier {
     _codeFieldFocusNode?.requestFocus();
     navigationController.moveNext();
     await Future.delayed(Duration.zero);
+    if (_disposed) {
+      return;
+    }
     patternFocusNode.requestFocus();
   }
 
@@ -170,6 +174,7 @@ class CodeSearchController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     _shouldShow = false;
     _codeFieldFocusNode?.removeListener(_onFocusChange);
     _codeFieldFocusNode = null;

@@ -50,6 +50,9 @@ class _GutterErrorWidgetState extends State<GutterErrorWidget> {
         Future.delayed(
           const Duration(milliseconds: 50),
           () {
+            if (!mounted) {
+              return;
+            }
             setState(() {
               if (!_mouseEnteredPopup) {
                 _entry?.remove();
