@@ -1,0 +1,68 @@
+# GitHub Triage Extension Configuration
+# Fork of flutter-code-editor -> zuraffa_code_editor (arrrrny).
+# Label vocabulary: bug / spec / chore (the fleet's three triage labels).
+
+auto_label: true
+auto_fix: false
+auto_implement: false
+persist_assessment: true
+auto_specify: false
+
+repo: "arrrrny/zuraffa_code_editor"
+limit: 0
+
+labels:
+  bug: "bug"
+  feature: "spec"
+  chore: "chore"
+  needs_triage: "needs_triage"
+  invalid: "invalid"
+
+severity_labels:
+  critical: "severity:critical"
+  high: "severity:high"
+  medium: "severity:medium"
+  low: "severity:low"
+  unknown: ""
+
+bug_keywords:
+  - crash
+  - error
+  - exception
+  - traceback
+  - broken
+  - regression
+  - fails
+  - bug
+  - stack trace
+  - leak
+  - hang
+  - deadlock
+  - freeze
+  - corrupt
+  - panic
+feature_keywords:
+  - feature
+  - enhancement
+  - request
+  - proposal
+  - "add support"
+  - idea
+  - suggestion
+  - want
+chore_keywords:
+  - chore
+  - cleanup
+  - refactor
+  - maintenance
+  - "tech debt"
+  - "dependency bump"
+  - bump
+  - migrate
+  - migration
+  - housekeeping
+  - branding
+  - "asset swap"
+  - rename
+  - "update logos"
+  - swap
