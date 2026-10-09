@@ -18,11 +18,22 @@ void main() {
   testWidgets('Disposing during the 50ms popup-close delay does not throw', (
     wt,
   ) async {
+    var showGutter = true;
+    StateSetter? setBody;
+
+    // The GutterErrorWidget is swappable inside a host that stays mounted, so
+    // the unmount below mirrors a route pop or scroll-away: the widget (and
+    // its State) go away while the enclosing MaterialApp Overlay survives.
     await wt.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: const Center(
-            child: GutterErrorWidget(issue, TextStyle()),
+          body: StatefulBuilder(
+            builder: (context, setState) {
+              setBody = setState;
+              return showGutter
+                  ? const Center(child: GutterErrorWidget(issue, TextStyle()))
+                  : const SizedBox.shrink();
+            },
           ),
         ),
       ),
@@ -41,10 +52,19 @@ void main() {
     await wt.pump();
 
     // Dispose inside the 50ms window, then let the delay elapse.
-    await wt.pumpWidget(const SizedBox());
+    showGutter = false;
+    setBody!.call(() {});
+    await wt.pump();
     await wt.pump(const Duration(milliseconds: 60));
 
     expect(wt.takeException(), isNull);
+    // The popup entry must not outlive its widget in the still-mounted
+    // Overlay.
+    expect(
+      find.text('boom'),
+      findsNothing,
+      reason: 'unmounted GutterErrorWidget must remove its popup OverlayEntry',
+    );
   });
 
   testWidgets('Popup still closes after the mouse leaves it (happy path)', (

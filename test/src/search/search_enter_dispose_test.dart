@@ -31,6 +31,8 @@ void main() {
 
     controller.searchController.showSearch();
     await wt.pump();
+    var notifiedAfterDispose = false;
+    controller.searchController.addListener(() => notifiedAfterDispose = true);
 
     // Enter is handled by the pattern field's FocusNode: schedules the async
     // continuation that requests focus after a microtask.
@@ -42,6 +44,11 @@ void main() {
     await wt.pump(const Duration(milliseconds: 10));
 
     expect(wt.takeException(), isNull);
+    expect(
+      notifiedAfterDispose,
+      isFalse,
+      reason: 'disposed controller must stay silent',
+    );
   });
 
   testWidgets('Enter in search still moves focus to the pattern field', (

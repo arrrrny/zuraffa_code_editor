@@ -23,6 +23,13 @@ class _GutterErrorWidgetState extends State<GutterErrorWidget> {
   bool _mouseEnteredPopup = false;
 
   @override
+  void dispose() {
+    _entry?.remove();
+    _entry = null;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: (event) {
