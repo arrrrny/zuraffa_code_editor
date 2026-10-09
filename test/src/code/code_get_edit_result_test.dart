@@ -250,6 +250,69 @@ public class MyClass {
       expect(result, example.expected, reason: example.name);
     }
   });
+
+  test('Code. getEditResult clamps transient out-of-range selections', () {
+    // An IME may report a selection that is out of range for the text
+    // it is being applied to, e.g. while a composition is being replaced.
+    const examples = [
+      _Example(
+        'Out-of-range selection before the edit is clamped',
+        fullTextBefore: 'abc',
+        visibleSelectionBefore: TextSelection.collapsed(offset: 10),
+        visibleValueAfter: TextEditingValue(
+          text: 'ab',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+        expected: CodeEditResult(
+          fullTextAfter: 'ab',
+          linesChanged: TextRange(start: 0, end: 0),
+        ),
+      ),
+
+      _Example(
+        'Out-of-range selection after the edit is clamped',
+        fullTextBefore: 'abc',
+        visibleSelectionBefore: TextSelection.collapsed(offset: 3),
+        visibleValueAfter: TextEditingValue(
+          text: 'abcd',
+          selection: TextSelection.collapsed(offset: 10),
+        ),
+        expected: CodeEditResult(
+          fullTextAfter: 'abcd',
+          linesChanged: TextRange(start: 0, end: 0),
+        ),
+      ),
+    ];
+
+    for (final example in examples) {
+      final highlighted = highlight.parse(
+        example.fullTextBefore,
+        language: _languageName,
+      );
+
+      final code = Code(
+        text: example.fullTextBefore,
+        highlighted: highlighted,
+        language: _language,
+        namedSectionParser: const BracketsStartEndNamedSectionParser(),
+      );
+
+      expect(
+        () => code.getEditResult(
+          example.visibleSelectionBefore,
+          example.visibleValueAfter,
+        ),
+        returnsNormally,
+        reason: example.name,
+      );
+
+      final result = code.getEditResult(
+        example.visibleSelectionBefore,
+        example.visibleValueAfter,
+      );
+      expect(result, example.expected, reason: example.name);
+    }
+  });
 }
 
 class _Example {

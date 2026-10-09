@@ -77,7 +77,11 @@ final _shortcuts = <ShortcutActivator, Intent>{
       const SearchIntent(),
   const SingleActivator(LogicalKeyboardKey.keyF, meta: true):
       const SearchIntent(),
+};
 
+// Shortcuts that must not fire while an IME composition is in progress,
+// as they would either drop the composition or act on the composing text.
+final _shortcutsIgnoredWhileComposing = <ShortcutActivator, Intent>{
   // Dismiss
   LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
 
@@ -406,6 +410,12 @@ class _CodeFieldState extends State<CodeField> {
 
     textStyle = defaultTextStyle.merge(widget.textStyle);
 
+    final isComposingText = widget.controller.hasActiveComposition;
+    final shortcuts = {
+      ..._shortcuts,
+      if (!isComposingText) ..._shortcutsIgnoredWhileComposing,
+    };
+
     final codeField = TextField(
       focusNode: _focusNode,
       scrollPadding: widget.padding,
@@ -447,7 +457,7 @@ class _CodeFieldState extends State<CodeField> {
 
     return FocusableActionDetector(
       actions: widget.controller.actions,
-      shortcuts: _shortcuts,
+      shortcuts: shortcuts,
       child: Container(
         decoration: widget.decoration,
         color: _backgroundCol,
