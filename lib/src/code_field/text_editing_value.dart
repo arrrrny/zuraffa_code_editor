@@ -7,6 +7,16 @@ import '../code_field/code_controller.dart';
 import '../util/edit_type.dart';
 import 'text_selection.dart';
 
+/// A fresh word-boundary pattern for engine calls (`indexOf`, `lastIndexOf`,
+/// `split`).
+///
+/// [RegExps.wordSplit] must not be handed to the engine directly: on the web
+/// target dart2js can carry `lastIndex` state between calls on a reused
+/// `RegExp`, which corrupts editing state
+/// (akvelon/flutter-code-editor#61).
+@visibleForTesting
+RegExp wordSplitPatternForScan() => RegExp(RegExps.wordSplit.pattern);
+
 extension TextEditingValueExtension on TextEditingValue {
   /// The position where the word at the cursor starts.
   /// `null` for a non-collapsed selection.
@@ -48,9 +58,12 @@ extension TextEditingValueExtension on TextEditingValue {
 
     final text = this.text;
     final start = cursorPosition > 0
-        ? text.lastIndexOf(RegExps.wordSplit, cursorPosition - 1) + 1
+        ? text.lastIndexOf(wordSplitPatternForScan(), cursorPosition - 1) + 1
         : 0;
-    final firstNonWord = text.indexOf(RegExps.wordSplit, cursorPosition);
+    final firstNonWord = text.indexOf(
+      wordSplitPatternForScan(),
+      cursorPosition,
+    );
     final end = firstNonWord == -1 ? text.length : firstNonWord;
 
     return [start, end];
