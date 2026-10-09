@@ -1,4 +1,4 @@
-import 'package:flutter_code_editor/src/folding/foldable_block.dart';
+import 'package:zuraffa_code_editor/src/folding/foldable_block.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'parsers/test_executor.dart';

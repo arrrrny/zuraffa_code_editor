@@ -1,8 +1,8 @@
-import 'package:flutter_code_editor/src/code_field/code_controller.dart';
-import 'package:flutter_code_editor/src/search/settings.dart';
-import 'package:flutter_code_editor/src/search/strategies/plain_case_insensitive.dart';
-import 'package:flutter_code_editor/src/search/strategies/plain_case_sensitive.dart';
-import 'package:flutter_code_editor/src/search/strategies/regexp.dart';
+import 'package:zuraffa_code_editor/src/code_field/code_controller.dart';
+import 'package:zuraffa_code_editor/src/search/settings.dart';
+import 'package:zuraffa_code_editor/src/search/strategies/plain_case_insensitive.dart';
+import 'package:zuraffa_code_editor/src/search/strategies/plain_case_sensitive.dart';
+import 'package:zuraffa_code_editor/src/search/strategies/regexp.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

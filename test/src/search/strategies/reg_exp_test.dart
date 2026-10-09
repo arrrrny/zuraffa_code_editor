@@ -1,7 +1,7 @@
-import 'package:flutter_code_editor/src/search/match.dart';
-import 'package:flutter_code_editor/src/search/result.dart';
-import 'package:flutter_code_editor/src/search/settings.dart';
-import 'package:flutter_code_editor/src/search/strategies/regexp.dart';
+import 'package:zuraffa_code_editor/src/search/match.dart';
+import 'package:zuraffa_code_editor/src/search/result.dart';
+import 'package:zuraffa_code_editor/src/search/settings.dart';
+import 'package:zuraffa_code_editor/src/search/strategies/regexp.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

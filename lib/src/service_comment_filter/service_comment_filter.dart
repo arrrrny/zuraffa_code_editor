@@ -1,4 +1,4 @@
-import '../../flutter_code_editor.dart';
+import '../../zuraffa_code_editor.dart';
 import '../single_line_comments/single_line_comment.dart';
 
 class ServiceCommentFilter {

@@ -9,7 +9,7 @@ import 'dart:js_interop' as js;
 import 'dart:js_interop_unsafe' as js_util;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_code_editor/flutter_code_editor.dart';
+import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 import 'package:flutter_highlight/themes/vs2015.dart';
 import 'package:highlight/languages/java.dart';
 

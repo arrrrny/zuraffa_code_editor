@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:highlight/highlight_core.dart';
 import 'package:meta/meta.dart';
 
-import '../../flutter_code_editor.dart';
+import '../../zuraffa_code_editor.dart';
 import '../autocomplete/autocompleter.dart';
 import '../code/code_edit_result.dart';
 import '../code/key_event.dart';

@@ -1,7 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_code_editor/src/code_field/code_controller.dart';
+import 'package:zuraffa_code_editor/src/code_field/code_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:highlight/languages/dart.dart';
 
@@ -171,7 +171,7 @@ $_method
       expect(controller.value.text, '''
 class MyClass {
   
-  void method() {
+  void method() {  }
   
 }''');
       expect(
@@ -218,7 +218,7 @@ void method2() {// [START method2]
 
       controller.foldAt(4);
       controller.visibleSectionNames = {'method2'};
-      expect(controller.value.text, 'void method2() {');
+      expect(controller.value.text, 'void method2() {}');
 
       controller.visibleSectionNames = {};
       expect(controller.value.text, '''
@@ -226,7 +226,7 @@ void method1() {
   int a;
 }
 
-void method2() {''');
+void method2() {}''');
     });
 
     test('Newline after closing comment on the last line', () {

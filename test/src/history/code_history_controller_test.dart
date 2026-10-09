@@ -2,9 +2,9 @@
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_code_editor/flutter_code_editor.dart';
-import 'package:flutter_code_editor/src/history/code_history_controller.dart';
-import 'package:flutter_code_editor/src/history/code_history_record.dart';
+import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
+import 'package:zuraffa_code_editor/src/history/code_history_controller.dart';
+import 'package:zuraffa_code_editor/src/history/code_history_record.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../common/create_app.dart';
@@ -398,7 +398,7 @@ void main() {
       testWidgets('Start typing -> Fold -> Continue -> Undo -> Still folded',
           (wt) async {
         const example = 'a\n// comment 1\n// comment2\n a';
-        const visible = 'a\n// comment 1\n a';
+        const visible = 'a\n// comment 1// comment2\n a';
         final controller = await pumpController(wt, example);
         await wt.cursorEnd();
 

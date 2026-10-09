@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:flutter_code_editor/src/hidden_ranges/hidden_range.dart';
-import 'package:flutter_code_editor/src/hidden_ranges/hidden_ranges.dart';
+import 'package:zuraffa_code_editor/src/hidden_ranges/hidden_range.dart';
+import 'package:zuraffa_code_editor/src/hidden_ranges/hidden_ranges.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'common.dart';

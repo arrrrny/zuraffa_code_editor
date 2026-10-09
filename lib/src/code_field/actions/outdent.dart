@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../../flutter_code_editor.dart';
+import '../../../zuraffa_code_editor.dart';
 
 class OutdentIntent extends Intent {
   const OutdentIntent();

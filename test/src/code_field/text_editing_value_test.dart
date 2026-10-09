@@ -1,5 +1,5 @@
 import 'package:flutter/rendering.dart';
-import 'package:flutter_code_editor/flutter_code_editor.dart';
+import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../common/lorem_ipsum.dart';

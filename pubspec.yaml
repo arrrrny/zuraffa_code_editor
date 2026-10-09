@@ -1,7 +1,17 @@
-name: flutter_code_editor
-description: A customizable code field supporting syntax highlighting and code folding.
-version: 0.3.5
-repository: https://github.com/akvelon/flutter-code-editor
+name: zuraffa_code_editor
+description: >-
+  A customizable Flutter code field supporting syntax highlighting, code
+  folding with visible closing lines, autocompletion and themes.
+version: 0.1.0
+repository: https://github.com/arrrrny/zuraffa_code_editor
+homepage: https://zuraffa.com
+issue_tracker: https://github.com/arrrrny/zuraffa_code_editor/issues
+topics:
+  - flutter
+  - code-editor
+  - syntax-highlighting
+  - code-folding
+  - zuraffa
 
 environment:
   sdk: ">=2.17.0 <4.0.0"
@@ -26,8 +36,8 @@ dependencies:
 
 dev_dependencies:
   fake_async: ^1.3.1
+  flutter_lints: ^6.0.0
   flutter_test: { sdk: flutter }
-  total_lints: ^3.1.1
 
 flutter:
   uses-material-design: true

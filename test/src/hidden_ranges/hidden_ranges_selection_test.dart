@@ -2,8 +2,8 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_code_editor/src/code_field/text_selection.dart';
-import 'package:flutter_code_editor/src/hidden_ranges/hidden_ranges.dart';
+import 'package:zuraffa_code_editor/src/code_field/text_selection.dart';
+import 'package:zuraffa_code_editor/src/hidden_ranges/hidden_ranges.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'common.dart';

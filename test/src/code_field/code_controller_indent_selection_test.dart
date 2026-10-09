@@ -2,7 +2,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:flutter_code_editor/flutter_code_editor.dart';
+import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:highlight/languages/java.dart';
 
@@ -319,13 +319,13 @@ import java.util.Arrays;
   a;
 ''',
           expectedVisibleText: '''
-// comment1
-package org.apache.beam.examples;
+// comment1// comment 2
+package org.apache.beam.examples;import java.util.Arrays;
 
   a;
 ''',
-          initialSelection: TextSelection(baseOffset: 47, extentOffset: 49),
-          expectedSelection: TextSelection(baseOffset: 47, extentOffset: 52),
+          initialSelection: TextSelection(baseOffset: 82, extentOffset: 84),
+          expectedSelection: TextSelection(baseOffset: 82, extentOffset: 88),
         ),
       ];
 

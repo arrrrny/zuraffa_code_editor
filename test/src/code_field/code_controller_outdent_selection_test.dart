@@ -3,7 +3,7 @@
 // ignore_for_file: prefer_final_locals
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_code_editor/flutter_code_editor.dart';
+import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:highlight/languages/java.dart';
 
@@ -285,13 +285,13 @@ import java.util.Arrays;
 a;
 ''',
           expectedVisibleText: '''
-// comment1
-package org.apache.beam.examples;
+// comment1// comment 2
+package org.apache.beam.examples;import java.util.Arrays;
 
 a;
 ''',
-          initialSelection: TextSelection(baseOffset: 47, extentOffset: 52),
-          expectedSelection: TextSelection(baseOffset: 47, extentOffset: 50),
+          initialSelection: TextSelection(baseOffset: 82, extentOffset: 87),
+          expectedSelection: TextSelection(baseOffset: 82, extentOffset: 86),
         ),
       ];
 

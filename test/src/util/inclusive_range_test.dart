@@ -1,4 +1,4 @@
-import 'package:flutter_code_editor/src/util/inclusive_range.dart';
+import 'package:zuraffa_code_editor/src/util/inclusive_range.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

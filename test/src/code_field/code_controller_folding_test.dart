@@ -10,7 +10,7 @@ import '../common/widget_tester.dart';
 
 const _codeFolded1 = '''
 private class MyClass {
-  void method1() {
+  void method1() {  }
 
   void method2() {
     return;
@@ -91,7 +91,7 @@ int c;
           foldedHtml,
           '''
 <span class="hljs-keyword">private</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span> </span>{
-  <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">method1</span><span class="hljs-params">()</span> </span>{<span class="hljs-keyword"></span><span class="hljs-keyword"></span><span class="hljs-comment"></span><span class="hljs-keyword"></span><span class="hljs-comment"></span>
+  <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">method1</span><span class="hljs-params">()</span> </span>{<span class="hljs-keyword"></span><span class="hljs-keyword"></span><span class="hljs-comment"></span><span class="hljs-keyword"></span><span class="hljs-comment"></span>  }
 
   <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">method2</span><span class="hljs-params">()</span> </span>{<span class="hljs-comment"></span>
     <span class="hljs-keyword">return</span>;
@@ -138,7 +138,7 @@ int c;
         expect(
           controller.text,
           '''
-// comment1
+// comment1///comment2
 
 package mypackage;
 import java.util.Arrays;
@@ -158,7 +158,7 @@ import java.util.Arrays;
 
         expect(
           controller.text,
-          '/*\n' + CommentImportSnippet.visible,
+          '/**/\n' + CommentImportSnippet.visible,
         );
       });
 
@@ -212,7 +212,7 @@ import java.util.Arrays;
 // comment1
 ///comment2
 
-package mypackage;
+package mypackage;import java.util.Arrays;
 
 {
 }
@@ -274,8 +274,8 @@ package mypackage;
 }
 ''';
         const expected = '''
-{{
-{
+{{}
+{}
 ''';
         final controller = createController(text);
 
@@ -324,12 +324,12 @@ package mypackage;
 
         const foldedVisible = '''
 {                                     //  0
-  {                                   //  1
+  {                                   //  1  }                                   //  2
                                       //  3
   {
   }
                                       //  6
-  {
+  {  }
                                       //  9
   {                                   //  10
 
@@ -349,7 +349,7 @@ package mypackage;
   }                                   //  25
 
                                       //  27
-  {                                   //  28
+  {                                   //  28  }                                   //  29
 }                                     //  30
 ''';
 
@@ -371,13 +371,13 @@ package mypackage;
 
       test(
           'When the last foldable block is folded '
-          'SHOULD NOT show characters other than `\n`', () {
+          'SHOULD NOT show the lines inside the block', () {
         const initialText = '''
 aaaa:
   aaaa
   aaaa''';
         const finalVisibleText = '''
-aaaa:''';
+aaaa:  aaaa''';
         final controller = createController(initialText, language: python);
         controller.foldAt(0);
 

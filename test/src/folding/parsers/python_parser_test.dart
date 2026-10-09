@@ -1,13 +1,13 @@
 // ignore_for_file: avoid_private_typedef_functions
 
-import 'package:flutter_code_editor/src/code/code_lines_builder.dart';
-import 'package:flutter_code_editor/src/folding/foldable_block.dart';
-import 'package:flutter_code_editor/src/folding/foldable_block_type.dart';
-import 'package:flutter_code_editor/src/folding/parsers/python.dart';
-import 'package:flutter_code_editor/src/named_sections/parsers/brackets_start_end.dart';
-import 'package:flutter_code_editor/src/service_comment_filter/service_comment_filter.dart';
-import 'package:flutter_code_editor/src/single_line_comments/parser/single_line_comment_parser.dart';
-import 'package:flutter_code_editor/src/single_line_comments/parser/single_line_comments.dart';
+import 'package:zuraffa_code_editor/src/code/code_lines_builder.dart';
+import 'package:zuraffa_code_editor/src/folding/foldable_block.dart';
+import 'package:zuraffa_code_editor/src/folding/foldable_block_type.dart';
+import 'package:zuraffa_code_editor/src/folding/parsers/python.dart';
+import 'package:zuraffa_code_editor/src/named_sections/parsers/brackets_start_end.dart';
+import 'package:zuraffa_code_editor/src/service_comment_filter/service_comment_filter.dart';
+import 'package:zuraffa_code_editor/src/single_line_comments/parser/single_line_comment_parser.dart';
+import 'package:zuraffa_code_editor/src/single_line_comments/parser/single_line_comments.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:highlight/highlight_core.dart';
 import 'package:highlight/languages/python.dart';

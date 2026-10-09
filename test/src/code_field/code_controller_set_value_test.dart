@@ -13,9 +13,9 @@ void main() {
         'Backspace after newline after folded block',
         initialFullText: 'int main(){\n}\n',
         //                                \
-        initialSelection: TextSelection.collapsed(offset: 12),
+        initialSelection: TextSelection.collapsed(offset: 13),
         foldedBlocks: [0],
-        finalVisibleText: 'int main(){\n',
+        finalVisibleText: 'int main(){}\n',
         key: LogicalKeyboardKey.backspace,
       ),
 
@@ -23,9 +23,9 @@ void main() {
         'Delete at the collapsed position of a folded block',
         initialFullText: 'int main(){\n}\n',
         //                           \
-        initialSelection: TextSelection.collapsed(offset: 11),
+        initialSelection: TextSelection.collapsed(offset: 12),
         foldedBlocks: [0],
-        finalVisibleText: 'int main(){\n',
+        finalVisibleText: 'int main(){}\n',
         key: LogicalKeyboardKey.delete,
       ),
     ];

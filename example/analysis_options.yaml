@@ -1,1 +1,8 @@
-include: package:total_lints/app.yaml
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - linux/**
+include: package:flutter_lints/flutter.yaml

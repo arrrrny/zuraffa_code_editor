@@ -1,6 +1,6 @@
 import 'package:highlight/highlight.dart';
 
-import '../../../flutter_code_editor.dart';
+import '../../../zuraffa_code_editor.dart';
 import '../../code/code_lines.dart';
 import 'abstract.dart';
 import 'java_fallback.dart';
