@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:zuraffa_code_editor/src/util/string_util.dart';
 
 void main() {

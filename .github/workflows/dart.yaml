@@ -59,16 +59,30 @@ jobs:
       - name: Test
         run: flutter test --coverage
 
-      # Ratchet, not a wall: the number only ever rises, and only in the PR
-      # that adds the tests behind it. Measured on this branch with a fresh
-      # coverage run and the CI helper: 90.29% (2642/2926 lines). Unreachable
-      # files are exempted (see EXEMPT_FILES in tool/coverage_gate.py): the CI
-      # helper imports every file under lib/, so dead/wip modules the package
-      # never references would otherwise drag the number down. The gate sits
-      # just under the measured value so master is green and every coverage PR
-      # raises it.
+      # Ratchet: the number only ever rises, and only in the PR that adds the
+      # tests behind it — the step below refuses a PR that lowers it.
+      # Measured on this branch with a fresh coverage run and the CI helper:
+      # 90.29% (2642/2926 lines). Unreachable files are exempted (see
+      # EXEMPT_FILES in tool/coverage_gate.py): the CI helper imports every
+      # file under lib/, so dead/wip modules the package never references
+      # would otherwise drag the number down. The gate sits just under the
+      # measured value so master is green and every coverage PR raises it.
       - name: Coverage gate
-        run: python3 tool/coverage_gate.py --min 90.0
+        run: |
+          python3 tool/coverage_gate.py --min 90.0
+          # Mechanical ratchet: fail a PR that lowers the gate below the base
+          # branch's value. GITHUB_BASE_REF is empty on push events, where
+          # there is nothing to compare against. Both sides are read with the
+          # same grep, first match = the gate invocation line above.
+          this_min="$(grep -m1 -oE 'min [0-9.]+' .github/workflows/dart.yaml | cut -d' ' -f2)"
+          if [ -n "$GITHUB_BASE_REF" ]; then
+            git fetch --quiet origin "$GITHUB_BASE_REF"
+            base_min="$(git show "origin/$GITHUB_BASE_REF:.github/workflows/dart.yaml" 2>/dev/null | grep -m1 -oE 'min [0-9.]+' | cut -d' ' -f2)" || true
+            if [ -n "$base_min" ] && ! awk -v a="$this_min" -v b="$base_min" 'BEGIN { exit !(a + 0 >= b + 0) }'; then
+              echo "::error::coverage gate lowered: --min $this_min < --min $base_min (base $GITHUB_BASE_REF)"
+              exit 1
+            fi
+          fi
 
       # As we don't use file generation, it's fine to include everything.
       # - name: Install lcov
