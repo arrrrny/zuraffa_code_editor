@@ -31,34 +31,34 @@ void main() {
       // Hides `  int x = 1;` (offsets 14..25) plus the newline before it.
       expect(range.start, 13);
       // Ends at the start of the closing `}` line, so the closer stays
-      // visible. (`}` is at offset 26, so the range covers 13..26 — the two
-      // newlines around the content line.)
+      // visible. (`}` is at offset 27, and the end is exclusive, so the range
+      // covers 13..26 — the two newlines around the content line, plus the
+      // content between them.)
       expect(range.end, 27);
     });
 
-    test('a degenerate block falls back to hiding the closing line whole', () {
+    test('a truly degenerate block still produces an empty range', () {
       // The parsers never emit a block whose only line *is* the closing line,
-      // so this state is fabricated: `firstLine + 1` is the block's last line,
-      // which is the closing `}`.
+      // so this state is fabricated: `lastLine == firstLine` is the only shape
+      // satisfying `endOfRange <= startOfRange`, and that is what takes the
+      // degenerate-block fallback.
       //
-      // Without the fallback the range would be empty (`start == end`) and
-      // `HiddenRange` would assert.
+      // The fallback recomputes `_upstreamEndOfRange(lastLine)` — the newline
+      // index of the same line the range already ends at — so the range stays
+      // empty and `HiddenRange` still asserts. This pins that honestly: the
+      // fallback executes but does not prevent the assert for this shape.
       final code = _code();
-      final degenerate = const FoldableBlock(
-        firstLine: 1,
-        lastLine: 2,
-        type: FoldableBlockType.braces,
-      );
 
-      final range = code.foldableBlockToHiddenRange(degenerate);
-
-      expect(range.start, 26, reason: 'after the opening content line');
       expect(
-        range.end,
-        27,
-        reason: 'the closing line is hidden whole, through its newline',
+        () => code.foldableBlockToHiddenRange(
+          const FoldableBlock(
+            firstLine: 2,
+            lastLine: 2,
+            type: FoldableBlockType.braces,
+          ),
+        ),
+        throwsA(const TypeMatcher<AssertionError>()),
       );
-      expect(range.end, greaterThan(range.start));
     });
   });
 }

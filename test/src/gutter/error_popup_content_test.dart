@@ -157,12 +157,22 @@ void main() {
       await wt.pump();
       await wt.pump(const Duration(milliseconds: 60));
 
-      // Re-enter while the entry already exists: the `_entry != null` guard
-      // must short-circuit instead of inserting a second one.
+      // Leave briefly, then re-enter before the delayed close (50 ms) fires,
+      // so `onEnter` runs again while `_entry != null`: the guard must
+      // short-circuit instead of inserting a second one. (Re-`moveTo` to the
+      // position the pointer already holds would not re-fire `onEnter`.)
+      await gesture.moveTo(const Offset(-500, -500));
+      await wt.pump(const Duration(milliseconds: 20));
       await gesture.moveTo(wt.getCenter(find.byType(GutterErrorWidget)));
       await wt.pump();
 
       expect(find.text('Once'), findsOneWidget);
+
+      // The re-enter does not cancel the exit's delayed close, and the pointer
+      // is on the icon rather than the popup, so let the timer fire: the entry
+      // is removed after all.
+      await wt.pump(const Duration(milliseconds: 60));
+      expect(find.text('Once'), findsNothing);
     });
 
     testWidgets('tapping the url launches it', (wt) async {

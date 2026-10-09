@@ -314,7 +314,7 @@ public class MyClass {
     }
   });
 
-  test('Code. getEditResult keeps text on backspace into a folded block', () {
+  test('Code.getEditResult keeps text on backspace into a folded block', () {
     const fullTextBefore = '''
 public class MyClass {
   public void main() {
@@ -331,9 +331,10 @@ public class MyClass {
 
     final visibleText = code.visibleText;
     // visibleText(51) = `public class MyClass {\n  public void main() {  }\n}\n`
-    // The folded block spans lines 1..2, so a caret at offset 48 (the `}` that
-    // closes it) is the last position inside its line range — that is where
-    // backspace would otherwise eat the opening brace of the folded body.
+    // The folded block spans lines 1..2, so a caret at offset 48 — the newline
+    // right after the glued `  }` (the `}` itself is visible 47) — is the last
+    // position inside its line range: that is where backspace would otherwise
+    // eat the opening brace of the folded body.
     const caret = 48;
     final selection = code.hiddenRanges.recoverSelection(
       const TextSelection.collapsed(offset: caret),
