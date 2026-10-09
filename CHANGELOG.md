@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.1.1
+
+### Fixed
+
+- **Fold ranges now end at the start of the last line only when that line is a
+  closing line** (`)`, `]`, `}` …). 0.1.0 applied this unconditionally, which
+  hid only the *newline* before a non-closing last line and glued the
+  neighbouring lines together: folding
+
+  ```dart
+  // first line
+  // second line
+  // third line
+  ```
+
+  produced `// first line// third line`. Content lines — the tail of a `//`
+  comment block, a continued argument, an import group — are hidden whole
+  again, exactly as upstream does, while folded closers stay on screen as
+  before: `parsers: [  ],`, `void method() {  }`, `ScraperConfig();`.
+
+- **The gutter now uses the code style's line height.**
+  `CodeField._buildGutter()` copied `fontSize` and `fontFamily` from the code
+  style "for consistency with lines" but not `height`, so gutter rows fell
+  back to the font's own metrics — 19 px against the code's 21 px at the
+  default style. The two grids therefore drifted ~1.9 px on *every* line,
+  reaching ~60 px by line 36 of a typical file. Because the fold chevron is
+  centred in its gutter row it inherited that drift, so chevrons climbed above
+  the line they labelled (over half a line off by line 9, worse further down).
+  The gutter now starts on the code text's top edge with a row pitch equal to
+  the rendered line height.
+
+### Added
+
+- `gutter_alignment_test.dart` pins the gutter/code grid invariant — top edge
+  and row pitch — in both the folded and unfolded states.
+- Comment-block regression tests pinning that non-closing blocks hide their
+  last line whole, with no glued text.
+
 ## 0.1.0
 
 First release of `zuraffa_code_editor`, a maintained fork of

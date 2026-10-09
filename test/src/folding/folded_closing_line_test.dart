@@ -118,4 +118,85 @@ final config = ScraperConfig(
       expect(controller.code.foldedBlocks, isEmpty);
     });
   });
+
+  /// The closing-line fix only changes blocks whose LAST line is a closer.
+  /// Every other kind of block — a `//` comment tail, a continued argument,
+  /// an import group — must still be hidden through the end of its last line,
+  /// exactly as upstream does.
+  ///
+  /// Stopping at the start of a *content* line instead would delete only the
+  /// newline that precedes it and glue the line onto its opener:
+  /// `// first// second`.
+  group('Non-closing blocks still hide their last line whole.', () {
+    test('A comment block folds without gluing its lines together', () {
+      final controller = CodeController(
+        text: 'class C {\n'
+            '  // write the body\n'
+            '  // of the method here\n'
+            '  int x = 1;\n'
+            '}\n',
+        language: java,
+      );
+
+      controller.foldAt(1); // the first `//` line opens the comment block.
+
+      expect(controller.text, '''
+class C {
+  // write the body
+  int x = 1;
+}
+''');
+      expect(
+        controller.code.text,
+        'class C {\n'
+        '  // write the body\n'
+        '  // of the method here\n'
+        '  int x = 1;\n'
+        '}\n',
+        reason: 'the full source must survive folding',
+      );
+    });
+
+    test('A single-line comment block hides only its tail', () {
+      final controller = CodeController(
+        text: '// first line\n'
+            '// second line\n'
+            '// third line\n',
+        language: java,
+      );
+
+      controller.foldAt(0);
+
+      expect(
+        controller.text,
+        '// first line\n',
+        reason: 'no `// first// second` gluing',
+      );
+      expect(controller.code.foldedBlocks, hasLength(1));
+    });
+
+    test('A comment block still reports a real line range when folded', () {
+      final controller = CodeController(
+        text: '// first line\n'
+            '// second line\n'
+            '// third line\n',
+        language: java,
+      )
+        ..foldAt(0);
+
+      // The hidden range must resolve to the block's last line — that is what
+      // keeps the gutter numbering and the fold-toggle row stable.
+      final range = controller.code.hiddenLineRanges;
+      expect(range.cutLineIndexIfVisible(0), 0, reason: 'opener stays visible');
+      expect(range.cutLineIndexIfVisible(1), isNull, reason: 'tail is hidden');
+      expect(range.cutLineIndexIfVisible(2), isNull, reason: 'tail is hidden');
+      expect(controller.code.lines.length, 4,
+          reason: 'three comment lines plus the trailing empty line');
+      expect(
+        range.visibleLineNumbers,
+        [0, 3],
+        reason: 'only the opener and the trailing empty line stay visible',
+      );
+    });
+  });
 }

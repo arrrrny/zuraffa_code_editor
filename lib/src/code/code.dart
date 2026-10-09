@@ -460,6 +460,18 @@ class Code {
         foldableBlocks.firstWhereOrNull((block) => block.firstLine == line);
   }
 
+  /// Whether the last line of a foldable block is a *closing* line — `)`,
+  /// `]`, `}`, `);`, `},` … — rather than a line of the block's content.
+  ///
+  /// Folding must leave a closing line on screen (see
+  /// [foldableBlockToHiddenRange]), but it must hide content lines whole.
+  static bool _isClosingLine(CodeLine line) {
+    final text = line.text.trimLeft();
+    return text.startsWith(')') ||
+        text.startsWith(']') ||
+        text.startsWith('}');
+  }
+
   HiddenRange foldableBlockToHiddenRange(FoldableBlock block) {
     final firstLine = lines.lines[block.firstLine + 1]; //Keep 1st line visible.
     final lastLine = lines.lines[block.lastLine];
@@ -467,25 +479,27 @@ class Code {
     // Includes '\n' before.
     final startOfRange = firstLine.textRange.start - 1;
 
-    // End the range at the START of the block's last line instead of at its
-    // end, so the closing line (`]`, `);`, `}` ...) stays visible when folded.
+    // Ends at the START of the block's last line when that line is a closing
+    // line, so the closer stays visible when folded. Hiding through the end
+    // of the last line made `parsers: [` fold to a lone opening bracket with
+    // no matching closer, which reads as broken code. Ending at the start
+    // still resolves — via `characterIndexToLineIndex` — to `block.lastLine`,
+    // exactly as the end does, so the derived `LineNumberingBreakpoint`s, the
+    // gutter numbering and the fold-toggle rows are bit-for-bit unchanged.
     //
-    // Hiding through the end of the last line made `parsers: [` fold to a lone
-    // opening bracket with no matching closer, which reads as broken code.
-    // `characterIndexToLineIndex` resolves `lastLine.textRange.start` to
-    // `block.lastLine` — the same line upstream's end resolves to — so the
-    // derived `LineNumberingBreakpoint`s, the gutter numbering and the
-    // fold-toggle rows are all bit-for-bit unchanged.
-    var endOfRange = lastLine.textRange.start;
+    // A content line (the tail of a `//` comment block, a continued argument)
+    // must be hidden whole, as upstream does. Stopping at its start would
+    // delete only the preceding newline and glue it onto the line above:
+    // `// first// second`.
+    var endOfRange = _isClosingLine(lastLine)
+        ? lastLine.textRange.start
+        : _upstreamEndOfRange(lastLine);
 
     if (endOfRange <= startOfRange) {
       // Degenerate block (lastLine == firstLine, so there is nothing between
       // the kept line and the closing line). Fall back to hiding the closing
       // line entirely, exactly as upstream does, to avoid an empty range.
-      endOfRange = lastLine.textRange.end - 1;
-      if (lastLine.text[lastLine.text.length - 1] != '\n') {
-        endOfRange++;
-      }
+      endOfRange = _upstreamEndOfRange(lastLine);
     }
 
     return HiddenRange(
@@ -495,6 +509,16 @@ class Code {
       lastLine: block.lastLine,
       wholeFirstLine: false, // Some characters of the first line are visible.
     );
+  }
+
+  /// The hidden range end upstream uses: the end of [line] excluding its
+  /// trailing newline.
+  static int _upstreamEndOfRange(CodeLine line) {
+    var end = line.textRange.end - 1;
+    if (line.text[line.text.length - 1] != '\n') {
+      end++;
+    }
+    return end;
   }
 
   /// Folds this code at the same blocks as the [oldCode] is.

@@ -319,13 +319,13 @@ import java.util.Arrays;
   a;
 ''',
           expectedVisibleText: '''
-// comment1// comment 2
-package org.apache.beam.examples;import java.util.Arrays;
+// comment1
+package org.apache.beam.examples;
 
   a;
 ''',
-          initialSelection: TextSelection(baseOffset: 82, extentOffset: 84),
-          expectedSelection: TextSelection(baseOffset: 82, extentOffset: 88),
+          initialSelection: TextSelection(baseOffset: 47, extentOffset: 49),
+          expectedSelection: TextSelection(baseOffset: 47, extentOffset: 52),
         ),
       ];
 

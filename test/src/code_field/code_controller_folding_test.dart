@@ -138,7 +138,7 @@ int c;
         expect(
           controller.text,
           '''
-// comment1///comment2
+// comment1
 
 package mypackage;
 import java.util.Arrays;
@@ -158,7 +158,7 @@ import java.util.Arrays;
 
         expect(
           controller.text,
-          '/**/\n' + CommentImportSnippet.visible,
+          '/*\n' + CommentImportSnippet.visible,
         );
       });
 
@@ -212,7 +212,7 @@ import java.util.Arrays;
 // comment1
 ///comment2
 
-package mypackage;import java.util.Arrays;
+package mypackage;
 
 {
 }
@@ -371,13 +371,13 @@ package mypackage;import java.util.Arrays;
 
       test(
           'When the last foldable block is folded '
-          'SHOULD NOT show the lines inside the block', () {
+          'SHOULD NOT show characters other than `\n`', () {
         const initialText = '''
 aaaa:
   aaaa
   aaaa''';
         const finalVisibleText = '''
-aaaa:  aaaa''';
+aaaa:''';
         final controller = createController(initialText, language: python);
         controller.foldAt(0);
 

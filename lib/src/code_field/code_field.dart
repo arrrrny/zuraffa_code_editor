@@ -490,6 +490,13 @@ class _CodeFieldState extends State<CodeField> {
       color: lineNumberColor,
       fontFamily: textStyle.fontFamily,
       fontSize: lineNumberSize,
+      // The gutter's line boxes must be exactly as tall as the code's.
+      // fontSize/fontFamily are already overridden for that reason, but
+      // without height each gutter row falls back to the font's own metrics
+      // and so has a different height than the text line it labels. The two
+      // grids then drift apart by that difference on every line, which is
+      // catastrophic once a few blocks are collapsed.
+      height: textStyle.height,
     );
 
     final gutterStyle = widget.gutterStyle.copyWith(

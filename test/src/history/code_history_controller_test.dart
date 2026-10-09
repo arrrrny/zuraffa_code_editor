@@ -398,7 +398,7 @@ void main() {
       testWidgets('Start typing -> Fold -> Continue -> Undo -> Still folded',
           (wt) async {
         const example = 'a\n// comment 1\n// comment2\n a';
-        const visible = 'a\n// comment 1// comment2\n a';
+        const visible = 'a\n// comment 1\n a';
         final controller = await pumpController(wt, example);
         await wt.cursorEnd();
 

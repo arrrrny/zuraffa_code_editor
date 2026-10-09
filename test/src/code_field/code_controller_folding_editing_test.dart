@@ -227,7 +227,7 @@ int n;
               'Adding non-import after folded imports -> Does not unfold',
               (wt) async {
             const example = 'package example;\nimport java.util.Date;\n';
-            const visible = 'package example;import java.util.Date;\n';
+            const visible = 'package example;\n';
             const inserted = 'a';
             final controller = await pumpController(wt, example);
 
@@ -264,7 +264,7 @@ int n;
               'Add non-comment after folded comments -> Does not unfold',
               (wt) async {
             const example = '// comment 1\n// comment 2\n';
-            const visible = '// comment 1// comment 2\n';
+            const visible = '// comment 1\n';
             const inserted = 'a';
             final controller = await pumpController(wt, example);
 
@@ -291,9 +291,9 @@ int n;
             );
             controller.foldAt(0);
 
-            expect(controller.value.text, 'a:  aaaa\n');
+            expect(controller.value.text, 'a:\n');
             //                                 \ selection
-            await wt.selectFromHome(9);
+            await wt.selectFromHome(3);
             controller.value = controller.value.replacedSelection('  bbbb');
 
             const expectedText = 'a:\n  aaaa\n  bbbb';
@@ -317,12 +317,12 @@ int n;
             );
             controller.foldAt(0);
 
-            expect(controller.value.text, 'a:  aaaa\n');
+            expect(controller.value.text, 'a:\n');
             //                                 \ selection
-            await wt.selectFromHome(9);
+            await wt.selectFromHome(3);
             controller.value = controller.value.replacedSelection('bbbb');
 
-            const expectedText = 'a:  aaaa\nbbbb';
+            const expectedText = 'a:\nbbbb';
 
             expect(controller.value.text, expectedText);
             expect(controller.code.foldedBlocks.length, 1);
@@ -345,13 +345,13 @@ int n;
 
             controller.foldAt(0);
 
-            expect(controller.value.text, 'a:  aaaa\n\n');
+            expect(controller.value.text, 'a:\n\n');
             //                                 \ selection
-            await wt.selectFromHome(10);
+            await wt.selectFromHome(3);
 
             controller.value = controller.value.replacedSelection('\n');
 
-            const expectedText = 'a:  aaaa\n\n\n';
+            const expectedText = 'a:\n\n\n';
 
             expect(controller.value.text, expectedText);
             expect(controller.code.foldedBlocks.length, 1);
@@ -610,7 +610,7 @@ if (true) ;}
       testWidgets('Deleting folded comments', (WidgetTester wt) async {
         final controller = await pumpController(wt, _commentsCode);
         controller.foldAt(1);
-        await wt.selectFromHome(26, offset: 25);
+        await wt.selectFromHome(26, offset: 13);
         // private class MyClass {\n  //comment1\n  void method...
         //                            \--selected-->
 
@@ -632,7 +632,7 @@ private class MyClass {
       testWidgets('Inserting after folded comments', (WidgetTester wt) async {
         final controller = await pumpController(wt, _commentsCode);
         controller.foldAt(1);
-        await wt.selectFromHome(49);
+        await wt.selectFromHome(37);
         // private class MyClass {\n  //comment1\n  void method...
         //                                        \ cursor
 
@@ -643,12 +643,12 @@ private class MyClass {
           const TextEditingValue(
             text: '''
 private class MyClass {
-  //comment1  //comment2
+  //comment1
   int n;
   void method() {}
 }
 ''',
-            selection: TextSelection.collapsed(offset: 58),
+            selection: TextSelection.collapsed(offset: 46),
           ),
         );
       });
