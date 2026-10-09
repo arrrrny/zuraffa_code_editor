@@ -189,6 +189,26 @@ class CodeField extends StatefulWidget {
   State<CodeField> createState() => _CodeFieldState();
 }
 
+/// Reads [controller.offset] but tolerates a controller that cannot answer
+/// it: returns 0 unless exactly one scroll position is attached.
+///
+/// `ScrollController.offset` throws `ScrollController not attached to any
+/// scroll views` while the field's scroll views have no position — a state the
+/// popup-offset updates can observe, because
+/// `CodeController.analyzeCode()` notifies from a later microtask. Upstream
+/// akvelon/flutter-code-editor#275 is a crash report from exactly that path.
+/// With multiple positions attached it throws
+/// `offset cannot be used when multiple ScrollPositions are attached`
+/// instead; this widget's controllers each wrap exactly one scroll view, and
+/// any other count degrades to 0 rather than crashing the notification path.
+@visibleForTesting
+double scrollOffsetOrZero(ScrollController controller) {
+  if (controller.positions.length != 1) {
+    return 0;
+  }
+  return controller.offset;
+}
+
 class _CodeFieldState extends State<CodeField> {
   // Add a controller
   LinkedScrollControllerGroup? _controllers;
@@ -323,7 +343,7 @@ class _CodeFieldState extends State<CodeField> {
       _editorOffset = box?.localToGlobal(Offset.zero);
       if (_editorOffset != null) {
         var fixedOffset = _editorOffset!;
-        fixedOffset += Offset(0, _codeScroll!.offset);
+        fixedOffset += Offset(0, scrollOffsetOrZero(_codeScroll!));
         _editorOffset = fixedOffset;
       }
     }
@@ -525,7 +545,7 @@ class _CodeFieldState extends State<CodeField> {
     return max(
       _getCaretOffset(textPainter).dx +
           widget.padding.left -
-          _horizontalCodeScroll!.offset +
+          scrollOffsetOrZero(_horizontalCodeScroll!) +
           (_editorOffset?.dx ?? 0),
       0,
     );
@@ -537,7 +557,7 @@ class _CodeFieldState extends State<CodeField> {
           caretHeight +
           16 +
           widget.padding.top -
-          _codeScroll!.offset +
+          scrollOffsetOrZero(_codeScroll!) +
           (_editorOffset?.dy ?? 0),
       0,
     );
