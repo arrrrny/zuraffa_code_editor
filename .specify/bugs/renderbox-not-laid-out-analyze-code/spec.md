@@ -35,8 +35,9 @@ the editor box being mounted and its first layout, i.e. only when the
 notification would otherwise crash.
 
 Behavior change: none. When the box is laid out the code runs exactly as
-before. When it is not, the offset read is skipped and the `setState` is
-deferred to the next frame — the frame after the layout that makes the offset
+before. When it is not, the offset read and the `setState` are skipped —
+nothing reschedules them; the popup offset update is picked up by the next
+notification, which arrives after the layout that makes the offset
 meaningful.
 
 ## Out of scope

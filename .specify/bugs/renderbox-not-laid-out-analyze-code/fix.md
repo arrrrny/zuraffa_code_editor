@@ -20,8 +20,8 @@
     callback runs inside `flushLayout`.
   - Test 1: a notification fired from that sibling, with the `CodeField` after it
     in a `Column`, asserts nothing.
-  - Test 2: the same notification followed by a frame, so the deferred
-    offset work still happens.
+  - Test 2: a follow-up notification after the layout completes is processed
+    cleanly — the skipped mid-frame work is not rescheduled.
 
 ## Not changed
 

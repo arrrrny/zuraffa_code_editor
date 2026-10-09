@@ -42,7 +42,8 @@ into `_onTextChanged` and `_updatePopupOffset`. Both tests pass;
   change under test) reproduces the `hasSize` assertion — the tests are not
   vacuous.
 - The guard is false only while the box is unlaid-out, so the second test is the
-  proof that the notification is deferred rather than dropped.
+  proof that a follow-up notification once the box is laid out is processed
+  cleanly. The skipped mid-frame work itself is not rescheduled.
 
 ## Full suite
 

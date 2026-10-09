@@ -305,6 +305,11 @@ class _CodeFieldState extends State<CodeField> {
     widget.controller.searchController.addListener(_onSearchControllerChange);
   }
 
+  /// The old `_codeScroll != null` half of this guard was dead weight:
+  /// `_codeScroll` and `_horizontalCodeScroll` are assigned unconditionally in
+  /// [initState] and only listeners attached after that can fire, so a
+  /// laid-out editor box implies both are non-null for the `!` unwraps in
+  /// `_onTextChanged`, `_getPopupLeftOffset` and `_getPopupTopOffset`.
   bool get _isEditorBoxLaidOut {
     final box = _editorKey.currentContext?.findRenderObject() as RenderBox?;
     return box != null && box.hasSize;
@@ -512,6 +517,12 @@ class _CodeFieldState extends State<CodeField> {
   }
 
   void _updatePopupOffset() {
+    if (!_isEditorBoxLaidOut) {
+      // Same mid-frame window as in _onTextChanged: without a laid-out editor
+      // box the offsets cannot be positioned and setState would throw.
+      return;
+    }
+
     final textPainter = _getTextPainter(widget.controller.text);
     final caretHeight = _getCaretHeight(textPainter);
 
@@ -520,12 +531,6 @@ class _CodeFieldState extends State<CodeField> {
     final flippedTopOffset =
         normalTopOffset -
         (Sizes.autocompletePopupMaxHeight + caretHeight + Sizes.caretPadding);
-
-    if (!_isEditorBoxLaidOut) {
-      // Same mid-frame window as in _onTextChanged: without a laid-out editor
-      // box the offsets cannot be positioned and setState would throw.
-      return;
-    }
 
     setState(() {
       _normalPopupOffset = Offset(leftOffset, normalTopOffset);

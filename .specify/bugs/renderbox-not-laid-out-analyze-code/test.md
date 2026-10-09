@@ -21,9 +21,10 @@
   not assert` — the pinned window: the notification reaches `_onTextChanged`
   and `_updatePopupOffset` while the editor box has no size, and no exception
   is reported.
-- `The deferred part of the mid-frame notification still applies` — the same
-  notification is not lost: a following frame reads the now laid-out editor box
-  without asserting, so the popup offset update still happens.
+- `A follow-up notification after layout is processed cleanly` — a second
+  notification once the editor box is laid out is handled without asserting.
+  The skipped mid-frame work is not rescheduled; it happens only if another
+  notification arrives.
 
 ## Honest caveat
 

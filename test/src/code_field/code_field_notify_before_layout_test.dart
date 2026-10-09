@@ -91,7 +91,7 @@ void main() {
     },
   );
 
-  testWidgets('The deferred part of the mid-frame notification still applies', (
+  testWidgets('A follow-up notification after layout is processed cleanly', (
     wt,
   ) async {
     final controller = createController('int a;');
@@ -128,8 +128,8 @@ void main() {
     expect(notified, true);
     expect(wt.takeException(), isNull);
 
-    // The notification that arrived mid-layout is not lost: a following
-    // frame reads the now laid-out editor box without asserting.
+    // The mid-frame notification itself is skipped, not rescheduled; a
+    // follow-up notification once the box is laid out is processed cleanly.
     controller.notifyListeners();
     await wt.pump();
     expect(wt.takeException(), isNull);
