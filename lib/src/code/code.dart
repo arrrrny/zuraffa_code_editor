@@ -464,14 +464,32 @@ class Code {
     final firstLine = lines.lines[block.firstLine + 1]; //Keep 1st line visible.
     final lastLine = lines.lines[block.lastLine];
 
-    // Exclude \n from the last line
-    var endOfRange = lastLine.textRange.end - 1;
-    if (lastLine.text[lastLine.text.length - 1] != '\n') {
-      endOfRange++;
+    // Includes '\n' before.
+    final startOfRange = firstLine.textRange.start - 1;
+
+    // End the range at the START of the block's last line instead of at its
+    // end, so the closing line (`]`, `);`, `}` ...) stays visible when folded.
+    //
+    // Hiding through the end of the last line made `parsers: [` fold to a lone
+    // opening bracket with no matching closer, which reads as broken code.
+    // `characterIndexToLineIndex` resolves `lastLine.textRange.start` to
+    // `block.lastLine` — the same line upstream's end resolves to — so the
+    // derived `LineNumberingBreakpoint`s, the gutter numbering and the
+    // fold-toggle rows are all bit-for-bit unchanged.
+    var endOfRange = lastLine.textRange.start;
+
+    if (endOfRange <= startOfRange) {
+      // Degenerate block (lastLine == firstLine, so there is nothing between
+      // the kept line and the closing line). Fall back to hiding the closing
+      // line entirely, exactly as upstream does, to avoid an empty range.
+      endOfRange = lastLine.textRange.end - 1;
+      if (lastLine.text[lastLine.text.length - 1] != '\n') {
+        endOfRange++;
+      }
     }
 
     return HiddenRange(
-      firstLine.textRange.start - 1, // Includes '\n' before.
+      startOfRange,
       endOfRange,
       firstLine: block.firstLine,
       lastLine: block.lastLine,

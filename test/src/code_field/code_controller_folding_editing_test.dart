@@ -33,7 +33,7 @@ void main() {
               const TextEditingValue(
                 text: '''
 public class MyClass {
-  void method1() {
+  void method1() {  }
 
   void method2() {
     return;
@@ -79,7 +79,7 @@ public class MyClass {
               controller.value,
               const TextEditingValue(
                 text: '''
-public class MyClass {
+public class MyClass {}
 ''',
                 selection: TextSelection(baseOffset: 0, extentOffset: 6),
               ),
@@ -113,7 +113,7 @@ public class MyClass {
             controller.foldAt(1);
             controller.foldAt(7);
 
-            await wt.selectFromHome(43);
+            await wt.selectFromHome(46);
             controller.value = controller.value.replacedSelection('int n;\n');
 
             expect(
@@ -121,13 +121,13 @@ public class MyClass {
               const TextEditingValue(
                 text: '''
 private class MyClass {
-  void method1() {
+  void method1() {  }
 int n;
 
-  void method2() {
+  void method2() {  }
 }
 ''',
-                selection: TextSelection.collapsed(offset: 50),
+                selection: TextSelection.collapsed(offset: 53),
               ),
             );
 
@@ -158,7 +158,7 @@ int n;
 
           testWidgets('Add multiline text before and after a folded block',
               (wt) async {
-            const visibleText = '\nmethod1(){\n';
+            const visibleText = '\nmethod1(){}\n';
             const example = '\nmethod1(){\n  if (true) return;\n}\n';
             const insertedText = 'a\na\na\n';
 
@@ -182,7 +182,7 @@ int n;
 
             const insertedAfterExpected = TextEditingValue(
               text: insertedText + visibleText + insertedText,
-              selection: TextSelection.collapsed(offset: 24),
+              selection: TextSelection.collapsed(offset: 25),
             );
 
             expect(controller.value, insertedAfterExpected);
@@ -196,7 +196,7 @@ int n;
             await wt.selectFromHome(0, offset: 6);
 
             const expected = TextEditingValue(
-              text: 'method1(){\n',
+              text: 'method1(){}\n',
               selection: TextSelection.collapsed(offset: 0),
             );
 
@@ -227,7 +227,7 @@ int n;
               'Adding non-import after folded imports -> Does not unfold',
               (wt) async {
             const example = 'package example;\nimport java.util.Date;\n';
-            const visible = 'package example;\n';
+            const visible = 'package example;import java.util.Date;\n';
             const inserted = 'a';
             final controller = await pumpController(wt, example);
 
@@ -264,7 +264,7 @@ int n;
               'Add non-comment after folded comments -> Does not unfold',
               (wt) async {
             const example = '// comment 1\n// comment 2\n';
-            const visible = '// comment 1\n';
+            const visible = '// comment 1// comment 2\n';
             const inserted = 'a';
             final controller = await pumpController(wt, example);
 
@@ -291,9 +291,9 @@ int n;
             );
             controller.foldAt(0);
 
-            expect(controller.value.text, 'a:\n');
+            expect(controller.value.text, 'a:  aaaa\n');
             //                                 \ selection
-            await wt.selectFromHome(3);
+            await wt.selectFromHome(9);
             controller.value = controller.value.replacedSelection('  bbbb');
 
             const expectedText = 'a:\n  aaaa\n  bbbb';
@@ -317,12 +317,12 @@ int n;
             );
             controller.foldAt(0);
 
-            expect(controller.value.text, 'a:\n');
+            expect(controller.value.text, 'a:  aaaa\n');
             //                                 \ selection
-            await wt.selectFromHome(3);
+            await wt.selectFromHome(9);
             controller.value = controller.value.replacedSelection('bbbb');
 
-            const expectedText = 'a:\nbbbb';
+            const expectedText = 'a:  aaaa\nbbbb';
 
             expect(controller.value.text, expectedText);
             expect(controller.code.foldedBlocks.length, 1);
@@ -345,13 +345,13 @@ int n;
 
             controller.foldAt(0);
 
-            expect(controller.value.text, 'a:\n\n');
+            expect(controller.value.text, 'a:  aaaa\n\n');
             //                                 \ selection
-            await wt.selectFromHome(3);
+            await wt.selectFromHome(10);
 
             controller.value = controller.value.replacedSelection('\n');
 
-            const expectedText = 'a:\n\n\n';
+            const expectedText = 'a:  aaaa\n\n\n';
 
             expect(controller.value.text, expectedText);
             expect(controller.code.foldedBlocks.length, 1);
@@ -370,7 +370,7 @@ int n;
             await wt.selectFromHome(0);
             controller.value = controller.value.replacedSelection('/*');
             const expected = TextEditingValue(
-              text: '/*\na{',
+              text: '/*\na{}',
               //       \ selection after insertion
               selection: TextSelection.collapsed(offset: 2),
             );
@@ -386,7 +386,7 @@ int n;
             await wt.selectFromHome(0);
             controller.value = controller.value.replacedSelection('/*');
             const expected = TextEditingValue(
-              text: '/*\na{',
+              text: '/*\na{}',
               //       \ selection after insertion
               selection: TextSelection.collapsed(offset: 2),
             );
@@ -411,7 +411,7 @@ int n;
             await wt.selectFromHome(0);
             controller.value = controller.value.replacedSelection('/*');
             const expected = TextEditingValue(
-              text: '/*\na{\n',
+              text: '/*\na{}\n',
               //       \ selection after insertion
               selection: TextSelection.collapsed(offset: 2),
             );
@@ -446,7 +446,7 @@ int n;
             await wt.selectFromHome(0);
             controller.value = controller.value.replacedSelection('"""');
             const expected = TextEditingValue(
-              text: '"""\na{',
+              text: '"""\na{}',
               //       \ selection after insertion
               selection: TextSelection.collapsed(offset: 3),
             );
@@ -466,7 +466,7 @@ int n;
             await wt.selectFromHome(0);
             controller.value = controller.value.replacedSelection('"""');
             const expected = TextEditingValue(
-              text: '"""\na{',
+              text: '"""\na{}',
               //       \ selection after insertion
               selection: TextSelection.collapsed(offset: 3),
             );
@@ -495,7 +495,7 @@ int n;
             await wt.selectFromHome(0);
             controller.value = controller.value.replacedSelection('"""');
             const expected = TextEditingValue(
-              text: '"""\na{\n',
+              text: '"""\na{}\n',
               //       \ selection after insertion
               selection: TextSelection.collapsed(offset: 3),
             );
@@ -523,7 +523,7 @@ int n;
         final controller = await pumpController(wt, TwoMethodsSnippet.full);
         controller.foldAt(1);
 
-        await wt.selectFromHome(41, offset: 2);
+        await wt.selectFromHome(41, offset: 5);
         // private class MyClass {\n  void method1() {
         //                                           \ cursor
         controller.value = controller.value.replacedSelection(';');
@@ -548,7 +548,7 @@ private class MyClass {
       testWidgets('Second block of the same length', (WidgetTester wt) async {
         final controller = await pumpController(wt, TwoMethodsSnippet.full);
         controller.foldAt(7);
-        await wt.selectFromHome(102, offset: 2);
+        await wt.selectFromHome(102, offset: 5);
         // ...void method2() {
         //                   \ cursor
 
@@ -586,7 +586,7 @@ if (true) {
 }
 ''');
           controller.foldAt(3);
-          await wt.selectFromHome(26, offset: 2);
+          await wt.selectFromHome(26, offset: 3);
           // {\nif (true) {\n}\nif (true) {}\n\n
           //                              \ cursor
 
@@ -597,7 +597,7 @@ if (true) {
             const TextEditingValue(
               text: '''
 {
-if (true) {
+if (true) {}
 if (true) ;}
 ''',
               // TODO(alexeyinkin): Selection.
@@ -610,7 +610,7 @@ if (true) ;}
       testWidgets('Deleting folded comments', (WidgetTester wt) async {
         final controller = await pumpController(wt, _commentsCode);
         controller.foldAt(1);
-        await wt.selectFromHome(26, offset: 13);
+        await wt.selectFromHome(26, offset: 25);
         // private class MyClass {\n  //comment1\n  void method...
         //                            \--selected-->
 
@@ -632,7 +632,7 @@ private class MyClass {
       testWidgets('Inserting after folded comments', (WidgetTester wt) async {
         final controller = await pumpController(wt, _commentsCode);
         controller.foldAt(1);
-        await wt.selectFromHome(37);
+        await wt.selectFromHome(49);
         // private class MyClass {\n  //comment1\n  void method...
         //                                        \ cursor
 
@@ -643,12 +643,12 @@ private class MyClass {
           const TextEditingValue(
             text: '''
 private class MyClass {
-  //comment1
+  //comment1  //comment2
   int n;
   void method() {}
 }
 ''',
-            selection: TextSelection.collapsed(offset: 46),
+            selection: TextSelection.collapsed(offset: 58),
           ),
         );
       });

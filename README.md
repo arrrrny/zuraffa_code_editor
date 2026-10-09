@@ -1,10 +1,26 @@
-# Flutter Code Editor
+# Zuraffa Code Editor
 
-[![Pub Version](https://img.shields.io/pub/v/flutter_code_editor)](https://pub.dev/packages/flutter_code_editor)
-[![CodeFactor](https://img.shields.io/codefactor/grade/github/akvelon/flutter-code-editor?style=flat-square)](https://www.codefactor.io/repository/github/akvelon/flutter-code-editor)
-[![codecov](https://codecov.io/gh/akvelon/flutter-code-editor/branch/main/graph/badge.svg?token=3IL0R2PK2Y)](https://codecov.io/gh/akvelon/flutter-code-editor)
+[![Pub Version](https://img.shields.io/pub/v/zuraffa_code_editor)](https://pub.dev/packages/zuraffa_code_editor)
 
-Flutter Code Editor is a multi-platform code editor supporting:
+A maintained fork of
+[`flutter_code_editor`](https://pub.dev/packages/flutter_code_editor) 0.3.5 for
+the [Zuraffa](https://pub.dev/packages/zuraffa) ecosystem.
+
+> **Why a fork?** Upstream hid a folded block through the end of its last line,
+> so folding `parsers: [ ... ]` left a dangling `parsers: [` with no matching
+> `],`. This fork keeps the closing line visible: `parsers: [  ],`. See the
+> [changelog](CHANGELOG.md) for the full diff from upstream.
+
+The API is unchanged, so migrating is a drop-in import swap:
+
+```dart
+// Before
+import 'package:flutter_code_editor/flutter_code_editor.dart';
+// After
+import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
+```
+
+Zuraffa Code Editor is a multi-platform code editor supporting:
 
 - Syntax highlighting for over 100 languages,
 - Code blocks folding,
@@ -14,14 +30,14 @@ Flutter Code Editor is a multi-platform code editor supporting:
 - Themes,
 - And many other features.
 
-![Basic example](https://raw.githubusercontent.com/akvelon/flutter-code-editor/main/example/images/main.gif)
+![Basic example](https://raw.githubusercontent.com/arrrrny/zuraffa_code_editor/master/example/images/main.gif)
 
 
 ## Basic Usage
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_code_editor/flutter_code_editor.dart';
+import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 import 'package:flutter_highlight/themes/monokai-sublime.dart';
 import 'package:highlight/languages/java.dart';
 
@@ -55,7 +71,7 @@ class CodeEditor extends StatelessWidget {
 }
 ```
 
-See the full runnable example [here](https://github.com/akvelon/flutter-code-editor/blob/main/example/lib/02.code_field.dart).
+See the full runnable example [here](https://github.com/arrrrny/zuraffa_code_editor/blob/master/example/lib/02.code_field.dart).
 
 
 ## Languages
@@ -94,7 +110,7 @@ Flutter Code Editor can detect and fold code blocks. Code blocks folding is supp
 - Python
 - Scala
 
-![Foldable blocks example](https://raw.githubusercontent.com/akvelon/flutter-code-editor/main/example/images/foldable_blocks_example.gif)
+![Foldable blocks example](https://raw.githubusercontent.com/arrrrny/zuraffa_code_editor/master/example/images/foldable_blocks_example.gif)
 
 Code blocks folding may support other languages in experimental mode.
 
@@ -103,7 +119,7 @@ Code blocks folding may support other languages in experimental mode.
 
 The editor supports pluggable analyzers to highlight errors and show error messages:
 
-![DartPadAnalyzer](https://raw.githubusercontent.com/akvelon/flutter-code-editor/main/example/images/dartpad-analyzer.png)
+![DartPadAnalyzer](https://raw.githubusercontent.com/arrrrny/zuraffa_code_editor/master/example/images/dartpad-analyzer.png)
 
 
 We ship the following analyzers:
@@ -164,7 +180,7 @@ see [this example](https://github.com/git-touch/highlight.dart/blob/master/flutt
 
 A lot of styling can be tuned with a `GutterStyle` object passed to a `CodeField` widget.
 See
-[this example](https://github.com/akvelon/flutter-code-editor/tree/main/example/lib/03.change_language_theme)
+[this example](https://github.com/arrrrny/zuraffa_code_editor/tree/master/example/lib/03.change_language_theme)
 that dynamically changes the properties listed here.
 
 ```dart
@@ -264,7 +280,7 @@ This means that locking affects them as well.
 
 To change a partially locked controller, set the `fullText` property.
 
-![Readonly blocks example](https://raw.githubusercontent.com/akvelon/flutter-code-editor/main/example/images/readonly-sections-example.gif)
+![Readonly blocks example](https://raw.githubusercontent.com/arrrrny/zuraffa_code_editor/master/example/images/readonly-sections-example.gif)
 
 
 ## Advanced Code Blocks Folding
@@ -332,7 +348,7 @@ To hide all the code except the given named section:
 controller.visibleSectionNames = {'section1'};
 ```
 
-![visibleSectionNames](https://raw.githubusercontent.com/akvelon/flutter-code-editor/main/example/images/visible-section-names.png)
+![visibleSectionNames](https://raw.githubusercontent.com/arrrrny/zuraffa_code_editor/master/example/images/visible-section-names.png)
 
 When hiding text, the full text is still preserved
 and available via `fullText` property in the Flutter Code Editor.
@@ -363,7 +379,7 @@ The editor does not perform any syntax analysis, so it cannot tell if a given cl
 the method the user is typing. This feature is meant to simplify typing, but should not be relied on
 when exploring classes and methods.
 
-![Suggestions example](https://raw.githubusercontent.com/akvelon/flutter-code-editor/main/example/images/suggestions_example.gif)
+![Suggestions example](https://raw.githubusercontent.com/arrrrny/zuraffa_code_editor/master/example/images/suggestions_example.gif)
 
 To disable autocompletion:
 
@@ -377,31 +393,28 @@ controller.popupController.enabled = false;
 - Indent (Tab)
 - Outdent (Shift-Tab)
 
-![indent outdent example](https://raw.githubusercontent.com/akvelon/flutter-code-editor/main/example/images/tab-shift-tab_example.gif)
+![indent outdent example](https://raw.githubusercontent.com/arrrrny/zuraffa_code_editor/master/example/images/tab-shift-tab_example.gif)
 
 - Comment out (Control-/)
 - Uncomment (Control-/)
 
-![comment out uncomment example](https://raw.githubusercontent.com/akvelon/flutter-code-editor/main/example/images/comment_out_example.gif)
+![comment out uncomment example](https://raw.githubusercontent.com/arrrrny/zuraffa_code_editor/master/example/images/comment_out_example.gif)
 
 
 ## Migration Guides
 
-- [Migrating from code_text_field to 0.1](https://github.com/akvelon/flutter-code-editor/blob/main/doc/migrating/0.1.md)
-- [Migrating from 0.1 to 0.2](https://github.com/akvelon/flutter-code-editor/blob/main/doc/migrating/0.2.md)
+- [Migrating from code_text_field to 0.1](https://github.com/arrrrny/zuraffa_code_editor/blob/master/doc/migrating/0.1.md)
+- [Migrating from 0.1 to 0.2](https://github.com/arrrrny/zuraffa_code_editor/blob/master/doc/migrating/0.2.md)
 
 
 ## Contact Us
 
-* [Get in touch with us](https://akvelon.com/contact-us/).
-* [Request a custom feature](https://akvelon.com/contact-us/).
-* [Request custom Flutter, Web, Mobile application development](https://akvelon.com/contact-us/).
-* [Share about your use case for the Flutter Code Editor](https://akvelon.com/contact-us/).
-* [Report an issue](https://github.com/akvelon/flutter-code-editor/issues).
+* [Report an issue](https://github.com/arrrrny/zuraffa_code_editor/issues).
 
 
-## Contribution Guide
+## Attribution
 
-To get involved with Flutter Code Editor, submit your contribution as a PR,
-[contact us](https://akvelon.com/contact-us/) with a feature request or question,
-or [report an issue](https://github.com/akvelon/flutter-code-editor/issues).
+Zuraffa Code Editor is a fork of
+[`akvelon/flutter-code-editor`](https://github.com/akvelon/flutter-code-editor),
+used under its CC0 public domain dedication. This fork's own changes are
+dedicated to the public domain under the same terms.

@@ -1,3 +1,30 @@
+# Changelog
+
+## 0.1.0
+
+First release of `zuraffa_code_editor`, a maintained fork of
+[`flutter_code_editor` 0.3.5](https://pub.dev/packages/flutter_code_editor).
+
+### Changed
+
+- **Folded blocks keep their closing line visible.** Upstream hid a folded
+  block through the end of its last line, so folding `parsers: [ ... ]` left a
+  dangling `parsers: [` with no matching `],` — broken-looking code. The fold
+  range now ends at the start of the block's last line, so the closing line
+  stays on screen: `parsers: [  ],`, `void method() {  }`, `ScraperConfig();`.
+  Gutter line numbering, fold-toggle placement and the number of rendered rows
+  are all unchanged — only the closing text is added back.
+- Repackaged from `flutter_code_editor` to `zuraffa_code_editor`; all imports
+  are now `package:zuraffa_code_editor/zuraffa_code_editor.dart`.
+- Linting moved from `total_lints` to `flutter_lints`.
+
+### Thanks
+
+Everything except the fold change above is the work of the upstream
+[akvelon/flutter-code-editor](https://github.com/akvelon/flutter-code-editor)
+contributors. Changes to this fork's own code are dedicated to the public
+domain under [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+
 ## 0.3.5
 
 - Fixed line numbers not aligning with lines (https://github.com/akvelon/flutter-code-editor/pull/307)

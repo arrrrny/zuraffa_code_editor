@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_private_typedef_functions
 
-import 'package:flutter_code_editor/src/folding/invalid_foldable_block.dart';
+import 'package:zuraffa_code_editor/src/folding/invalid_foldable_block.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:highlight/languages/scala.dart';
 

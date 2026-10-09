@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
-import 'package:flutter_code_editor/src/code_field/text_editing_value.dart';
-import 'package:flutter_code_editor/src/util/edit_type.dart';
+import 'package:zuraffa_code_editor/src/code_field/text_editing_value.dart';
+import 'package:zuraffa_code_editor/src/util/edit_type.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

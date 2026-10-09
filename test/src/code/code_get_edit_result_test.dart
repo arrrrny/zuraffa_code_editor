@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_code_editor/src/code/code.dart';
-import 'package:flutter_code_editor/src/code/code_edit_result.dart';
-import 'package:flutter_code_editor/src/named_sections/parsers/brackets_start_end.dart';
+import 'package:zuraffa_code_editor/src/code/code.dart';
+import 'package:zuraffa_code_editor/src/code/code_edit_result.dart';
+import 'package:zuraffa_code_editor/src/named_sections/parsers/brackets_start_end.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:highlight/highlight.dart';
 import 'package:highlight/languages/java.dart';

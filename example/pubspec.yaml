@@ -9,14 +9,14 @@ environment:
 
 dependencies:
   flutter: { sdk: flutter }
-  flutter_code_editor: { path: ../ }
+  zuraffa_code_editor: { path: ../ }
   flutter_highlight: ^0.7.0
   highlight: ^0.7.0
   http: ^1.1.0
 
 dev_dependencies:
   flutter_test: { sdk: flutter }
-  total_lints: ^3.1.1
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

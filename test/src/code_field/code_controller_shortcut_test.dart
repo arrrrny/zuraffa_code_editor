@@ -100,7 +100,7 @@ void main() {
       for (final example in examples) {
         controller.value = const TextEditingValue(text: MethodSnippet.full);
         controller.foldAt(1);
-        await wt.selectFromHome(18, offset: 16);
+        await wt.selectFromHome(18, offset: 19);
         mockClipboardHandler(wt);
 
         await example.act();

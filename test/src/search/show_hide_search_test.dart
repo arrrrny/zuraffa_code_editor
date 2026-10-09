@@ -1,9 +1,9 @@
-import 'package:flutter_code_editor/src/code/code.dart';
-import 'package:flutter_code_editor/src/code_field/code_controller.dart';
-import 'package:flutter_code_editor/src/search/controller.dart';
-import 'package:flutter_code_editor/src/search/result.dart';
-import 'package:flutter_code_editor/src/search/settings.dart';
-import 'package:flutter_code_editor/src/search/widget/search_widget.dart';
+import 'package:zuraffa_code_editor/src/code/code.dart';
+import 'package:zuraffa_code_editor/src/code_field/code_controller.dart';
+import 'package:zuraffa_code_editor/src/search/controller.dart';
+import 'package:zuraffa_code_editor/src/search/result.dart';
+import 'package:zuraffa_code_editor/src/search/settings.dart';
+import 'package:zuraffa_code_editor/src/search/widget/search_widget.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../common/create_app.dart';

@@ -2,7 +2,7 @@
 // It uses CodeController with an ordinary TextField.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_code_editor/flutter_code_editor.dart';
+import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 import 'package:flutter_highlight/themes/monokai-sublime.dart';
 import 'package:highlight/languages/java.dart';
 

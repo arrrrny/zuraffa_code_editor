@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_dynamic_calls
 
-import 'package:flutter_code_editor/flutter_code_editor.dart';
+import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 
 // Converts json to Issue object for the DartAnalyzer.
 Issue issueFromJson(Map<String, dynamic> json) {

@@ -1,8 +1,8 @@
 import 'package:flutter/services.dart';
-import 'package:flutter_code_editor/flutter_code_editor.dart';
-import 'package:flutter_code_editor/src/search/match.dart';
-import 'package:flutter_code_editor/src/search/result.dart';
-import 'package:flutter_code_editor/src/search/settings.dart';
+import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
+import 'package:zuraffa_code_editor/src/search/match.dart';
+import 'package:zuraffa_code_editor/src/search/result.dart';
+import 'package:zuraffa_code_editor/src/search/settings.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../common/create_app.dart';

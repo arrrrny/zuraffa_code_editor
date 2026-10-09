@@ -1,12 +1,12 @@
 // ignore_for_file: use_named_constants
 
-import 'package:flutter_code_editor/src/code/code_lines.dart';
-import 'package:flutter_code_editor/src/code/code_lines_builder.dart';
-import 'package:flutter_code_editor/src/hidden_ranges/hidden_line_ranges.dart';
-import 'package:flutter_code_editor/src/hidden_ranges/hidden_line_ranges_builder.dart';
-import 'package:flutter_code_editor/src/hidden_ranges/hidden_range.dart';
-import 'package:flutter_code_editor/src/hidden_ranges/hidden_ranges.dart';
-import 'package:flutter_code_editor/src/hidden_ranges/line_numbering_breakpoint.dart';
+import 'package:zuraffa_code_editor/src/code/code_lines.dart';
+import 'package:zuraffa_code_editor/src/code/code_lines_builder.dart';
+import 'package:zuraffa_code_editor/src/hidden_ranges/hidden_line_ranges.dart';
+import 'package:zuraffa_code_editor/src/hidden_ranges/hidden_line_ranges_builder.dart';
+import 'package:zuraffa_code_editor/src/hidden_ranges/hidden_range.dart';
+import 'package:zuraffa_code_editor/src/hidden_ranges/hidden_ranges.dart';
+import 'package:zuraffa_code_editor/src/hidden_ranges/line_numbering_breakpoint.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../common/lorem_ipsum.dart';

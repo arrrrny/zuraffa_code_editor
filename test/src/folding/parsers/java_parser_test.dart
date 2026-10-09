@@ -1,12 +1,12 @@
 // ignore_for_file: avoid_private_typedef_functions
 // ignore_for_file: prefer_const_constructors
 
-import 'package:flutter_code_editor/flutter_code_editor.dart';
-import 'package:flutter_code_editor/src/code/code_lines_builder.dart';
-import 'package:flutter_code_editor/src/folding/parsers/java.dart';
-import 'package:flutter_code_editor/src/service_comment_filter/service_comment_filter.dart';
-import 'package:flutter_code_editor/src/single_line_comments/parser/single_line_comment_parser.dart';
-import 'package:flutter_code_editor/src/single_line_comments/parser/single_line_comments.dart';
+import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
+import 'package:zuraffa_code_editor/src/code/code_lines_builder.dart';
+import 'package:zuraffa_code_editor/src/folding/parsers/java.dart';
+import 'package:zuraffa_code_editor/src/service_comment_filter/service_comment_filter.dart';
+import 'package:zuraffa_code_editor/src/single_line_comments/parser/single_line_comment_parser.dart';
+import 'package:zuraffa_code_editor/src/single_line_comments/parser/single_line_comments.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:highlight/highlight.dart';
 import 'package:highlight/languages/java.dart';

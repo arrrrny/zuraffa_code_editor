@@ -1,4 +1,4 @@
-import 'package:flutter_code_editor/src/hidden_ranges/hidden_range.dart';
+import 'package:zuraffa_code_editor/src/hidden_ranges/hidden_range.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // ignore_for_file: prefer_const_constructors

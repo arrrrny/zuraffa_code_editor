@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_code_editor/flutter_code_editor.dart';
+import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 
 import '../common/snippets.dart';
 import '../common/themes.dart';

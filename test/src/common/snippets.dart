@@ -18,7 +18,7 @@ class MyClass {
 
   static const visibleFolded1 = '''
 class MyClass {
-  void method() {
+  void method() {  }
 }
 ''';
 }

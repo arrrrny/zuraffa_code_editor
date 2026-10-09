@@ -1,8 +1,9 @@
-include: package:total_lints/app.yaml
+include: package:flutter_lints/flutter.yaml
 
 analyzer:
   exclude:
     - lib/src/wip
+    - build/**
 
 linter: 
   rules:
