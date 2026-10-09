@@ -23,6 +23,13 @@ class _GutterErrorWidgetState extends State<GutterErrorWidget> {
   bool _mouseEnteredPopup = false;
 
   @override
+  void dispose() {
+    _entry?.remove();
+    _entry = null;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: (event) {
@@ -40,6 +47,9 @@ class _GutterErrorWidgetState extends State<GutterErrorWidget> {
         // Delay event here to keep overlay
         // if mouse has exited the icon and entered popup.
         Future.delayed(const Duration(milliseconds: 50), () {
+          if (!mounted) {
+            return;
+          }
           setState(() {
             if (!_mouseEnteredPopup) {
               _entry?.remove();
