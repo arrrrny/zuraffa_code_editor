@@ -4,10 +4,7 @@ extension TextSelectionExtension on TextSelection {
   int get length => end - start;
 
   TextSelection get reversed {
-    return copyWith(
-      baseOffset: extentOffset,
-      extentOffset: baseOffset,
-    );
+    return copyWith(baseOffset: extentOffset, extentOffset: baseOffset);
   }
 
   bool get isSelectionNormalized {

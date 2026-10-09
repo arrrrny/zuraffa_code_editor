@@ -36,9 +36,7 @@ abstract class AbstractFoldableBlockParser {
   /// Records that a block has started at [line].
   @protected
   void startBlock(int line, FoldableBlockType type) {
-    _startedBlocks.add(
-      _StartedFoldableBlock(line: line, type: type),
-    );
+    _startedBlocks.add(_StartedFoldableBlock(line: line, type: type));
   }
 
   /// Checks if the block has started and it is its turn to terminate at [line].
@@ -48,22 +46,13 @@ abstract class AbstractFoldableBlockParser {
     final started = _startedBlocks.lastOrNull;
 
     if (started == null || started.type != type) {
-      invalidBlocks.add(
-        InvalidFoldableBlock(
-          endLine: line,
-          type: type,
-        ),
-      );
+      invalidBlocks.add(InvalidFoldableBlock(endLine: line, type: type));
       return;
     }
 
     if (line != started.line) {
       blocks.add(
-        FoldableBlock(
-          firstLine: started.line,
-          lastLine: line,
-          type: type,
-        ),
+        FoldableBlock(firstLine: started.line, lastLine: line, type: type),
       );
     }
 
@@ -75,10 +64,7 @@ abstract class AbstractFoldableBlockParser {
   @protected
   void submitLine(int index, LineSemantics semantics) {
     _linesWithSemantics.add(
-      _LineWithSemantics(
-        index: index,
-        semantics: semantics,
-      ),
+      _LineWithSemantics(index: index, semantics: semantics),
     );
   }
 
@@ -219,10 +205,7 @@ abstract class AbstractFoldableBlockParser {
 
     for (final started in _startedBlocks) {
       invalidBlocks.add(
-        InvalidFoldableBlock(
-          startLine: started.line,
-          type: started.type,
-        ),
+        InvalidFoldableBlock(startLine: started.line, type: started.type),
       );
     }
     _startedBlocks.clear();
@@ -237,18 +220,12 @@ class _StartedFoldableBlock {
   final int line;
   final FoldableBlockType type;
 
-  const _StartedFoldableBlock({
-    required this.line,
-    required this.type,
-  });
+  const _StartedFoldableBlock({required this.line, required this.type});
 }
 
 class _LineWithSemantics {
   final int index;
   final LineSemantics semantics;
 
-  const _LineWithSemantics({
-    required this.index,
-    required this.semantics,
-  });
+  const _LineWithSemantics({required this.index, required this.semantics});
 }

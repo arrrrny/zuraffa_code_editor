@@ -19,16 +19,12 @@ class HiddenRanges {
   final List<HiddenRange> ranges;
   final int textLength;
 
-  HiddenRanges({
-    required this.ranges,
-    required this.textLength,
-  })  : assert(
-          _areSortedAndNotOverlapping(ranges),
-          'Texts must be sorted and not overlap',
-        ),
-        hiddenCharactersBeforeRanges = _getHiddenCharactersBeforeRanges(
-          ranges,
-        );
+  HiddenRanges({required this.ranges, required this.textLength})
+    : assert(
+        _areSortedAndNotOverlapping(ranges),
+        'Texts must be sorted and not overlap',
+      ),
+      hiddenCharactersBeforeRanges = _getHiddenCharactersBeforeRanges(ranges);
 
   const HiddenRanges._({
     required this.hiddenCharactersBeforeRanges,
@@ -139,8 +135,9 @@ class HiddenRanges {
 
     Node cutHighlightedNode(Node node) {
       final value = cutHighlightedString(node.value);
-      final children =
-          node.children?.map(cutHighlightedNode).toList(growable: false);
+      final children = node.children
+          ?.map(cutHighlightedNode)
+          .toList(growable: false);
 
       return Node(
         className: node.className,
@@ -152,7 +149,7 @@ class HiddenRanges {
 
     final nodes =
         highlighted.nodes?.map(cutHighlightedNode).toList(growable: false) ??
-            const <Node>[];
+        const <Node>[];
 
     return Result(
       relevance: highlighted.relevance,
@@ -184,7 +181,8 @@ class HiddenRanges {
       final lowerChar = ranges[lowerRange].start;
       final upperChar = ranges[upperRange].end;
 
-      final rangeIndex = lowerRange +
+      final rangeIndex =
+          lowerRange +
           ((position - lowerChar) /
                   (upperChar - lowerChar) *
                   (upperRange - lowerRange))
@@ -249,7 +247,8 @@ class HiddenRanges {
       final upperChar =
           ranges[upperRange].end - hiddenCharactersBeforeRanges[upperRange + 1];
 
-      int rangeIndex = lowerRange +
+      int rangeIndex =
+          lowerRange +
           ((position - lowerChar) /
                   (upperChar - lowerChar) *
                   (upperRange - lowerRange))
@@ -314,10 +313,7 @@ class HiddenRanges {
   TextSelection cutSelection(TextSelection selection) {
     if (selection.isCollapsed) {
       final position = cutPosition(selection.start);
-      return selection.copyWith(
-        baseOffset: position,
-        extentOffset: position,
-      );
+      return selection.copyWith(baseOffset: position, extentOffset: position);
     }
 
     return selection.copyWith(
@@ -335,10 +331,7 @@ class HiddenRanges {
         placeHiddenRanges: TextAffinity.downstream,
       );
 
-      return selection.copyWith(
-        baseOffset: position,
-        extentOffset: position,
-      );
+      return selection.copyWith(baseOffset: position, extentOffset: position);
     }
 
     return selection.copyWith(
@@ -367,10 +360,7 @@ class HiddenRanges {
   }
 
   @override
-  int get hashCode => Object.hash(
-        Object.hashAll(ranges),
-        textLength,
-      );
+  int get hashCode => Object.hash(Object.hashAll(ranges), textLength);
 
   @override
   bool operator ==(Object other) {

@@ -19,23 +19,13 @@ void main() {
       HiddenRange(2, 3, firstLine: 0, lastLine: 0, wholeFirstLine: true);
 
       expect(
-        () => HiddenRange(
-          2,
-          2,
-          firstLine: 0,
-          lastLine: 0,
-          wholeFirstLine: true,
-        ),
+        () =>
+            HiddenRange(2, 2, firstLine: 0, lastLine: 0, wholeFirstLine: true),
         throwsAssertionError,
       );
       expect(
-        () => HiddenRange(
-          3,
-          2,
-          firstLine: 0,
-          lastLine: 0,
-          wholeFirstLine: true,
-        ),
+        () =>
+            HiddenRange(3, 2, firstLine: 0, lastLine: 0, wholeFirstLine: true),
         throwsAssertionError,
       );
     });

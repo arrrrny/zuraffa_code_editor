@@ -9,9 +9,7 @@ class PlainCaseInsensitiveSearchStrategy extends SearchStrategy {
     final lowerCaseText = text.toLowerCase();
     final lowerCasePattern = settings.pattern.toLowerCase();
     final matches = lowerCasePattern
-        .allMatches(
-          lowerCaseText,
-        )
+        .allMatches(lowerCaseText)
         .map((match) => SearchMatch(start: match.start, end: match.end))
         .toList(growable: false);
 

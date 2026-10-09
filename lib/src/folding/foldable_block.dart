@@ -23,11 +23,7 @@ class FoldableBlock extends InclusiveRange with Equatable {
   });
 
   @override
-  List<Object?> get props => [
-        firstLine,
-        lastLine,
-        type,
-      ];
+  List<Object?> get props => [firstLine, lastLine, type];
 
   bool includes(FoldableBlock other) {
     return firstLine <= other.firstLine && lastLine >= other.lastLine;
@@ -35,26 +31,11 @@ class FoldableBlock extends InclusiveRange with Equatable {
 
   int get lineCount => lastLine - firstLine + 1;
 
-  bool get isComment {
-    // ignore: missing_enum_constant_in_switch
-    switch (type) {
-      case FoldableBlockType.singleLineComment:
-      case FoldableBlockType.multilineComment:
-        return true;
-    }
+  bool get isComment =>
+      type == FoldableBlockType.singleLineComment ||
+      type == FoldableBlockType.multilineComment;
 
-    return false;
-  }
-
-  bool get isImports {
-    // ignore: missing_enum_constant_in_switch
-    switch (type) {
-      case FoldableBlockType.imports:
-        return true;
-    }
-
-    return false;
-  }
+  bool get isImports => type == FoldableBlockType.imports;
 
   bool isSameLines(FoldableBlock other) {
     return firstLine == other.firstLine && lastLine == other.lastLine;
@@ -122,9 +103,11 @@ extension FoldableBlockList on List<FoldableBlock> {
 
       // And fix every violation of the hierarchy by bubbling the block up,
       // removing non-ancestors from the working list, and joining when needed.
-      for (int ancestorIndex = ancestors.length - 2;
-          ancestorIndex >= 0;
-          ancestorIndex--) {
+      for (
+        int ancestorIndex = ancestors.length - 2;
+        ancestorIndex >= 0;
+        ancestorIndex--
+      ) {
         final ancestor = ancestors[ancestorIndex];
 
         if (ancestor.lastLine < bubble.firstLine) {
@@ -138,7 +121,8 @@ extension FoldableBlockList on List<FoldableBlock> {
 
         final isDuplicate = bubble.isSameLines(ancestor);
 
-        final areIntersecting = ancestor.lastLine >= bubble.firstLine &&
+        final areIntersecting =
+            ancestor.lastLine >= bubble.firstLine &&
             ancestor.lastLine < bubble.lastLine;
 
         if (isDuplicate || areIntersecting) {

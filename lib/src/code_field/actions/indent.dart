@@ -9,9 +9,7 @@ class IndentIntent extends Intent {
 class IndentIntentAction extends Action<IndentIntent> {
   final CodeController controller;
 
-  IndentIntentAction({
-    required this.controller,
-  });
+  IndentIntentAction({required this.controller});
 
   @override
   Object? invoke(IndentIntent intent) {

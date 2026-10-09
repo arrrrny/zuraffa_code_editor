@@ -15,11 +15,7 @@ void main() {
   test('Java Foldable Block parser (Highlight + Fallback)', () {
     final examples = [
       //
-      _Example(
-        'empty code',
-        code: '',
-        expected: [],
-      ),
+      _Example('empty code', code: '', expected: []),
 
       _Example(
         'All types of foldable blocks are recognized',
@@ -65,9 +61,7 @@ class MyClass{                                      // 10
 public class MyClass {
     public static void main(String[] args) {}
 }''',
-        expected: [
-          _FB(firstLine: 0, lastLine: 2, type: _T.braces),
-        ],
+        expected: [_FB(firstLine: 0, lastLine: 2, type: _T.braces)],
       ),
 
       _Example(
@@ -217,9 +211,7 @@ class MyClass {
 // [START section1]
 // [END section2]
 }''',
-        expected: [
-          _FB(firstLine: 0, lastLine: 3, type: _T.braces),
-        ],
+        expected: [_FB(firstLine: 0, lastLine: 3, type: _T.braces)],
       ),
 
       _Example(
@@ -231,9 +223,7 @@ class MyClass{            // 0
 * some weird comment         3
 */                        // 4
 ''',
-        expected: [
-          _FB(firstLine: 0, lastLine: 4, type: _T.union),
-        ],
+        expected: [_FB(firstLine: 0, lastLine: 4, type: _T.union)],
       ),
 
       _Example(
@@ -292,9 +282,7 @@ class MyClass{
 }
 */
 ''',
-        expected: [
-          _FB(firstLine: 0, lastLine: 6, type: _T.union),
-        ],
+        expected: [_FB(firstLine: 0, lastLine: 6, type: _T.union)],
       ),
 
       _Example(
@@ -359,10 +347,7 @@ import java.lang.Exception;   // 9
     for (final example in examples) {
       for (final code in [example.code, example.breakingCode]) {
         highlight.registerLanguage('language', java);
-        final highlighted = highlight.parse(
-          code,
-          language: 'language',
-        );
+        final highlighted = highlight.parse(code, language: 'language');
 
         final sequences = SingleLineComments.byMode[java] ?? [];
 
@@ -385,8 +370,9 @@ import java.lang.Exception;   // 9
         final javaParser = JavaFoldableBlockParser()
           ..parse(
             highlighted: highlighted,
-            serviceCommentsSources:
-                serviceComments.map((e) => e.source).toSet(),
+            serviceCommentsSources: serviceComments
+                .map((e) => e.source)
+                .toSet(),
             lines: codeLines,
           );
 

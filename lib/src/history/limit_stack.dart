@@ -2,9 +2,7 @@ class LimitStack<T> extends Iterable<T> {
   final int maxLength;
   final _items = <T>[];
 
-  LimitStack({
-    required this.maxLength,
-  });
+  LimitStack({required this.maxLength});
 
   @override
   int get length => _items.length;

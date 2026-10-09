@@ -15,11 +15,7 @@ void main() {
     test('parses indents', () {
       const examples = [
         //
-        _Example(
-          'Python. Empty text',
-          code: '',
-          expected: [],
-        ),
+        _Example('Python. Empty text', code: '', expected: []),
 
         _Example(
           'Python. One nesting',
@@ -206,11 +202,7 @@ class _Example {
   final String code;
   final List<FoldableBlock> expected;
 
-  const _Example(
-    this.name, {
-    required this.code,
-    required this.expected,
-  });
+  const _Example(this.name, {required this.code, required this.expected});
 }
 
 /// Shorter alias for [FoldableBlock] to avoid line breaks.

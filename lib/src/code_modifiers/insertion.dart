@@ -12,22 +12,32 @@ class InsertionCodeModifier extends CodeModifier {
     required this.closeString,
   }) : super(openChar);
 
-  static const backticks =
-      InsertionCodeModifier(openChar: '`', closeString: '`');
+  static const backticks = InsertionCodeModifier(
+    openChar: '`',
+    closeString: '`',
+  );
 
   static const braces = InsertionCodeModifier(openChar: '{', closeString: '}');
 
-  static const brackets =
-      InsertionCodeModifier(openChar: '[', closeString: ']');
+  static const brackets = InsertionCodeModifier(
+    openChar: '[',
+    closeString: ']',
+  );
 
-  static const doubleQuotes =
-      InsertionCodeModifier(openChar: '"', closeString: '"');
+  static const doubleQuotes = InsertionCodeModifier(
+    openChar: '"',
+    closeString: '"',
+  );
 
-  static const parentheses =
-      InsertionCodeModifier(openChar: '(', closeString: ')');
+  static const parentheses = InsertionCodeModifier(
+    openChar: '(',
+    closeString: ')',
+  );
 
-  static const singleQuotes =
-      InsertionCodeModifier(openChar: '\'', closeString: '\'');
+  static const singleQuotes = InsertionCodeModifier(
+    openChar: '\'',
+    closeString: '\'',
+  );
 
   @override
   TextEditingValue? updateString(

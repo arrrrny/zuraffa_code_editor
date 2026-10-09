@@ -91,9 +91,8 @@ class Code {
       invalidBlocks = parser.invalidBlocks;
     }
 
-    final sections = namedSectionParser?.parse(
-          singleLineComments: commentParser.comments,
-        ) ??
+    final sections =
+        namedSectionParser?.parse(singleLineComments: commentParser.comments) ??
         const [];
     final sectionsMap = {for (final s in sections) s.name: s};
 
@@ -114,17 +113,12 @@ class Code {
       lines,
     );
 
-    final commentsHiddenRanges = _commentsToHiddenRanges(
-      serviceComments,
-    );
+    final commentsHiddenRanges = _commentsToHiddenRanges(serviceComments);
 
-    final hiddenRangesBuilder = HiddenRangesBuilder.fromMaps(
-      {
-        String: visibleSectionsHiddenRanges,
-        int: commentsHiddenRanges,
-      },
-      textLength: text.length,
-    );
+    final hiddenRangesBuilder = HiddenRangesBuilder.fromMaps({
+      String: visibleSectionsHiddenRanges,
+      int: commentsHiddenRanges,
+    }, textLength: text.length);
     final hiddenRanges = hiddenRangesBuilder.ranges;
 
     final hiddenLineRangesBuilder = HiddenLineRangesBuilder(
@@ -143,8 +137,9 @@ class Code {
       invalidBlocks: invalidBlocks,
       lines: lines,
       namedSections: sectionsMap,
-      visibleHighlighted:
-          hiddenRanges.cutHighlighted(highlighted)?.splitLines(),
+      visibleHighlighted: hiddenRanges
+          .cutHighlighted(highlighted)
+          ?.splitLines(),
       visibleText: hiddenRanges.cutString(text),
       visibleSectionNames: visibleSectionNames,
     );
@@ -181,9 +176,7 @@ class Code {
     visibleSectionNames: {},
   );
 
-  static void _makeCodeReadonly({
-    required List<CodeLine> lines,
-  }) {
+  static void _makeCodeReadonly({required List<CodeLine> lines}) {
     for (int i = 0; i < lines.length; i++) {
       lines[i] = lines[i].copyWith(isReadOnly: true);
     }
@@ -326,7 +319,8 @@ class Code {
     TextSelection oldSelection,
     TextEditingValue visibleAfter,
   ) {
-    final visibleRangeAfter = visibleAfter.getChangedRange(
+    final visibleRangeAfter =
+        visibleAfter.getChangedRange(
           TextEditingValue(text: visibleText, selection: oldSelection),
         ) ??
         visibleAfter.text.getChangedRange(
@@ -335,10 +329,7 @@ class Code {
         );
 
     if (visibleRangeAfter.start == -1 && visibleRangeAfter.end == -1) {
-      return CodeEditResult(
-        fullTextAfter: text,
-        linesChanged: TextRange.empty,
-      );
+      return CodeEditResult(fullTextAfter: text, linesChanged: TextRange.empty);
     }
 
     // Recover what exactly was the full old text that was replaced
@@ -394,7 +385,8 @@ class Code {
       );
     }
 
-    final fullTextAfter = rangeBefore.textBefore(text) +
+    final fullTextAfter =
+        rangeBefore.textBefore(text) +
         visibleRangeAfter.textInside(visibleAfter.text) +
         rangeBefore.textAfter(text);
 
@@ -405,7 +397,8 @@ class Code {
     //  - (2) The char before [start] is not '\n'.
     // We don't need to check (1) because otherwise [end] and [end - 1]
     // are on the same line.
-    final lastChar = rangeBefore.end -
+    final lastChar =
+        rangeBefore.end -
         ((rangeBefore.start == 0 || text[rangeBefore.start - 1] == '\n')
             ? 1
             : 0);
@@ -563,8 +556,9 @@ class Code {
       invalidBlocks: invalidBlocks,
       lines: lines,
       namedSections: namedSections,
-      visibleHighlighted:
-          hiddenRanges.cutHighlighted(highlighted)?.splitLines(),
+      visibleHighlighted: hiddenRanges
+          .cutHighlighted(highlighted)
+          ?.splitLines(),
       visibleText: hiddenRanges.cutString(text),
       visibleSectionNames: visibleSectionNames,
     );

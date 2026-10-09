@@ -64,10 +64,7 @@ class SearchSettingsWidget extends StatelessWidget {
                 settingsController.value.isCaseSensitive,
                 settingsController.value.isRegExp,
               ],
-              children: const [
-                Text('Aa'),
-                Text('.*'),
-              ],
+              children: const [Text('Aa'), Text('.*')],
             ),
           ],
         );

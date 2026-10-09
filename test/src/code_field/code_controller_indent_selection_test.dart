@@ -30,14 +30,8 @@ aaaa
 aaaa
 aaaa
 ''',
-          initialSelection: TextSelection(
-            baseOffset: -1,
-            extentOffset: -1,
-          ),
-          expectedSelection: TextSelection(
-            baseOffset: -1,
-            extentOffset: -1,
-          ),
+          initialSelection: TextSelection(baseOffset: -1, extentOffset: -1),
+          expectedSelection: TextSelection(baseOffset: -1, extentOffset: -1),
         ),
         _Example(
           'WHEN start == 0 && end == 0 '
@@ -47,20 +41,19 @@ aaaa
 aaaa
 aaaa
 ''',
-          expectedFullText: '''
+          expectedFullText:
+              '''
 ${indent}aaaa
 aaaa
 aaaa
 ''',
-          expectedVisibleText: '''
+          expectedVisibleText:
+              '''
 ${indent}aaaa
 aaaa
 aaaa
 ''',
-          initialSelection: const TextSelection(
-            baseOffset: 0,
-            extentOffset: 0,
-          ),
+          initialSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
           expectedSelection: TextSelection(
             baseOffset: 0 + indentLength,
             extentOffset: 0 + indentLength,
@@ -74,20 +67,19 @@ aaaa
 aaaa
 aaaa
 ''',
-          expectedFullText: '''
+          expectedFullText:
+              '''
 aaaa
 ${indent}aaaa
 aaaa
 ''',
-          expectedVisibleText: '''
+          expectedVisibleText:
+              '''
 aaaa
 ${indent}aaaa
 aaaa
 ''',
-          initialSelection: const TextSelection(
-            baseOffset: 5,
-            extentOffset: 5,
-          ),
+          initialSelection: const TextSelection(baseOffset: 5, extentOffset: 5),
           expectedSelection: TextSelection(
             baseOffset: 5 + indentLength,
             extentOffset: 5 + indentLength,
@@ -111,10 +103,7 @@ aaaa
     aaaa
 aaaa
 ''',
-          initialSelection: TextSelection(
-            baseOffset: 8,
-            extentOffset: 8,
-          ),
+          initialSelection: TextSelection(baseOffset: 8, extentOffset: 8),
           expectedSelection: TextSelection(
             baseOffset: 8 + 1,
             extentOffset: 8 + 1,
@@ -128,20 +117,19 @@ aaaa
   aaaa
 aaaa
 ''',
-          expectedFullText: '''
+          expectedFullText:
+              '''
 aaaa
   ${indent}aaaa
 aaaa
 ''',
-          expectedVisibleText: '''
+          expectedVisibleText:
+              '''
 aaaa
   ${indent}aaaa
 aaaa
 ''',
-          initialSelection: const TextSelection(
-            baseOffset: 7,
-            extentOffset: 7,
-          ),
+          initialSelection: const TextSelection(baseOffset: 7, extentOffset: 7),
           expectedSelection: TextSelection(
             baseOffset: 7 + indentLength,
             extentOffset: 7 + indentLength,
@@ -155,12 +143,14 @@ aaaa
 aaaa
 aaaa
 ''',
-          expectedFullText: '''
+          expectedFullText:
+              '''
 aaaa
 aaaa
 aaaa$indent
 ''',
-          expectedVisibleText: '''
+          expectedVisibleText:
+              '''
 aaaa
 aaaa
 aaaa$indent
@@ -202,10 +192,7 @@ aaaa$indent
           example.expectedSelection,
           reason: example.name,
         );
-        expect(
-          controller.code,
-          controller.historyController.lastCode,
-        );
+        expect(controller.code, controller.historyController.lastCode);
         expect(
           controller.value.selection,
           controller.historyController.lastSelection,
@@ -225,13 +212,15 @@ aaAA
 AAAa
 aaaa
 ''',
-          expectedFullText: '''
+          expectedFullText:
+              '''
 aaaa
 ${indent}aaAA
 ${indent}AAAa
 aaaa
 ''',
-          expectedVisibleText: '''
+          expectedVisibleText:
+              '''
 aaaa
 ${indent}aaAA
 ${indent}AAAa
@@ -241,10 +230,7 @@ aaaa
             baseOffset: 7,
             extentOffset: 13,
           ),
-          expectedSelection: TextSelection(
-            baseOffset: 5,
-            extentOffset: 19,
-          ),
+          expectedSelection: TextSelection(baseOffset: 5, extentOffset: 19),
         ),
         _Example(
           'WHEN entire document is selected without new line at the end '
@@ -253,11 +239,13 @@ aaaa
 AAA
 AAA
 AAA''',
-          expectedFullText: '''
+          expectedFullText:
+              '''
 ${indent}AAA
 ${indent}AAA
 ${indent}AAA''',
-          expectedVisibleText: '''
+          expectedVisibleText:
+              '''
 ${indent}AAA
 ${indent}AAA
 ${indent}AAA''',
@@ -265,10 +253,7 @@ ${indent}AAA''',
             baseOffset: 0,
             extentOffset: 11,
           ),
-          expectedSelection: TextSelection(
-            baseOffset: 0,
-            extentOffset: 17,
-          ),
+          expectedSelection: TextSelection(baseOffset: 0, extentOffset: 17),
         ),
         _Example(
           'WHEN entire document is selected with new line at the end '
@@ -278,12 +263,14 @@ AAA
 AAA
 AAA
 ''',
-          expectedFullText: '''
+          expectedFullText:
+              '''
 ${indent}AAA
 ${indent}AAA
 ${indent}AAA
 ''',
-          expectedVisibleText: '''
+          expectedVisibleText:
+              '''
 ${indent}AAA
 ${indent}AAA
 ${indent}AAA
@@ -292,10 +279,7 @@ ${indent}AAA
             baseOffset: 0,
             extentOffset: 12,
           ),
-          expectedSelection: TextSelection(
-            baseOffset: 0,
-            extentOffset: 18,
-          ),
+          expectedSelection: TextSelection(baseOffset: 0, extentOffset: 18),
         ),
         _Example(
           'Indent SHOULD NOT unfold folded comment at line 0 '
@@ -330,9 +314,7 @@ package org.apache.beam.examples;
       ];
 
       for (final example in examples) {
-        final controller = CodeController(
-          language: java,
-        );
+        final controller = CodeController(language: java);
         controller.text = example.initialFullText;
         controller.foldCommentAtLineZero();
         controller.foldImports();
@@ -360,10 +342,7 @@ package org.apache.beam.examples;
           example.expectedSelection,
           reason: example.name,
         );
-        expect(
-          controller.code,
-          controller.historyController.lastCode,
-        );
+        expect(controller.code, controller.historyController.lastCode);
         expect(
           controller.value.selection,
           controller.historyController.lastSelection,
@@ -376,13 +355,13 @@ package org.apache.beam.examples;
     final language = java;
     const readonlySectionName = 'readonlySection'; // length = 15
 
-    test(
-        'If the there is at least 1 readonly line selected, '
+    test('If the there is at least 1 readonly line selected, '
         'entire modification should be cancelled', () {
       final examples = [
         _Example(
           'Selection is within readonly section',
-          initialFullText: '''
+          initialFullText:
+              '''
 // [START $readonlySectionName]
 aAA{
   AAAA();
@@ -398,7 +377,8 @@ aAA{
 }
 
 ''',
-          expectedFullText: '''
+          expectedFullText:
+              '''
 // [START $readonlySectionName]
 aAA{
   AAAA();
@@ -419,7 +399,8 @@ aAA{
         ),
         _Example(
           'Selection goes through readonly section',
-          initialFullText: '''
+          initialFullText:
+              '''
 aAA{
 
 }
@@ -447,7 +428,8 @@ Aaa{
 
 }
 ''',
-          expectedFullText: '''
+          expectedFullText:
+              '''
 aAA{
 
 }
@@ -489,10 +471,7 @@ Aaa{
         controller.text = example.initialFullText;
         controller.selection = example.initialSelection;
 
-        expect(
-          controller.value.text,
-          example.initialVisibleText,
-        );
+        expect(controller.value.text, example.initialVisibleText);
 
         controller.indentSelection();
 
@@ -511,10 +490,7 @@ Aaa{
           example.expectedSelection,
           reason: example.name,
         );
-        expect(
-          controller.code,
-          controller.historyController.lastCode,
-        );
+        expect(controller.code, controller.historyController.lastCode);
         expect(
           controller.value.selection,
           controller.historyController.lastSelection,

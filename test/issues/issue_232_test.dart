@@ -68,9 +68,7 @@ public class MyClass {
 
 void main() {
   test('Issue 232', () {
-    final controller = CodeController(
-      language: java,
-    );
+    final controller = CodeController(language: java);
 
     controller.fullText = _fullText;
     controller.foldCommentAtLineZero();

@@ -6,21 +6,13 @@ import 'package:url_launcher/url_launcher_string.dart';
 import '../analyzer/models/issue.dart';
 import 'clickable.dart';
 
-const errorIcon = Icon(
-  Icons.cancel,
-  color: Colors.red,
-  size: 16,
-);
+const errorIcon = Icon(Icons.cancel, color: Colors.red, size: 16);
 
 class GutterErrorWidget extends StatefulWidget {
   final Issue issue;
   final TextStyle popupTextStyle;
 
-  const GutterErrorWidget(
-    this.issue,
-    this.popupTextStyle, {
-    super.key,
-  });
+  const GutterErrorWidget(this.issue, this.popupTextStyle, {super.key});
 
   @override
   State<GutterErrorWidget> createState() => _GutterErrorWidgetState();
@@ -105,18 +97,14 @@ class _GutterErrorWidgetState extends State<GutterErrorWidget> {
                     decoration: BoxDecoration(
                       color: style.backgroundColor,
                       border: style.color != null
-                          ? Border.all(
-                              color: style.color!,
-                            )
+                          ? Border.all(color: style.color!)
                           : null,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          issue.message,
-                        ),
+                        Text(issue.message),
                         if (issue.url != null) ...[
                           ClickableWidget(
                             child: Text(issue.url!),
@@ -126,9 +114,7 @@ class _GutterErrorWidgetState extends State<GutterErrorWidget> {
                           ),
                         ],
                         if (issue.suggestion != null) ...[
-                          Divider(
-                            color: style.color,
-                          ),
+                          Divider(color: style.color),
                           Text(issue.suggestion!),
                         ],
                       ],

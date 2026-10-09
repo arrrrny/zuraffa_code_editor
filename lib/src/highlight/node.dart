@@ -92,13 +92,12 @@ extension MyNode on Node {
     String? value,
     bool? noPrefix,
     List<Node>? children,
-  }) =>
-      Node(
-        className: className ?? this.className,
-        value: value ?? this.value,
-        noPrefix: noPrefix ?? this.noPrefix,
-        children: children ?? this.children,
-      );
+  }) => Node(
+    className: className ?? this.className,
+    value: value ?? this.value,
+    noPrefix: noPrefix ?? this.noPrefix,
+    children: children ?? this.children,
+  );
 }
 
 extension NodeListExtension on List<Node> {

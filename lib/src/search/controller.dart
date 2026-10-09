@@ -44,10 +44,10 @@ class CodeSearchController extends ChangeNotifier {
   bool _disposed = false;
   Timer? _hidingTimer;
 
-  CodeSearchController({
-    required CodeController codeController,
-  }) : navigationController =
-            SearchNavigationController(codeController: codeController) {
+  CodeSearchController({required CodeController codeController})
+    : navigationController = SearchNavigationController(
+        codeController: codeController,
+      ) {
     patternFocusNode.addListener(_onFocusChange);
   }
 
@@ -58,19 +58,14 @@ class CodeSearchController extends ChangeNotifier {
     }
 
     _hidingTimer?.cancel();
-    _hidingTimer = Timer.periodic(
-      _hidingCheckInterval,
-      _hidingTimerCallback,
-    );
+    _hidingTimer = Timer.periodic(_hidingCheckInterval, _hidingTimerCallback);
 
     _shouldShow = true;
     notifyListeners();
   }
 
   @internal
-  void hideSearch({
-    required bool returnFocusToCodeField,
-  }) {
+  void hideSearch({required bool returnFocusToCodeField}) {
     patternFocusNode.unfocus();
     _hidingTimer?.cancel();
 

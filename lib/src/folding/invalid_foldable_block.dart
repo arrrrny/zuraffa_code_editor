@@ -13,26 +13,19 @@ class InvalidFoldableBlock with Equatable {
   final Issue issue;
   final FoldableBlockType type;
 
-  InvalidFoldableBlock({
-    required this.type,
-    this.startLine,
-    this.endLine,
-  })  : assert(
-          startLine != null || endLine != null,
-          'startLine or endLine must be non-null',
-        ),
-        issue = Issue(
-          line: startLine ?? endLine ?? 0,
-          message: 'Invalid foldable block',
-          type: IssueType.error,
-        );
+  InvalidFoldableBlock({required this.type, this.startLine, this.endLine})
+    : assert(
+        startLine != null || endLine != null,
+        'startLine or endLine must be non-null',
+      ),
+      issue = Issue(
+        line: startLine ?? endLine ?? 0,
+        message: 'Invalid foldable block',
+        type: IssueType.error,
+      );
 
   @override
-  List<Object?> get props => [
-        startLine,
-        endLine,
-        type,
-      ];
+  List<Object?> get props => [startLine, endLine, type];
 }
 
 extension InvalidFoldableBlockList on List<InvalidFoldableBlock> {

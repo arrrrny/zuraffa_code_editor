@@ -8,9 +8,7 @@ import 'code_modifier.dart';
 class IndentModifier extends CodeModifier {
   final bool handleBrackets;
 
-  const IndentModifier({
-    this.handleBrackets = true,
-  }) : super('\n');
+  const IndentModifier({this.handleBrackets = true}) : super('\n');
 
   @override
   TextEditingValue? updateString(

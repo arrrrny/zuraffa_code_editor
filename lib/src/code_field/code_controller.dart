@@ -164,10 +164,10 @@ class CodeController extends TextEditingController {
     this.readOnly = false,
     this.params = const EditorParams(),
     this.modifiers = defaultCodeModifiers,
-  })  : _analyzer = analyzer,
-        _readOnlySectionNames = readOnlySectionNames,
-        _code = Code.empty,
-        _isTabReplacementEnabled = modifiers.any((e) => e is TabModifier) {
+  }) : _analyzer = analyzer,
+       _readOnlySectionNames = readOnlySectionNames,
+       _code = Code.empty,
+       _isTabReplacementEnabled = modifiers.any((e) => e is TabModifier) {
     setLanguage(language, analyzer: analyzer);
     this.visibleSectionNames = visibleSectionNames;
     _code = _createCode(text ?? '');
@@ -244,10 +244,7 @@ class CodeController extends TextEditingController {
     notifyListeners();
   }
 
-  void setLanguage(
-    Mode? language, {
-    required AbstractAnalyzer analyzer,
-  }) {
+  void setLanguage(Mode? language, {required AbstractAnalyzer analyzer}) {
     if (language == _language) {
       return;
     }
@@ -301,10 +298,7 @@ class CodeController extends TextEditingController {
     final sel = selection;
     text = text.replaceRange(selection.start, selection.end, '');
 
-    selection = sel.copyWith(
-      baseOffset: sel.start,
-      extentOffset: sel.start,
-    );
+    selection = sel.copyWith(baseOffset: sel.start, extentOffset: sel.start);
   }
 
   /// Remove the selection or last char if the selection is empty
@@ -416,10 +410,7 @@ class CodeController extends TextEditingController {
       extentOffset: endSelectionPosition + offsetIfEndsWithSpace,
     );
 
-    value = TextEditingValue(
-      text: replacedText,
-      selection: adjustedSelection,
-    );
+    value = TextEditingValue(text: replacedText, selection: adjustedSelection);
 
     popupController.hide();
   }
@@ -477,8 +468,9 @@ class CodeController extends TextEditingController {
         return;
       }
 
-      final selectionSnapshot =
-          code.hiddenRanges.recoverSelection(newValue.selection);
+      final selectionSnapshot = code.hiddenRanges.recoverSelection(
+        newValue.selection,
+      );
       _updateCodeIfChanged(editResult.fullTextAfter);
 
       if (newValue.text != _code.visibleText) {
@@ -518,8 +510,9 @@ class CodeController extends TextEditingController {
 
   void applyHistoryRecord(CodeHistoryRecord record) {
     _code = record.code.foldedAs(_code);
-    final fullSelection =
-        record.code.hiddenRanges.recoverSelection(record.selection);
+    final fullSelection = record.code.hiddenRanges.recoverSelection(
+      record.selection,
+    );
     final cutSelection = _code.hiddenRanges.cutSelection(fullSelection);
 
     super.value = TextEditingValue(
@@ -644,11 +637,7 @@ class CodeController extends TextEditingController {
         return line;
       }
 
-      return line.replaceRange(
-        0,
-        0,
-        '$sequence ',
-      );
+      return line.replaceRange(0, 0, '$sequence ');
     });
   }
 
@@ -689,9 +678,7 @@ class CodeController extends TextEditingController {
   /// [modifierCallback] - transformation function that modifies the line.
   /// `line` in the callback contains '\n' symbol at the end, except for the last line of the document.
   // TODO(yescorp): need to preserve folding..
-  void modifySelectedLines(
-    String Function(String line) modifierCallback,
-  ) {
+  void modifySelectedLines(String Function(String line) modifierCallback) {
     if (readOnly) {
       return;
     }
@@ -731,8 +718,9 @@ class CodeController extends TextEditingController {
       baseOffset: firstLineStart,
       extentOffset: firstLineStart + modifiedLinesString.length,
     );
-    final finalVisibleSelection =
-        _code.hiddenRanges.cutSelection(finalFullSelection);
+    final finalVisibleSelection = _code.hiddenRanges.cutSelection(
+      finalFullSelection,
+    );
 
     // TODO(yescorp): move to the listener both here and in `set value`
     //  or come up with a different approach
@@ -762,10 +750,7 @@ class CodeController extends TextEditingController {
     final firstLineIndex = _code.lines.characterIndexToLineIndex(firstChar);
     final lastLineIndex = _code.lines.characterIndexToLineIndex(lastChar);
 
-    return TextRange(
-      start: firstLineIndex,
-      end: lastLineIndex + 1,
-    );
+    return TextRange(start: firstLineIndex, end: lastLineIndex + 1);
   }
 
   Code get code => _code;
@@ -819,8 +804,9 @@ class CodeController extends TextEditingController {
       return;
     }
 
-    final suggestions =
-        (await autocompleter.getSuggestions(prefix)).toList(growable: false);
+    final suggestions = (await autocompleter.getSuggestions(
+      prefix,
+    )).toList(growable: false);
 
     if (suggestions.isNotEmpty) {
       popupController.show(suggestions);
@@ -896,8 +882,9 @@ class CodeController extends TextEditingController {
   /// in any way.
   void foldOutsideSections(Iterable<String> names) {
     final foldLines = {..._code.foldableBlocks.map((b) => b.firstLine)};
-    final sections =
-        names.map((s) => _code.namedSections[s]).whereType<NamedSection>();
+    final sections = names
+        .map((s) => _code.namedSections[s])
+        .whereType<NamedSection>();
 
     for (final block in _code.foldableBlocks) {
       for (final section in sections) {
@@ -918,13 +905,11 @@ class CodeController extends TextEditingController {
     TextStyle? style,
     bool? withComposing,
   }) {
-    final spanBeforeSearch = _createTextSpan(
-      context: context,
-      style: style,
-    );
+    final spanBeforeSearch = _createTextSpan(context: context, style: style);
 
-    final visibleSearchResult =
-        _code.hiddenRanges.cutSearchResult(fullSearchResult);
+    final visibleSearchResult = _code.hiddenRanges.cutSearchResult(
+      fullSearchResult,
+    );
 
     // TODO(alexeyinkin): Return cached if the value did not change, https://github.com/akvelon/flutter-code-editor/issues/127
     lastTextSpan = SearchResultHighlightedBuilder(
@@ -937,10 +922,7 @@ class CodeController extends TextEditingController {
     return lastTextSpan!;
   }
 
-  TextSpan _createTextSpan({
-    required BuildContext context,
-    TextStyle? style,
-  }) {
+  TextSpan _createTextSpan({required BuildContext context, TextStyle? style}) {
     // Return parsing
     if (_language != null) {
       return SpanBuilder(

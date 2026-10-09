@@ -40,23 +40,19 @@ class SingleLineComment {
     required List<String> sequences,
     Object? source,
   }) : this(
-          characterIndex: characterIndex,
-          innerContent: _cutSequence(
-            outerContent: outerContent,
-            sequences: sequences,
-          ),
-          lineIndex: lineIndex,
-          outerContent: outerContent,
-          source: source,
-        );
+         characterIndex: characterIndex,
+         innerContent: _cutSequence(
+           outerContent: outerContent,
+           sequences: sequences,
+         ),
+         lineIndex: lineIndex,
+         outerContent: outerContent,
+         source: source,
+       );
 
   @override
-  int get hashCode => Object.hash(
-        characterIndex,
-        innerContent,
-        lineIndex,
-        outerContent,
-      );
+  int get hashCode =>
+      Object.hash(characterIndex, innerContent, lineIndex, outerContent);
 
   @override
   bool operator ==(Object other) {

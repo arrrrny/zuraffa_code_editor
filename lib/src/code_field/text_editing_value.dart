@@ -141,10 +141,7 @@ extension TextEditingValueExtension on TextEditingValue {
     if (selection.baseOffset == -1 || selection.extentOffset == -1) {
       return '';
     }
-    final selectionSubstring = text.substring(
-      selection.start,
-      selection.end,
-    );
+    final selectionSubstring = text.substring(selection.start, selection.end);
     return selectionSubstring;
   }
 
@@ -180,10 +177,7 @@ extension TextEditingValueExtension on TextEditingValue {
 
     return TextEditingValue(
       composing: composing,
-      selection: TextSelection(
-        baseOffset: position,
-        extentOffset: match.end,
-      ),
+      selection: TextSelection(baseOffset: position, extentOffset: match.end),
       text: text,
     );
   }

@@ -34,17 +34,12 @@ void main() {
       );
       const initialText = 'Aa';
       const initialResult = SearchResult(
-        matches: [
-          SearchMatch(start: 1, end: 2),
-        ],
+        matches: [SearchMatch(start: 1, end: 2)],
       );
 
       const changedText = 'Aaa';
       const resultAfterChange = SearchResult(
-        matches: [
-          SearchMatch(start: 1, end: 2),
-          SearchMatch(start: 2, end: 3),
-        ],
+        matches: [SearchMatch(start: 1, end: 2), SearchMatch(start: 2, end: 3)],
       );
 
       final controller = await pumpController(wt, initialText);

@@ -22,9 +22,7 @@ func (
 	y int) bool {
 
 }''';
-      const expectedBlocks = [
-        FB(firstLine: 0, lastLine: 5, type: FBT.union),
-      ];
+      const expectedBlocks = [FB(firstLine: 0, lastLine: 5, type: FBT.union)];
       _Tester.parseAndCheck(mode: go, code: code, expected: expectedBlocks);
     });
 
@@ -33,9 +31,7 @@ func (
 func main() {
 	type Life struct { a, b *Field;w, h int;}
 }''';
-      const expectedBlocks = [
-        FB(firstLine: 0, lastLine: 2, type: FBT.braces),
-      ];
+      const expectedBlocks = [FB(firstLine: 0, lastLine: 2, type: FBT.braces)];
       _Tester.parseAndCheck(mode: go, code: code, expected: expectedBlocks);
     });
 
@@ -74,9 +70,7 @@ func main() {
 	a := "{[("
 	b := `)]}`
 }''';
-      const expectedBlocks = [
-        FB(firstLine: 0, lastLine: 3, type: FBT.braces),
-      ];
+      const expectedBlocks = [FB(firstLine: 0, lastLine: 3, type: FBT.braces)];
       _Tester.parseAndCheck(mode: go, code: code, expected: expectedBlocks);
     });
 
@@ -130,9 +124,7 @@ import "strings" //  9
 
 
 func main() {}''';
-      const expectedBlocks = [
-        FB(firstLine: 0, lastLine: 9, type: FBT.imports),
-      ];
+      const expectedBlocks = [FB(firstLine: 0, lastLine: 9, type: FBT.imports)];
       _Tester.parseAndCheck(mode: go, code: code, expected: expectedBlocks);
     });
 
@@ -147,9 +139,7 @@ import (
 )
 
 func main() {}''';
-      const expectedBlocks = [
-        FB(firstLine: 0, lastLine: 6, type: FBT.imports),
-      ];
+      const expectedBlocks = [FB(firstLine: 0, lastLine: 6, type: FBT.imports)];
       _Tester.parseAndCheck(mode: go, code: code, expected: expectedBlocks);
     });
 
@@ -189,9 +179,7 @@ func main() {}''';
 func main() {
 }//comment
 //comment''';
-      const expectedBlocks = [
-        FB(firstLine: 0, lastLine: 1, type: FBT.braces),
-      ];
+      const expectedBlocks = [FB(firstLine: 0, lastLine: 1, type: FBT.braces)];
       _Tester.parseAndCheck(mode: go, code: code, expected: expectedBlocks);
     });
 
@@ -201,9 +189,7 @@ func main() {
 // [START section1]
 // [END section2]
 }''';
-      const expectedBlocks = [
-        FB(firstLine: 0, lastLine: 3, type: FBT.braces),
-      ];
+      const expectedBlocks = [FB(firstLine: 0, lastLine: 3, type: FBT.braces)];
       _Tester.parseAndCheck(mode: go, code: code, expected: expectedBlocks);
     });
   });

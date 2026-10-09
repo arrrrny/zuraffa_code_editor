@@ -16,11 +16,7 @@ void main() {
   test('Python. Foldable blocks', () {
     const examples = [
       //
-      _Example(
-        'Empty string',
-        code: '',
-        expected: [],
-      ),
+      _Example('Empty string', code: '', expected: []),
 
       _Example(
         'Multiline list in another block',
@@ -143,9 +139,7 @@ class Mapping:                               # 0
 #{[(
 #)]}
 ''',
-        expected: [
-          _FB(firstLine: 0, lastLine: 1, type: _T.singleLineComment),
-        ],
+        expected: [_FB(firstLine: 0, lastLine: 1, type: _T.singleLineComment)],
       ),
 
       _Example(
@@ -154,9 +148,7 @@ class Mapping:                               # 0
 '#'{
 "#"}
 ''',
-        expected: [
-          _FB(firstLine: 0, lastLine: 1, type: _T.braces),
-        ],
+        expected: [_FB(firstLine: 0, lastLine: 1, type: _T.braces)],
       ),
 
       _Example(
@@ -169,9 +161,7 @@ class Mapping:                               # 0
 '\\\'{#'
 "\\\"}#"
 ''',
-        expected: [
-          _FB(firstLine: 2, lastLine: 3, type: _T.braces),
-        ],
+        expected: [_FB(firstLine: 2, lastLine: 3, type: _T.braces)],
       ),
 
       _Example(
@@ -242,9 +232,7 @@ import bar
 
 pie = math.pi
 process("The value of pi is : ",pie)''',
-        expected: [
-          _FB(firstLine: 0, lastLine: 5, type: _T.imports),
-        ],
+        expected: [_FB(firstLine: 0, lastLine: 5, type: _T.imports)],
       ),
 
       _Example(
@@ -276,19 +264,14 @@ if (isFlutterCodeEditor
     process("I like Flutter code editor!")
     process("I will upvote it on pub.dev right now!")
 ''',
-        expected: [
-          _FB(firstLine: 0, lastLine: 3, type: _T.union),
-        ],
+        expected: [_FB(firstLine: 0, lastLine: 3, type: _T.union)],
       ),
     ];
 
     for (final example in examples) {
       for (final code in [example.code, example.breakingCode]) {
         highlight.registerLanguage('language', python);
-        final highlighted = highlight.parse(
-          code,
-          language: 'language',
-        );
+        final highlighted = highlight.parse(code, language: 'language');
 
         final sequences = SingleLineComments.byMode[python] ?? [];
 
@@ -311,8 +294,9 @@ if (isFlutterCodeEditor
         final pythonParser = PythonFoldableBlockParser()
           ..parse(
             highlighted: highlighted,
-            serviceCommentsSources:
-                serviceComments.map((e) => e.source).toSet(),
+            serviceCommentsSources: serviceComments
+                .map((e) => e.source)
+                .toSet(),
             lines: codeLines,
           );
 
@@ -338,11 +322,8 @@ class _Example {
   final String breakingCode;
   final List<FoldableBlock> expected;
 
-  const _Example(
-    this.name, {
-    required this.code,
-    required this.expected,
-  }) : breakingCode = '$code\ndef fn() #comment\n';
+  const _Example(this.name, {required this.code, required this.expected})
+    : breakingCode = '$code\ndef fn() #comment\n';
 }
 
 /// Shorter alias for [FoldableBlock] to avoid line breaks.

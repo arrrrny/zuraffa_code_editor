@@ -70,8 +70,8 @@ class SearchResultHighlightedBuilder {
   /// or currently highlighted match.
   Color get searchMatchBackgroundColor =>
       highlightedMatchIndex == _currentMatchIndex
-          ? currentMatchBackgroundColor
-          : matchBackgroundColor;
+      ? currentMatchBackgroundColor
+      : matchBackgroundColor;
 
   /// Overrides `TextStyle` of span to highlight search result.
   TextStyle get searchStyle =>
@@ -106,10 +106,7 @@ class SearchResultHighlightedBuilder {
       return true;
     });
 
-    return TextSpan(
-      children: _spans,
-      style: rootStyle,
-    );
+    return TextSpan(children: _spans, style: rootStyle);
   }
 
   /// Recursively processes the text and adds TextSpans
@@ -122,34 +119,21 @@ class SearchResultHighlightedBuilder {
   /// adds the whole text to the [_spans] with regular styling.
   void _processText(String text) {
     if (_areAllMatchesProcessed) {
-      _spans.add(
-        TextSpan(
-          text: text,
-          style: _currentSpanStyle,
-        ),
-      );
+      _spans.add(TextSpan(text: text, style: _currentSpanStyle));
       return;
     }
 
     final sliceIndex = matchIndexes[_currentMatchIndex] - _currentWindowStart;
 
     if (sliceIndex < 0 || sliceIndex > text.length) {
-      _spans.add(
-        TextSpan(
-          text: text,
-          style: _actualStyle,
-        ),
-      );
+      _spans.add(TextSpan(text: text, style: _actualStyle));
       _currentWindowStart += text.length;
       return;
     }
 
     if (sliceIndex != 0) {
       _spans.add(
-        TextSpan(
-          text: text.substring(0, sliceIndex),
-          style: _actualStyle,
-        ),
+        TextSpan(text: text.substring(0, sliceIndex), style: _actualStyle),
       );
     }
 

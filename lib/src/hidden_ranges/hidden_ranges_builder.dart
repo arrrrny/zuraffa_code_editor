@@ -30,18 +30,13 @@ class HiddenRangesBuilder {
     sourceMap: {},
   );
 
-  const HiddenRangesBuilder._({
-    required this.ranges,
-    required this.sourceMap,
-  });
+  const HiddenRangesBuilder._({required this.ranges, required this.sourceMap});
 
-  HiddenRangesBuilder.fromMaps(
-    this.sourceMap, {
-    required int textLength,
-  }) : ranges = HiddenRanges(
-          ranges: _merge(sourceMap.values.expand((map) => map.values)),
-          textLength: textLength,
-        );
+  HiddenRangesBuilder.fromMaps(this.sourceMap, {required int textLength})
+    : ranges = HiddenRanges(
+        ranges: _merge(sourceMap.values.expand((map) => map.values)),
+        textLength: textLength,
+      );
 
   static List<HiddenRange> _merge(Iterable<HiddenRange> ranges) {
     final result = [...ranges]..sort(HiddenRange.sort);

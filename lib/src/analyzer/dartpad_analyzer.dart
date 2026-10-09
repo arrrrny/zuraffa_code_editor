@@ -20,9 +20,7 @@ class DartPadAnalyzer extends AbstractAnalyzer {
 
     final response = await client.post(
       Uri.parse(_url),
-      body: json.encode({
-        'source': code.text,
-      }),
+      body: json.encode({'source': code.text}),
       encoding: utf8,
     );
 

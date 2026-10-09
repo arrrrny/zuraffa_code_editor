@@ -56,15 +56,12 @@ void main() {
         ),
       );
 
-      expect(
-        code.visibleHighlighted!.toHtml(),
-        '''
+      expect(code.visibleHighlighted!.toHtml(), '''
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span> </span>{ <span class="hljs-comment">// comment</span>
   <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{ <span class="hljs-comment"></span>
   } <span class="hljs-comment"></span>
 }
-''',
-      );
+''');
     });
 
     test('foldableBlockToHiddenRange', () {

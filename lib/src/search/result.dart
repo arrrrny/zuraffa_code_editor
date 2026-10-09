@@ -7,12 +7,8 @@ class SearchResult extends Equatable {
 
   final List<SearchMatch> matches;
 
-  static const empty = SearchResult(
-    matches: [],
-  );
+  static const empty = SearchResult(matches: []);
 
   @override
-  List<Object?> get props => [
-        matches,
-      ];
+  List<Object?> get props => [matches];
 }

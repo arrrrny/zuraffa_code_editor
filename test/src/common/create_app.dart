@@ -9,10 +9,7 @@ FocusNode focusNode = FocusNode();
 /// Passed controller will be disposed with the widget.
 MaterialApp createApp(CodeController controller, FocusNode focusNode) {
   return MaterialApp(
-    home: TestApp(
-      controller: controller,
-      focusNode: focusNode,
-    ),
+    home: TestApp(controller: controller, focusNode: focusNode),
   );
 }
 
@@ -47,11 +44,7 @@ class TestApp extends StatefulWidget {
   final CodeController controller;
   final FocusNode focusNode;
 
-  const TestApp({
-    super.key,
-    required this.controller,
-    required this.focusNode,
-  });
+  const TestApp({super.key, required this.controller, required this.focusNode});
 
   @override
   State<TestApp> createState() => _TestAppState();
@@ -64,10 +57,7 @@ class _TestAppState extends State<TestApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CodeField(
-        controller: controller,
-        focusNode: focusNode,
-      ),
+      body: CodeField(controller: controller, focusNode: focusNode),
     );
   }
 

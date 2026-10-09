@@ -25,11 +25,7 @@ class NamedSection extends InclusiveRange with Equatable {
   });
 
   @override
-  List<Object?> get props => [
-        firstLine,
-        lastLine,
-        name,
-      ];
+  List<Object?> get props => [firstLine, lastLine, name];
 
   @override
   String toString() => '$firstLine-$lastLine: "$name"';

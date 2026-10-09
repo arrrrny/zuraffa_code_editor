@@ -259,11 +259,7 @@ void main() {
         //Uncomment to see result in the console.
         //print(result.toStringRecursive());
 
-        expect(
-          result,
-          example.expected,
-          reason: name,
-        );
+        expect(result, example.expected, reason: name);
       });
     });
   });

@@ -65,9 +65,9 @@ class PopupState extends State<Popup> {
     final double leftOffsetLimit =
         // TODO(nausharipov): find where 100 comes from
         widget.editingWindowSize.width -
-            Sizes.autocompletePopupMaxWidth +
-            (widget.editorOffset?.dx ?? 0) -
-            100;
+        Sizes.autocompletePopupMaxWidth +
+        (widget.editorOffset?.dx ?? 0) -
+        100;
 
     // Fixes assertion error when ISC isn't attached but _attach method
     // of ISC instance are being called
@@ -97,10 +97,7 @@ class PopupState extends State<Popup> {
           child: Container(
             decoration: BoxDecoration(
               color: widget.backgroundColor,
-              border: Border.all(
-                color: widget.style.color!,
-                width: 0.5,
-              ),
+              border: Border.all(color: widget.style.color!, width: 0.5),
             ),
             child: ScrollablePositionedList.builder(
               shrinkWrap: true,
@@ -121,7 +118,8 @@ class PopupState extends State<Popup> {
   bool _isVerticalFlipRequired() {
     final isPopupShorterThanWindow =
         Sizes.autocompletePopupMaxHeight < widget.editingWindowSize.height;
-    final isPopupOverflowingHeight = widget.normalOffset.dy +
+    final isPopupOverflowingHeight =
+        widget.normalOffset.dy +
             Sizes.autocompletePopupMaxHeight -
             (widget.editorOffset?.dy ?? 0) >
         widget.editingWindowSize.height;

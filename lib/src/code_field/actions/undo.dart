@@ -5,9 +5,7 @@ import '../code_controller.dart';
 class UndoAction extends Action<UndoTextIntent> {
   final CodeController controller;
 
-  UndoAction({
-    required this.controller,
-  });
+  UndoAction({required this.controller});
 
   @override
   Object? invoke(UndoTextIntent intent) {

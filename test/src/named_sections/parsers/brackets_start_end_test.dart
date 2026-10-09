@@ -88,9 +88,7 @@ void main() {
     ];
 
     const parser = BracketsStartEndNamedSectionParser();
-    final parsed = parser.parse(
-      singleLineComments: comments,
-    );
+    final parsed = parser.parse(singleLineComments: comments);
 
     expect(parsed, expected);
   });

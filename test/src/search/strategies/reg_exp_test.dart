@@ -10,10 +10,7 @@ void main() {
       const text = 'AaAa';
       const pattern = 'A+';
       const expectedResult = SearchResult(
-        matches: [
-          SearchMatch(start: 0, end: 1),
-          SearchMatch(start: 2, end: 3),
-        ],
+        matches: [SearchMatch(start: 0, end: 1), SearchMatch(start: 2, end: 3)],
       );
 
       final result = RegExpSearchStrategy().searchPlain(
@@ -32,9 +29,7 @@ void main() {
       const text = 'AaAa';
       const pattern = 'A+';
       const expectedResult = SearchResult(
-        matches: [
-          SearchMatch(start: 0, end: 4),
-        ],
+        matches: [SearchMatch(start: 0, end: 4)],
       );
 
       final result = RegExpSearchStrategy().searchPlain(

@@ -43,19 +43,13 @@ void main() {
       ];
 
       for (final selection in selections) {
-        expect(
-          HiddenRanges.empty.cutSelection(selection),
-          selection,
-        );
+        expect(HiddenRanges.empty.cutSelection(selection), selection);
         expect(
           HiddenRanges.empty.cutSelection(selection.reversed),
           selection.reversed,
         );
 
-        expect(
-          HiddenRanges.empty.recoverSelection(selection),
-          selection,
-        );
+        expect(HiddenRanges.empty.recoverSelection(selection), selection);
         expect(
           HiddenRanges.empty.recoverSelection(selection.reversed),
           selection.reversed,
@@ -179,18 +173,18 @@ class _Example {
     this.name, {
     required TextRange full,
     required TextRange cut,
-  })  : cutInput = full,
-        cutExpected = cut,
-        recoverInput = cut,
-        recoverExpected = full;
+  }) : cutInput = full,
+       cutExpected = cut,
+       recoverInput = cut,
+       recoverExpected = full;
 
   const _Example.transit(
     this.name, {
     required TextRange full,
     required TextRange cut,
     required TextRange recovered,
-  })  : cutInput = full,
-        cutExpected = cut,
-        recoverInput = cut,
-        recoverExpected = recovered;
+  }) : cutInput = full,
+       cutExpected = cut,
+       recoverInput = cut,
+       recoverExpected = recovered;
 }
