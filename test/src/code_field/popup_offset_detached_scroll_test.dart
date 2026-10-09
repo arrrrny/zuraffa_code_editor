@@ -90,7 +90,9 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Offstage(
-              offstage: true, child: CodeField(controller: controller)),
+            offstage: true,
+            child: CodeField(controller: controller),
+          ),
         ),
       ),
     );
