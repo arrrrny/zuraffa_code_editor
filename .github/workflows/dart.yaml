@@ -68,7 +68,7 @@ jobs:
       # just under the measured value so master is green and every coverage PR
       # raises it.
       - name: Coverage gate
-        run: python3 tool/coverage_gate.py --min 90.0
+        run: python3 tool/coverage_gate.py --min 90.5
 
       # As we don't use file generation, it's fine to include everything.
       # - name: Install lcov
