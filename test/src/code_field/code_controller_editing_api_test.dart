@@ -158,21 +158,27 @@ void main() {
       await wt.pump();
       expect(controller.popupController.shouldShow, isTrue);
 
-      controller.onKey(
-        const KeyDownEvent(
-          logicalKey: LogicalKeyboardKey.arrowDown,
-          physicalKey: PhysicalKeyboardKey.arrowDown,
-          timeStamp: Duration.zero,
+      expect(
+        controller.onKey(
+          const KeyDownEvent(
+            logicalKey: LogicalKeyboardKey.arrowDown,
+            physicalKey: PhysicalKeyboardKey.arrowDown,
+            timeStamp: Duration.zero,
+          ),
         ),
+        KeyEventResult.handled,
       );
       expect(controller.popupController.selectedIndex, 1);
 
-      controller.onKey(
-        const KeyDownEvent(
-          logicalKey: LogicalKeyboardKey.arrowUp,
-          physicalKey: PhysicalKeyboardKey.arrowUp,
-          timeStamp: Duration.zero,
+      expect(
+        controller.onKey(
+          const KeyDownEvent(
+            logicalKey: LogicalKeyboardKey.arrowUp,
+            physicalKey: PhysicalKeyboardKey.arrowUp,
+            timeStamp: Duration.zero,
+          ),
         ),
+        KeyEventResult.handled,
       );
       expect(controller.popupController.selectedIndex, 0);
     });
@@ -221,11 +227,14 @@ void main() {
       final controller = _makeController('int a;');
       addTearDown(controller.dispose);
       controller.setCursor(3);
-      controller.popupController.show(['int']);
+      // A longer completion pins the replacement and the selection math:
+      // endSelectionPosition 7 + the trailing-space offset 1.
+      controller.popupController.show(['integer']);
 
       controller.insertSelectedWord();
 
-      expect(controller.text, 'int a;');
+      expect(controller.text, 'integer a;');
+      expect(controller.selection, const TextSelection.collapsed(offset: 8));
       expect(controller.popupController.shouldShow, isFalse);
     });
 
