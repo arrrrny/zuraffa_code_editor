@@ -52,12 +52,12 @@ void main() {
       final code = _codeWithReadOnlySection();
 
       final readOnlyLine = code.lines.lines.firstWhere((l) => l.isReadOnly);
+      final caret = readOnlyLine.textRange.start + 1;
 
-      // The normalized-collapsed branch is what a single caret uses.
       expect(
-        code.isReadOnlySelected(readOnlyLine.textRange),
+        code.isReadOnlySelected(TextRange(start: caret, end: caret)),
         isTrue,
-        reason: 'a collapsed range inside the read-only section counts',
+        reason: 'a single caret inside the read-only section counts',
       );
     });
 
