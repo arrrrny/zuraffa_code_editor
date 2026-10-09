@@ -217,6 +217,22 @@ class CodeField extends StatefulWidget {
   State<CodeField> createState() => _CodeFieldState();
 }
 
+/// Reads [controller.offset] but tolerates a controller with no attached
+/// scroll view.
+///
+/// `ScrollController.offset` throws `ScrollController not attached to any
+/// scroll views` while the field's scroll views have no position — a state the
+/// popup-offset updates can observe, because
+/// `CodeController.analyzeCode()` notifies from a later microtask. Upstream
+/// akvelon/flutter-code-editor#275 is a crash report from exactly that path.
+@visibleForTesting
+double scrollOffsetOrZero(ScrollController controller) {
+  if (!controller.hasClients) {
+    return 0;
+  }
+  return controller.offset;
+}
+
 class _CodeFieldState extends State<CodeField> {
   // Add a controller
   LinkedScrollControllerGroup? _controllers;
@@ -558,7 +574,7 @@ class _CodeFieldState extends State<CodeField> {
     return max(
       _getCaretOffset(textPainter).dx +
           widget.padding.left -
-          _horizontalCodeScroll!.offset +
+          scrollOffsetOrZero(_horizontalCodeScroll!) +
           (_editorOffset?.dx ?? 0),
       0,
     );
@@ -570,7 +586,7 @@ class _CodeFieldState extends State<CodeField> {
           caretHeight +
           16 +
           widget.padding.top -
-          _codeScroll!.offset +
+          scrollOffsetOrZero(_codeScroll!) +
           (_editorOffset?.dy ?? 0),
       0,
     );
