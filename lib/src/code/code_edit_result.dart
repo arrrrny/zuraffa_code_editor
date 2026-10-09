@@ -21,10 +21,8 @@ class CodeEditResult {
   }
 
   @override
-  int get hashCode => Object.hash(
-        fullTextAfter.hashCode,
-        linesChanged.hashCode,
-      );
+  int get hashCode =>
+      Object.hash(fullTextAfter.hashCode, linesChanged.hashCode);
 
   @override
   bool operator ==(Object other) {

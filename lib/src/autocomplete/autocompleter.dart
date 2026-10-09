@@ -44,9 +44,9 @@ class Autocompleter {
   }
 
   void _parseStringKeywords(String keywords) {
-    _keywordsAutocomplete.enterList(
-      [...keywords.split(_whitespacesRe).where((k) => k.isNotEmpty)],
-    );
+    _keywordsAutocomplete.enterList([
+      ...keywords.split(_whitespacesRe).where((k) => k.isNotEmpty),
+    ]);
   }
 
   void _addKeywords(Iterable<String> keywords) {

@@ -47,9 +47,7 @@ void main() {
 
     group('Code without tabs', () {
       test('without selection', () {
-        expectSame(
-          const TextEditingValue(text: _codeWithDoubleSpaces),
-        );
+        expectSame(const TextEditingValue(text: _codeWithDoubleSpaces));
       });
 
       test('with cursor at the start', () {
@@ -77,8 +75,9 @@ void main() {
         expectSame(
           const TextEditingValue(
             text: _codeWithDoubleSpaces,
-            selection:
-                TextSelection.collapsed(offset: _codeWithDoubleSpaces.length),
+            selection: TextSelection.collapsed(
+              offset: _codeWithDoubleSpaces.length,
+            ),
           ),
         );
       });
@@ -100,10 +99,7 @@ void main() {
         expectSame(
           const TextEditingValue(
             text: _codeWithDoubleSpaces,
-            selection: TextSelection(
-              baseOffset: 10,
-              extentOffset: 5,
-            ),
+            selection: TextSelection(baseOffset: 10, extentOffset: 5),
           ),
         );
       });
@@ -192,10 +188,7 @@ void main() {
       test('with non-empty reversed selection', () {
         TextEditingValue value = const TextEditingValue(
           text: _codeWithTabs,
-          selection: TextSelection(
-            baseOffset: 55,
-            extentOffset: 24,
-          ),
+          selection: TextSelection(baseOffset: 55, extentOffset: 24),
         );
         final expected = value.copyWith(
           text: _codeWithDoubleSpaces,

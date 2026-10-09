@@ -48,11 +48,7 @@ void main() {
         example.settings,
       );
 
-      expect(
-        result.runtimeType,
-        example.strategyType,
-        reason: example.name,
-      );
+      expect(result.runtimeType, example.strategyType, reason: example.name);
     }
   });
 }

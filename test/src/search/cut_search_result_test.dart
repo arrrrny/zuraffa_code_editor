@@ -12,14 +12,10 @@ void main() {
         'No hidden ranges',
         ranges: HiddenRanges(ranges: const [], textLength: 100),
         fullSearchResult: const SearchResult(
-          matches: [
-            SearchMatch(start: 20, end: 24),
-          ],
+          matches: [SearchMatch(start: 20, end: 24)],
         ),
         visibleSearchResult: const SearchResult(
-          matches: [
-            SearchMatch(start: 20, end: 24),
-          ],
+          matches: [SearchMatch(start: 20, end: 24)],
         ),
       ),
 
@@ -64,11 +60,7 @@ void main() {
     for (final example in examples) {
       final result = example.ranges.cutSearchResult(example.fullSearchResult);
 
-      expect(
-        result,
-        example.visibleSearchResult,
-        reason: example.name,
-      );
+      expect(result, example.visibleSearchResult, reason: example.name);
     }
   });
 }

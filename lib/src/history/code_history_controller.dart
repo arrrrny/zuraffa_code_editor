@@ -39,10 +39,9 @@ class CodeHistoryController {
   static const idle = Duration(seconds: 5);
   static const limit = 100;
 
-  CodeHistoryController({
-    required this.codeController,
-  })  : lastCode = codeController.code,
-        lastSelection = codeController.value.selection {
+  CodeHistoryController({required this.codeController})
+    : lastCode = codeController.code,
+      lastSelection = codeController.value.selection {
     _push();
   }
 
@@ -212,10 +211,7 @@ class CodeHistoryController {
   }
 
   CodeHistoryRecord _createRecord() {
-    return CodeHistoryRecord(
-      code: lastCode,
-      selection: lastSelection,
-    );
+    return CodeHistoryRecord(code: lastCode, selection: lastSelection);
   }
 
   void _pushRecord(CodeHistoryRecord record) {

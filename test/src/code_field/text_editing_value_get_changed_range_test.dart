@@ -164,25 +164,15 @@ void main() {
         reason: example.name,
       );
 
-      final range = example.newValue.getChangedRange(
-        example.oldValue,
-      );
+      final range = example.newValue.getChangedRange(example.oldValue);
       final reversedRange = example.newValue.getChangedRange(
         example.oldValue.copyWith(
           selection: example.oldValue.selection.reversed,
         ),
       );
 
-      expect(
-        range,
-        example.expected,
-        reason: example.name,
-      );
-      expect(
-        reversedRange,
-        example.expected,
-        reason: example.name,
-      );
+      expect(range, example.expected, reason: example.name);
+      expect(reversedRange, example.expected, reason: example.name);
     }
   });
 }

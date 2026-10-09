@@ -15,9 +15,9 @@ void main() {
 
       registerFallbackValue(Code.empty);
       // ignore: discarded_futures
-      when(() => testAnalyzer.analyze(any())).thenAnswer(
-        (_) async => const AnalysisResult(issues: []),
-      );
+      when(
+        () => testAnalyzer.analyze(any()),
+      ).thenAnswer((_) async => const AnalysisResult(issues: []));
     });
 
     test('Initialize', () async {
@@ -25,8 +25,10 @@ void main() {
       final analyzers = [testAnalyzer, testAnalyzer];
 
       for (int i = 0; i < languages.length; i++) {
-        final controller =
-            CodeController(language: languages[i], analyzer: analyzers[i]);
+        final controller = CodeController(
+          language: languages[i],
+          analyzer: analyzers[i],
+        );
 
         expect(controller.analyzer, same(analyzers[i]));
         expect(controller.language, same(languages[i]));
@@ -69,8 +71,10 @@ void main() {
     test('Set language resets analyzer', () {
       final languages = [python, null];
       for (final language in languages) {
-        final controller =
-            CodeController(language: java, analyzer: testAnalyzer);
+        final controller = CodeController(
+          language: java,
+          analyzer: testAnalyzer,
+        );
         expect(controller.analyzer, same(testAnalyzer));
 
         controller.language = language;

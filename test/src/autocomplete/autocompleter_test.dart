@@ -41,27 +41,15 @@ void main() {
       final nullResults = await ac.getSuggestions('f');
 
       expect(initialResults, const []);
-      expect(
-        javaResults,
-        [
-          'false',
-          'final',
-          'finally',
-          'float',
-          'for',
-        ],
-      );
-      expect(
-        dartResults,
-        [
-          'factory',
-          'false',
-          'final',
-          'finally',
-          'for',
-          //'Function', // https://github.com/AKushWarrior/autotrie/issues/8
-        ],
-      );
+      expect(javaResults, ['false', 'final', 'finally', 'float', 'for']);
+      expect(dartResults, [
+        'factory',
+        'false',
+        'final',
+        'finally',
+        'for',
+        //'Function', // https://github.com/AKushWarrior/autotrie/issues/8
+      ]);
       expect(nullResults, const []);
     });
 
@@ -75,24 +63,21 @@ void main() {
       ac.setText('2', _edgeText);
       final bothResults = await ac.getSuggestions('s');
 
-      expect(
-        bothResults,
-        [
-          'sed',
-          //'Single_quotes1', // https://github.com/AKushWarrior/autotrie/issues/8
-          'single_quotes2',
-          'single_quotes3',
-          'sint',
-          'sit',
-          'slash1',
-          'slash2',
-          'slash3',
-          'star1',
-          'star2',
-          'star3',
-          'sunt',
-        ],
-      );
+      expect(bothResults, [
+        'sed',
+        //'Single_quotes1', // https://github.com/AKushWarrior/autotrie/issues/8
+        'single_quotes2',
+        'single_quotes3',
+        'sint',
+        'sit',
+        'slash1',
+        'slash2',
+        'slash3',
+        'star1',
+        'star2',
+        'star3',
+        'sunt',
+      ]);
 
       ac.setText('2', null);
       final singleResults2 = await ac.getSuggestions('s');

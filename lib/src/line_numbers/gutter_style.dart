@@ -63,18 +63,17 @@ class GutterStyle {
   GutterStyle copyWith({
     TextStyle? errorPopupTextStyle,
     TextStyle? textStyle,
-  }) =>
-      GutterStyle(
-        width: width,
-        textAlign: textAlign,
-        textStyle: textStyle ?? this.textStyle,
-        errorPopupTextStyle: errorPopupTextStyle,
-        background: background,
-        margin: margin,
-        showErrors: showErrors,
-        showFoldingHandles: showFoldingHandles,
-        showLineNumbers: showLineNumbers,
-      );
+  }) => GutterStyle(
+    width: width,
+    textAlign: textAlign,
+    textStyle: textStyle ?? this.textStyle,
+    errorPopupTextStyle: errorPopupTextStyle,
+    background: background,
+    margin: margin,
+    showErrors: showErrors,
+    showFoldingHandles: showFoldingHandles,
+    showLineNumbers: showLineNumbers,
+  );
 }
 
 @Deprecated('Renamed to GutterStyle')

@@ -129,7 +129,8 @@ void main() {
     expect(
       pitch,
       closeTo(lineHeight, 0.001),
-      reason: '$state: gutter row pitch must equal the rendered code line '
+      reason:
+          '$state: gutter row pitch must equal the rendered code line '
           'height ($lineHeight), was $pitch over ${rows.length} rows',
     );
 
@@ -149,8 +150,11 @@ void main() {
     final rows = gutterRows(wt, controller);
 
     // 36 source lines plus the trailing empty line after the final '\n'.
-    expect(rows.length, 37,
-        reason: 'every source line, trailing empty one included, gets a row');
+    expect(
+      rows.length,
+      37,
+      reason: 'every source line, trailing empty one included, gets a row',
+    );
 
     expectOnGrid(
       rows,

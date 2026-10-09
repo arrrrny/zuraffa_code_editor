@@ -41,24 +41,22 @@ class GutterWidget extends StatelessWidget {
   Widget _buildOnChange(BuildContext context, Widget? child) {
     final code = codeController.code;
 
-    final gutterWidth = style.width -
+    final gutterWidth =
+        style.width -
         (style.showErrors ? 0 : _issueColumnWidth) -
         (style.showFoldingHandles ? 0 : _foldingColumnWidth);
 
     final issueColumnWidth = style.showErrors ? _issueColumnWidth : 0.0;
-    final foldingColumnWidth =
-        style.showFoldingHandles ? _foldingColumnWidth : 0.0;
+    final foldingColumnWidth = style.showFoldingHandles
+        ? _foldingColumnWidth
+        : 0.0;
 
     final tableRows = List.generate(
       code.hiddenLineRanges.visibleLineNumbers.length,
       // ignore: prefer_const_constructors
       (i) => TableRow(
         // ignore: prefer_const_literals_to_create_immutables
-        children: [
-          const SizedBox(),
-          const SizedBox(),
-          const SizedBox(),
-        ],
+        children: [const SizedBox(), const SizedBox(), const SizedBox()],
       ),
     );
 

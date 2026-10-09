@@ -38,16 +38,10 @@ void main() {
         code.lines,
         CodeLines([
           // 30
-          CodeLine.fromTextAndStart(
-            '1 Lorem ipsum dolor sit amet,\n',
-            0,
-          ),
+          CodeLine.fromTextAndStart('1 Lorem ipsum dolor sit amet,\n', 0),
 
           // 31
-          CodeLine.fromTextAndStart(
-            '2 consectetur adipiscing elit,\n',
-            30,
-          ),
+          CodeLine.fromTextAndStart('2 consectetur adipiscing elit,\n', 30),
 
           // 61
           CodeLine.fromTextAndStart(
@@ -68,34 +62,19 @@ void main() {
           ),
 
           // 13
-          CodeLine.fromTextAndStart(
-            '6 ut aliquip\n',
-            206,
-          ),
+          CodeLine.fromTextAndStart('6 ut aliquip\n', 206),
 
           // 5
-          CodeLine.fromTextAndStart(
-            '7 ex\n',
-            219,
-          ),
+          CodeLine.fromTextAndStart('7 ex\n', 219),
 
           // 1
-          CodeLine.fromTextAndStart(
-            '\n',
-            224,
-          ),
+          CodeLine.fromTextAndStart('\n', 224),
 
           // 24
-          CodeLine.fromTextAndStart(
-            '9 ea commodo consequat.\n',
-            225,
-          ),
+          CodeLine.fromTextAndStart('9 ea commodo consequat.\n', 225),
 
           // 28
-          CodeLine.fromTextAndStart(
-            '10 Duis aute irure dolor in\n',
-            249,
-          ),
+          CodeLine.fromTextAndStart('10 Duis aute irure dolor in\n', 249),
 
           // 55
           CodeLine.fromTextAndStart(
@@ -104,10 +83,7 @@ void main() {
           ),
 
           // 29
-          CodeLine.fromTextAndStart(
-            '12 eu fugiat nulla pariatur.\n',
-            332,
-          ),
+          CodeLine.fromTextAndStart('12 eu fugiat nulla pariatur.\n', 332),
 
           // 37
           CodeLine.fromTextAndStart(
@@ -116,10 +92,7 @@ void main() {
           ),
 
           // 17
-          CodeLine.fromTextAndStart(
-            '14 non proident,\n',
-            398,
-          ),
+          CodeLine.fromTextAndStart('14 non proident,\n', 398),
 
           // 65
           CodeLine.fromTextAndStart(
@@ -135,10 +108,7 @@ void main() {
       const tails = ['', '\n'];
       for (final tail in tails) {
         final textWithTail = loremIpsum + tail;
-        final code = Code(
-          text: textWithTail,
-          language: _language,
-        );
+        final code = Code(text: textWithTail, language: _language);
 
         final map = {
           0: 0,

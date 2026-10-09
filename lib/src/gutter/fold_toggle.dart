@@ -20,11 +20,7 @@ class FoldToggle extends StatelessWidget {
       onTap: onTap,
       child: RotatedBox(
         quarterTurns: isFolded ? 0 : 1,
-        child: Icon(
-          Icons.chevron_right,
-          color: color,
-          size: 16,
-        ),
+        child: Icon(Icons.chevron_right, color: color, size: 16),
       ),
     );
   }

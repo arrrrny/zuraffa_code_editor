@@ -14,11 +14,7 @@ class CodeLines with Equatable {
   const CodeLines(this.lines);
 
   static const empty = CodeLines([
-    CodeLine(
-      text: '',
-      textRange: TextRange.collapsed(0),
-      indent: 0,
-    ),
+    CodeLine(text: '', textRange: TextRange.collapsed(0), indent: 0),
   ]);
 
   CodeLine operator [](int i) => lines[i];
@@ -44,7 +40,8 @@ class CodeLines with Equatable {
       }
 
       // Linear interpolation search.
-      final lineIndex = lowerLine +
+      final lineIndex =
+          lowerLine +
           ((upperLine - lowerLine) *
                   (characterIndex - lowerCharacter) /
                   (upperCharacter - lowerCharacter))
@@ -76,7 +73,5 @@ class CodeLines with Equatable {
   }
 
   @override
-  List<Object> get props => [
-        lines,
-      ];
+  List<Object> get props => [lines];
 }

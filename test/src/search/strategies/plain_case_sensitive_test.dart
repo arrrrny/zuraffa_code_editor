@@ -10,10 +10,7 @@ void main() {
       const text = 'Aaaaa';
       const pattern = 'aa';
       const expectedResult = SearchResult(
-        matches: [
-          SearchMatch(start: 1, end: 3),
-          SearchMatch(start: 3, end: 5),
-        ],
+        matches: [SearchMatch(start: 1, end: 3), SearchMatch(start: 3, end: 5)],
       );
 
       final result = PlainCaseSensitiveSearchStrategy().searchPlain(

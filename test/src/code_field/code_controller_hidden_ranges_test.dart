@@ -87,97 +87,90 @@ public class MyClass {
             selection: TextSelection.collapsed(offset: 0),
           ),
         );
-        expect(
-          controller.fullText,
-          'void method() {\n}\n',
-        );
+        expect(controller.fullText, 'void method() {\n}\n');
       },
     );
 
-    testWidgets(
-      'Indent new line before hidden range',
-      (WidgetTester wt) async {
-        final controller = CodeController(
-          text: '''
+    testWidgets('Indent new line before hidden range', (WidgetTester wt) async {
+      final controller = CodeController(
+        text: '''
 class MyClass {
   void method() {// [START section2]
   }// [END section2]
 }
 ''',
-          language: _language,
-          namedSectionParser: const BracketsStartEndNamedSectionParser(),
-        );
-        final focusNode = FocusNode();
+        language: _language,
+        namedSectionParser: const BracketsStartEndNamedSectionParser(),
+      );
+      final focusNode = FocusNode();
 
-        await wt.pumpWidget(createApp(controller, focusNode));
-        focusNode.requestFocus();
+      await wt.pumpWidget(createApp(controller, focusNode));
+      focusNode.requestFocus();
 
-        // Go to the beginning.
-        await wt.sendKeyDownEvent(LogicalKeyboardKey.alt);
-        await wt.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-        await wt.sendKeyUpEvent(LogicalKeyboardKey.alt);
+      // Go to the beginning.
+      await wt.sendKeyDownEvent(LogicalKeyboardKey.alt);
+      await wt.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await wt.sendKeyUpEvent(LogicalKeyboardKey.alt);
 
-        for (int i = 37; --i >= 0;) {
-          await wt.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-        }
+      for (int i = 37; --i >= 0;) {
+        await wt.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      }
 
-        controller.value = controller.value.replacedSelection('\n');
+      controller.value = controller.value.replacedSelection('\n');
 
-        expect(
-          controller.value,
-          const TextEditingValue(
-            text: 'class MyClass {\n  void method() {\n  }\n  \n}\n',
-            //                                        cursor /
-            selection: TextSelection.collapsed(offset: 40),
-          ),
-        );
-        expect(
-          controller.fullText,
-          '''
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: 'class MyClass {\n  void method() {\n  }\n  \n}\n',
+          //                                        cursor /
+          selection: TextSelection.collapsed(offset: 40),
+        ),
+      );
+      expect(
+        controller.fullText,
+        '''
 class MyClass {
   void method() {// [START section2]
   }
   // [END section2]
 }
 ''', // The new line is empty
-        );
-      },
-    );
+      );
+    });
 
-    testWidgets(
-      'A typed-in service comment becomes a hidden range',
-      (WidgetTester wt) async {
-        final controller = CodeController(
-          text: _text,
-          language: _language,
-          namedSectionParser: const BracketsStartEndNamedSectionParser(),
-        );
-        final focusNode = FocusNode();
+    testWidgets('A typed-in service comment becomes a hidden range', (
+      WidgetTester wt,
+    ) async {
+      final controller = CodeController(
+        text: _text,
+        language: _language,
+        namedSectionParser: const BracketsStartEndNamedSectionParser(),
+      );
+      final focusNode = FocusNode();
 
-        await wt.pumpWidget(createApp(controller, focusNode));
-        focusNode.requestFocus();
+      await wt.pumpWidget(createApp(controller, focusNode));
+      focusNode.requestFocus();
 
-        // Go to the beginning.
-        await wt.sendKeyDownEvent(LogicalKeyboardKey.alt);
-        await wt.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-        await wt.sendKeyUpEvent(LogicalKeyboardKey.alt);
+      // Go to the beginning.
+      await wt.sendKeyDownEvent(LogicalKeyboardKey.alt);
+      await wt.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await wt.sendKeyUpEvent(LogicalKeyboardKey.alt);
 
-        await wt.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-        controller.value = controller.value.replacedSelection('//readonly ');
+      await wt.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      controller.value = controller.value.replacedSelection('//readonly ');
 
-        expect(
-          controller.value,
-          const TextEditingValue(
-            text: '\n\n}\n',
-            //       \ cursor
-            selection: TextSelection.collapsed(offset: 1),
-          ),
-        );
-        expect(
-          controller.fullText,
-          '// [START section2]\n//readonly void method() {\n}\n',
-        );
-      },
-    );
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '\n\n}\n',
+          //       \ cursor
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      expect(
+        controller.fullText,
+        '// [START section2]\n//readonly void method() {\n}\n',
+      );
+    });
   });
 }

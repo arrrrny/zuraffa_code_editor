@@ -13,11 +13,7 @@ class SpanBuilder {
 
   int _visibleLineIndex = 0;
 
-  SpanBuilder({
-    required this.code,
-    required this.theme,
-    this.rootStyle,
-  });
+  SpanBuilder({required this.code, required this.theme, this.rootStyle});
 
   TextSpan build() {
     _visibleLineIndex = 0;
@@ -85,8 +81,9 @@ class SpanBuilder {
       return style;
     }
 
-    final fullLineIndex =
-        code.hiddenLineRanges.recoverLineIndex(_visibleLineIndex);
+    final fullLineIndex = code.hiddenLineRanges.recoverLineIndex(
+      _visibleLineIndex,
+    );
     if (code.lines[fullLineIndex].isReadOnly) {
       return style?.paled();
     }

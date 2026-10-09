@@ -37,9 +37,7 @@ class MyClass(var myVar1: Int,
 class MyClass() {
   def main() = {}
 }''';
-      const expected = [
-        FB(firstLine: 0, lastLine: 2, type: FBT.braces),
-      ];
+      const expected = [FB(firstLine: 0, lastLine: 2, type: FBT.braces)];
       _Tester.parseAndCheck(mode: scala, code: code, expected: expected);
     });
 
@@ -151,9 +149,7 @@ import users.User // Without this, it is 'braces' block.
 import users.{ 
   User
 }''';
-      const expected = [
-        FB(firstLine: 0, lastLine: 3, type: FBT.imports),
-      ];
+      const expected = [FB(firstLine: 0, lastLine: 3, type: FBT.imports)];
       _Tester.parseAndCheck(mode: scala, code: code, expected: expected);
     });
 
@@ -177,9 +173,7 @@ class MyClass() {
 // [START section1]
 // [END section2]
 }''';
-      const expected = [
-        FB(firstLine: 0, lastLine: 3, type: FBT.braces),
-      ];
+      const expected = [FB(firstLine: 0, lastLine: 3, type: FBT.braces)];
       _Tester.parseAndCheck(mode: scala, code: code, expected: expected);
     });
 
@@ -205,9 +199,7 @@ object Main {
   def main(args: Array[String]): Unit =
     method1("Hello, Scala developer!")
 }''';
-      const expected = [
-        FB(firstLine: 0, lastLine: 3, type: FBT.braces),
-      ];
+      const expected = [FB(firstLine: 0, lastLine: 3, type: FBT.braces)];
       _Tester.parseAndCheck(mode: scala, code: code, expected: expected);
     });
 
@@ -220,9 +212,7 @@ val list: List[Any] = List(
   true, // a boolean value
   () => "an anonymous function returning a string"
 )''';
-      const expected = [
-        FB(firstLine: 0, lastLine: 6, type: FBT.parentheses),
-      ];
+      const expected = [FB(firstLine: 0, lastLine: 6, type: FBT.parentheses)];
       _Tester.parseAndCheck(mode: scala, code: code, expected: expected);
     });
 
@@ -233,9 +223,7 @@ def matchTest(x: Int): String = x match {
   case 2 => "two"
   case _ => "other"
 }''';
-      const expected = [
-        FB(firstLine: 0, lastLine: 4, type: FBT.braces),
-      ];
+      const expected = [FB(firstLine: 0, lastLine: 4, type: FBT.braces)];
       _Tester.parseAndCheck(mode: scala, code: code, expected: expected);
     });
   });

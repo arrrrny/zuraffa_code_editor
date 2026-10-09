@@ -22,100 +22,70 @@ import 'js_workarounds/js_workarounds.dart';
 
 final _shortcuts = <ShortcutActivator, Intent>{
   // Copy
-  LogicalKeySet(
-    LogicalKeyboardKey.control,
-    LogicalKeyboardKey.keyC,
-  ): CopySelectionTextIntent.copy,
-  const SingleActivator(
-    LogicalKeyboardKey.keyC,
-    meta: true,
-  ): CopySelectionTextIntent.copy,
-  LogicalKeySet(
-    LogicalKeyboardKey.control,
-    LogicalKeyboardKey.insert,
-  ): CopySelectionTextIntent.copy,
+  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyC):
+      CopySelectionTextIntent.copy,
+  const SingleActivator(LogicalKeyboardKey.keyC, meta: true):
+      CopySelectionTextIntent.copy,
+  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.insert):
+      CopySelectionTextIntent.copy,
 
   // Cut
-  LogicalKeySet(
-    LogicalKeyboardKey.control,
-    LogicalKeyboardKey.keyX,
-  ): const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
-  const SingleActivator(
-    LogicalKeyboardKey.keyX,
-    meta: true,
-  ): const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
-  LogicalKeySet(
-    LogicalKeyboardKey.shift,
-    LogicalKeyboardKey.delete,
-  ): const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
+  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyX):
+      const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
+  const SingleActivator(LogicalKeyboardKey.keyX, meta: true):
+      const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
+  LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.delete):
+      const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
 
   // Undo
-  LogicalKeySet(
-    LogicalKeyboardKey.control,
-    LogicalKeyboardKey.keyZ,
-  ): const UndoTextIntent(SelectionChangedCause.keyboard),
-  const SingleActivator(
-    LogicalKeyboardKey.keyZ,
-    meta: true,
-  ): const UndoTextIntent(SelectionChangedCause.keyboard),
+  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyZ):
+      const UndoTextIntent(SelectionChangedCause.keyboard),
+  const SingleActivator(LogicalKeyboardKey.keyZ, meta: true):
+      const UndoTextIntent(SelectionChangedCause.keyboard),
 
   // Redo
   LogicalKeySet(
     LogicalKeyboardKey.shift,
     LogicalKeyboardKey.control,
     LogicalKeyboardKey.keyZ,
-  ): const RedoTextIntent(SelectionChangedCause.keyboard),
+  ): const RedoTextIntent(
+    SelectionChangedCause.keyboard,
+  ),
   LogicalKeySet(
     LogicalKeyboardKey.shift,
     LogicalKeyboardKey.meta,
     LogicalKeyboardKey.keyZ,
-  ): const RedoTextIntent(SelectionChangedCause.keyboard),
+  ): const RedoTextIntent(
+    SelectionChangedCause.keyboard,
+  ),
 
   // Indent
-  LogicalKeySet(
-    LogicalKeyboardKey.tab,
-  ): const IndentIntent(),
+  LogicalKeySet(LogicalKeyboardKey.tab): const IndentIntent(),
 
   // Outdent
-  LogicalKeySet(
-    LogicalKeyboardKey.shift,
-    LogicalKeyboardKey.tab,
-  ): const OutdentIntent(),
+  LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab):
+      const OutdentIntent(),
 
   // Comment Uncomment
-  LogicalKeySet(
-    LogicalKeyboardKey.control,
-    LogicalKeyboardKey.slash,
-  ): const CommentUncommentIntent(),
-  const SingleActivator(
-    LogicalKeyboardKey.slash,
-    meta: true,
-  ): const CommentUncommentIntent(),
+  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.slash):
+      const CommentUncommentIntent(),
+  const SingleActivator(LogicalKeyboardKey.slash, meta: true):
+      const CommentUncommentIntent(),
 
   // Search
-  LogicalKeySet(
-    LogicalKeyboardKey.control,
-    LogicalKeyboardKey.keyF,
-  ): const SearchIntent(),
-  const SingleActivator(
-    LogicalKeyboardKey.keyF,
-    meta: true,
-  ): const SearchIntent(),
+  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyF):
+      const SearchIntent(),
+  const SingleActivator(LogicalKeyboardKey.keyF, meta: true):
+      const SearchIntent(),
 
   // Dismiss
-  LogicalKeySet(
-    LogicalKeyboardKey.escape,
-  ): const DismissIntent(),
+  LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
 
   // EnterKey
-  LogicalKeySet(
-    LogicalKeyboardKey.enter,
-  ): const EnterKeyIntent(),
+  LogicalKeySet(LogicalKeyboardKey.enter): const EnterKeyIntent(),
 
   // TabKey
-  LogicalKeySet(
-    LogicalKeyboardKey.tab,
-  ): const TabKeyIntent(),
+  LogicalKeySet(LogicalKeyboardKey.tab): const TabKeyIntent(),
 };
 
 class CodeField extends StatefulWidget {
@@ -206,12 +176,14 @@ class CodeField extends StatefulWidget {
     @Deprecated('Use gutterStyle instead') this.lineNumbers,
     @Deprecated('Use gutterStyle instead')
     this.lineNumberStyle = const GutterStyle(),
-  })  : assert(
-            gutterStyle == null || lineNumbers == null,
-            'Can not provide gutterStyle and lineNumbers at the same time. '
-            'Please use gutterStyle and provide necessary columns to show/hide'),
-        gutterStyle = gutterStyle ??
-            ((lineNumbers == false) ? GutterStyle.none : lineNumberStyle);
+  }) : assert(
+         gutterStyle == null || lineNumbers == null,
+         'Can not provide gutterStyle and lineNumbers at the same time. '
+         'Please use gutterStyle and provide necessary columns to show/hide',
+       ),
+       gutterStyle =
+           gutterStyle ??
+           ((lineNumbers == false) ? GutterStyle.none : lineNumberStyle);
 
   @override
   State<CodeField> createState() => _CodeFieldState();
@@ -252,9 +224,7 @@ class _CodeFieldState extends State<CodeField> {
     widget.controller.addListener(_onTextChanged);
     widget.controller.addListener(_updatePopupOffset);
     widget.controller.popupController.addListener(_onPopupStateChanged);
-    widget.controller.searchController.addListener(
-      _onSearchControllerChange,
-    );
+    widget.controller.searchController.addListener(_onSearchControllerChange);
     _horizontalCodeScroll = ScrollController();
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode!.attach(context, onKeyEvent: _onKeyEvent);
@@ -312,9 +282,7 @@ class _CodeFieldState extends State<CodeField> {
     widget.controller.addListener(_onTextChanged);
     widget.controller.addListener(_updatePopupOffset);
     widget.controller.popupController.addListener(_onPopupStateChanged);
-    widget.controller.searchController.addListener(
-      _onSearchControllerChange,
-    );
+    widget.controller.searchController.addListener(_onSearchControllerChange);
   }
 
   void rebuild() {
@@ -375,10 +343,7 @@ class _CodeFieldState extends State<CodeField> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: 0,
-              minWidth: minWidth,
-            ),
+            constraints: BoxConstraints(maxHeight: 0, minWidth: minWidth),
             child: Padding(
               padding: const EdgeInsets.only(right: 16),
               child: Text(longestLine, style: textStyle),
@@ -390,9 +355,7 @@ class _CodeFieldState extends State<CodeField> {
     );
 
     return SingleChildScrollView(
-      padding: EdgeInsets.only(
-        right: widget.padding.right,
-      ),
+      padding: EdgeInsets.only(right: widget.padding.right),
       scrollDirection: Axis.horizontal,
       controller: _horizontalCodeScroll,
       child: intrinsic,
@@ -406,7 +369,8 @@ class _CodeFieldState extends State<CodeField> {
 
     final themeData = Theme.of(context);
     final styles = CodeTheme.of(context)?.styles;
-    _backgroundCol = widget.background ??
+    _backgroundCol =
+        widget.background ??
         styles?[rootKey]?.backgroundColor ??
         DefaultStyles.backgroundColor;
 
@@ -450,9 +414,9 @@ class _CodeFieldState extends State<CodeField> {
     );
 
     final editingField = Theme(
-      data: Theme.of(context).copyWith(
-        textSelectionTheme: widget.textSelectionTheme,
-      ),
+      data: Theme.of(
+        context,
+      ).copyWith(textSelectionTheme: widget.textSelectionTheme),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           // Control horizontal scrolling
@@ -482,26 +446,28 @@ class _CodeFieldState extends State<CodeField> {
 
   Widget _buildGutter() {
     final lineNumberSize = textStyle.fontSize;
-    final lineNumberColor = widget.gutterStyle.textStyle?.color ??
+    final lineNumberColor =
+        widget.gutterStyle.textStyle?.color ??
         textStyle.color?.withValues(alpha: .5);
 
-    final lineNumberTextStyle =
-        (widget.gutterStyle.textStyle ?? textStyle).copyWith(
-      color: lineNumberColor,
-      fontFamily: textStyle.fontFamily,
-      fontSize: lineNumberSize,
-      // The gutter's line boxes must be exactly as tall as the code's.
-      // fontSize/fontFamily are already overridden for that reason, but
-      // without height each gutter row falls back to the font's own metrics
-      // and so has a different height than the text line it labels. The two
-      // grids then drift apart by that difference on every line, which is
-      // catastrophic once a few blocks are collapsed.
-      height: textStyle.height,
-    );
+    final lineNumberTextStyle = (widget.gutterStyle.textStyle ?? textStyle)
+        .copyWith(
+          color: lineNumberColor,
+          fontFamily: textStyle.fontFamily,
+          fontSize: lineNumberSize,
+          // The gutter's line boxes must be exactly as tall as the code's.
+          // fontSize/fontFamily are already overridden for that reason, but
+          // without height each gutter row falls back to the font's own metrics
+          // and so has a different height than the text line it labels. The two
+          // grids then drift apart by that difference on every line, which is
+          // catastrophic once a few blocks are collapsed.
+          height: textStyle.height,
+        );
 
     final gutterStyle = widget.gutterStyle.copyWith(
       textStyle: lineNumberTextStyle,
-      errorPopupTextStyle: widget.gutterStyle.errorPopupTextStyle ??
+      errorPopupTextStyle:
+          widget.gutterStyle.errorPopupTextStyle ??
           CodeTheme.of(context)?.styles['root'] ??
           textStyle.copyWith(
             fontSize: DefaultStyles.errorPopupTextSize,
@@ -523,7 +489,8 @@ class _CodeFieldState extends State<CodeField> {
 
     final leftOffset = _getPopupLeftOffset(textPainter);
     final normalTopOffset = _getPopupTopOffset(textPainter, caretHeight);
-    final flippedTopOffset = normalTopOffset -
+    final flippedTopOffset =
+        normalTopOffset -
         (Sizes.autocompletePopupMaxHeight + caretHeight + Sizes.caretPadding);
 
     setState(() {
@@ -619,12 +586,8 @@ class _CodeFieldState extends State<CodeField> {
           child: Container(
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-              border: Border.all(
-                color: borderColor,
-              ),
-              borderRadius: const BorderRadius.all(
-                Radius.circular(5),
-              ),
+              border: Border.all(color: borderColor),
+              borderRadius: const BorderRadius.all(Radius.circular(5)),
             ),
             child: Material(
               child: SearchWidget(

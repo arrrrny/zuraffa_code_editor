@@ -8,9 +8,9 @@ class DefaultLocalAnalyzer extends AbstractAnalyzer {
 
   @override
   Future<AnalysisResult> analyze(Code code) async {
-    final issues = code.invalidBlocks.map((e) => e.issue).toList(
-          growable: false,
-        );
+    final issues = code.invalidBlocks
+        .map((e) => e.issue)
+        .toList(growable: false);
     return AnalysisResult(issues: issues);
   }
 }

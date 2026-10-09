@@ -361,11 +361,7 @@ class _IntExample {
   final TextEditingValue value;
   final int? expected;
 
-  const _IntExample(
-    this.name, {
-    required this.value,
-    required this.expected,
-  });
+  const _IntExample(this.name, {required this.value, required this.expected});
 }
 
 class _StringExample {

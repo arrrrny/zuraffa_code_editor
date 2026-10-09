@@ -30,9 +30,5 @@ class SearchSettings extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-        isCaseSensitive,
-        isRegExp,
-        pattern,
-      ];
+  List<Object?> get props => [isCaseSensitive, isRegExp, pattern];
 }

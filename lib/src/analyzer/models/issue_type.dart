@@ -1,5 +1,1 @@
-enum IssueType {
-  error,
-  warning,
-  info,
-}
+enum IssueType { error, warning, info }

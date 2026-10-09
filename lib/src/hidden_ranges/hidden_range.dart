@@ -15,13 +15,13 @@ class HiddenRange extends NormalizedTextRange with Equatable {
     required this.firstLine,
     required this.lastLine,
     required this.wholeFirstLine,
-  })  : assert(start >= 0, 'Start should be >= 0, $start given'),
-        assert(end > start, 'Range should not be empty, $start-$end given'),
-        assert(
-          lastLine >= firstLine,
-          'lastLine must be >= firstLine, $firstLine-$lastLine given',
-        ),
-        super(start: start, end: end);
+  }) : assert(start >= 0, 'Start should be >= 0, $start given'),
+       assert(end > start, 'Range should not be empty, $start-$end given'),
+       assert(
+         lastLine >= firstLine,
+         'lastLine must be >= firstLine, $firstLine-$lastLine given',
+       ),
+       super(start: start, end: end);
 
   int get length => end - start;
 
@@ -38,11 +38,5 @@ class HiddenRange extends NormalizedTextRange with Equatable {
   }
 
   @override
-  List<Object> get props => [
-        start,
-        end,
-        firstLine,
-        lastLine,
-        wholeFirstLine,
-      ];
+  List<Object> get props => [start, end, firstLine, lastLine, wholeFirstLine];
 }

@@ -22,10 +22,7 @@ bool _isTimerSet = false;
 
 void disableSpellCheck() {
   if (!_isTimerSet) {
-    js.globalContext.callMethod(
-      'eval'.toJS,
-      _jsSetDisableSpellCheckTimer.toJS,
-    );
+    js.globalContext.callMethod('eval'.toJS, _jsSetDisableSpellCheckTimer.toJS);
     _isTimerSet = true;
   }
 }

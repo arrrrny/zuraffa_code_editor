@@ -10,8 +10,9 @@ void main() {
 
     test('inserts at the start of string correctly', () {
       const text = 'Hello World';
-      final selection =
-          TextSelection.fromPosition(const TextPosition(offset: 0));
+      final selection = TextSelection.fromPosition(
+        const TextPosition(offset: 0),
+      );
 
       final result = modifier.updateString(text, selection, editorParams);
 
@@ -22,8 +23,9 @@ void main() {
 
     test('inserts in the middle of string correctly', () {
       const text = 'Hello World';
-      final selection =
-          TextSelection.fromPosition(const TextPosition(offset: 5));
+      final selection = TextSelection.fromPosition(
+        const TextPosition(offset: 5),
+      );
 
       final result = modifier.updateString(text, selection, editorParams);
 
@@ -34,8 +36,9 @@ void main() {
 
     test('inserts at the end of string correctly', () {
       const text = 'Hello World';
-      final selection =
-          TextSelection.fromPosition(const TextPosition(offset: text.length));
+      final selection = TextSelection.fromPosition(
+        const TextPosition(offset: text.length),
+      );
 
       final result = modifier.updateString(text, selection, editorParams);
 
@@ -46,10 +49,7 @@ void main() {
 
     test('inserts in the middle of string with selection correctly', () {
       const text = 'Hello World';
-      const selection = TextSelection(
-        baseOffset: 5,
-        extentOffset: 7,
-      );
+      const selection = TextSelection(baseOffset: 5, extentOffset: 7);
 
       final result = modifier.updateString(text, selection, editorParams);
 
@@ -60,8 +60,9 @@ void main() {
 
     test('inserts at empty string correctly', () {
       const text = '';
-      final selection =
-          TextSelection.fromPosition(const TextPosition(offset: 0));
+      final selection = TextSelection.fromPosition(
+        const TextPosition(offset: 0),
+      );
 
       final result = modifier.updateString(text, selection, editorParams);
 

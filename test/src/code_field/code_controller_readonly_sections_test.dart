@@ -41,55 +41,43 @@ void main() {
       });
 
       final readonly1 = controller.code.lines.lines.map((l) => l.isReadOnly);
-      expect(
-        readonly1,
-        [
-          false,
-          false,
-          true,
-          true,
-          true,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-        ],
-      );
-      expect(
-        controller.readOnlySectionNames,
-        {'section1'},
-      );
+      expect(readonly1, [
+        false,
+        false,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+      ]);
+      expect(controller.readOnlySectionNames, {'section1'});
 
       controller.readOnlySectionNames = {'section2', 'nonexistent2'};
 
       final readonly2 = controller.code.lines.lines.map((l) => l.isReadOnly);
-      expect(
-        readonly2,
-        [
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          true,
-          true,
-          true,
-          false,
-          false,
-        ],
-      );
+      expect(readonly2, [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        false,
+        false,
+      ]);
 
       expect(notifiedCount, 1);
 
-      expect(
-        controller.readOnlySectionNames,
-        {'section2', 'nonexistent2'},
-      );
+      expect(controller.readOnlySectionNames, {'section2', 'nonexistent2'});
     });
   });
 }

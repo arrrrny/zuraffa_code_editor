@@ -7,14 +7,8 @@ class CodeHistoryRecord with Equatable {
   final Code code;
   final TextSelection selection;
 
-  const CodeHistoryRecord({
-    required this.code,
-    required this.selection,
-  });
+  const CodeHistoryRecord({required this.code, required this.selection});
 
   @override
-  List<Object> get props => [
-        code,
-        selection,
-      ];
+  List<Object> get props => [code, selection];
 }

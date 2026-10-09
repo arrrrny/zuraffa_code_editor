@@ -24,8 +24,9 @@ class IndentFoldableBlockParser extends AbstractFoldableBlockParser {
 
   void _parse(List<CodeLine> lines) {
     _linesIndents = _calculateLinesIndents(lines);
-    final significantIndentIndexes =
-        _SignificantIndentIndexes.fromLineIndents(_linesIndents);
+    final significantIndentIndexes = _SignificantIndentIndexes.fromLineIndents(
+      _linesIndents,
+    );
 
     if (significantIndentIndexes == null) {
       return;
@@ -52,9 +53,11 @@ class IndentFoldableBlockParser extends AbstractFoldableBlockParser {
     int lastExistingIndent = _linesIndents[significantIndentIndexes.first]!;
     int lastExistingIndentIndex = significantIndentIndexes.first;
 
-    for (int i = significantIndentIndexes.second;
-        i < _linesIndents.length;
-        i++) {
+    for (
+      int i = significantIndentIndexes.second;
+      i < _linesIndents.length;
+      i++
+    ) {
       final currentLineIndent = _linesIndents[i];
 
       if (_isSeparatorLine(currentLineIndent)) {

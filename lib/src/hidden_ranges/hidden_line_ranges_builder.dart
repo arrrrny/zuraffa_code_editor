@@ -64,7 +64,5 @@ class HiddenLineRangesBuilder {
     );
   }
 
-  const HiddenLineRangesBuilder._({
-    required this.hiddenLineRanges,
-  });
+  const HiddenLineRangesBuilder._({required this.hiddenLineRanges});
 }

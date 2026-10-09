@@ -50,10 +50,14 @@ void main() {
       final controller = createTestController({'whole'});
 
       expect(controller.value.text, _fullVisibleText);
-      expect(
-        controller.code.hiddenLineRanges.visibleLineNumbers.toList(),
-        [0, 1, 2, 3, 4, 5],
-      );
+      expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+      ]);
     });
 
     test('Separate start no end', () {
@@ -64,10 +68,13 @@ void main() {
 $_method
   
 }''');
-      expect(
-        controller.code.hiddenLineRanges.visibleLineNumbers.toList(),
-        [1, 2, 3, 4, 5],
-      );
+      expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
+        1,
+        2,
+        3,
+        4,
+        5,
+      ]);
     });
 
     test('Separate start separate end', () {
@@ -78,10 +85,12 @@ $_method
 $_method
   
 ''');
-      expect(
-        controller.code.hiddenLineRanges.visibleLineNumbers.toList(),
-        [1, 2, 3, 4],
-      );
+      expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
+        1,
+        2,
+        3,
+        4,
+      ]);
     });
 
     test('Separate start trailing end', () {
@@ -91,10 +100,11 @@ $_method
   
 $_method
 ''');
-      expect(
-        controller.code.hiddenLineRanges.visibleLineNumbers.toList(),
-        [1, 2, 3],
-      );
+      expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
+        1,
+        2,
+        3,
+      ]);
     });
 
     test('Trailing start no end', () {
@@ -104,10 +114,12 @@ $_method
 $_method
   
 }''');
-      expect(
-        controller.code.hiddenLineRanges.visibleLineNumbers.toList(),
-        [2, 3, 4, 5],
-      );
+      expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
+        2,
+        3,
+        4,
+        5,
+      ]);
     });
 
     test('Trailing start separate end', () {
@@ -117,10 +129,11 @@ $_method
 $_method
   
 ''');
-      expect(
-        controller.code.hiddenLineRanges.visibleLineNumbers.toList(),
-        [2, 3, 4],
-      );
+      expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
+        2,
+        3,
+        4,
+      ]);
     });
 
     test('Trailing start trailing end', () {
@@ -129,10 +142,10 @@ $_method
       expect(controller.value.text, '''
 $_method
 ''');
-      expect(
-        controller.code.hiddenLineRanges.visibleLineNumbers.toList(),
-        [2, 3],
-      );
+      expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
+        2,
+        3,
+      ]);
     });
 
     test('No start separate end', () {
@@ -144,10 +157,13 @@ class MyClass {
 $_method
   
 ''');
-      expect(
-        controller.code.hiddenLineRanges.visibleLineNumbers.toList(),
-        [0, 1, 2, 3, 4],
-      );
+      expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
+        0,
+        1,
+        2,
+        3,
+        4,
+      ]);
     });
 
     test('No start trailing end', () {
@@ -158,10 +174,12 @@ class MyClass {
   
 $_method
 ''');
-      expect(
-        controller.code.hiddenLineRanges.visibleLineNumbers.toList(),
-        [0, 1, 2, 3],
-      );
+      expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
+        0,
+        1,
+        2,
+        3,
+      ]);
     });
 
     test('Block folding works correctly', () {
@@ -174,10 +192,13 @@ class MyClass {
   void method() {  }
   
 }''');
-      expect(
-        controller.code.hiddenLineRanges.visibleLineNumbers.toList(),
-        [0, 1, 2, 4, 5],
-      );
+      expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
+        0,
+        1,
+        2,
+        4,
+        5,
+      ]);
     });
 
     test('Code containing visible sections is readonly', () {
@@ -186,8 +207,9 @@ class MyClass {
       final newLineIndexes = '\n'.allMatches(_fullVisibleText).toList();
       for (int i = 0; i < newLineIndexes.length; i++) {
         final index = newLineIndexes[i].start;
-        // ignore: prefer_interpolation_to_compose_strings
-        final newText = _fullVisibleText.substring(0, index) +
+        final newText =
+            // ignore: prefer_interpolation_to_compose_strings
+            _fullVisibleText.substring(0, index) +
             'some text' +
             _fullVisibleText.substring(index);
         controller.value = TextEditingValue(
@@ -196,25 +218,26 @@ class MyClass {
         );
 
         expect(controller.value.text, _fullVisibleText);
-        expect(
-          controller.code.hiddenLineRanges.visibleLineNumbers.toList(),
-          [0, 1, 2, 3, 4, 5],
-        );
+        expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+        ]);
       }
     });
 
     test('Code folding works with changing visible sections', () {
-      final controller = createController(
-        '''
+      final controller = createController('''
 void method1() {// [START method1]
   int a;
 }// [END method1]
 
 void method2() {// [START method2]
   int a;
-}// [END method2]''',
-        language: dart,
-      );
+}// [END method2]''', language: dart);
 
       controller.foldAt(4);
       controller.visibleSectionNames = {'method2'};

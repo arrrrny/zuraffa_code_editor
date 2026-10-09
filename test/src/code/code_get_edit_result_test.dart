@@ -247,11 +247,7 @@ public class MyClass {
         example.visibleSelectionBefore,
         example.visibleValueAfter,
       );
-      expect(
-        result,
-        example.expected,
-        reason: example.name,
-      );
+      expect(result, example.expected, reason: example.name);
     }
   });
 }

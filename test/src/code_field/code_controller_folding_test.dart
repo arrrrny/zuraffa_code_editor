@@ -87,9 +87,7 @@ int c;
         controller.unfoldAt(1);
         final unfoldedHtml = controller.code.visibleHighlighted?.toHtml();
 
-        expect(
-          foldedHtml,
-          '''
+        expect(foldedHtml, '''
 <span class="hljs-keyword">private</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span> </span>{
   <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">method1</span><span class="hljs-params">()</span> </span>{<span class="hljs-keyword"></span><span class="hljs-keyword"></span><span class="hljs-comment"></span><span class="hljs-keyword"></span><span class="hljs-comment"></span>  }
 
@@ -97,8 +95,7 @@ int c;
     <span class="hljs-keyword">return</span>;
   }<span class="hljs-comment"></span>
 }
-''',
-        );
+''');
         expect(unfoldedHtml, originalHtml);
       });
 
@@ -135,9 +132,7 @@ int c;
 
         controller.foldCommentAtLineZero();
 
-        expect(
-          controller.text,
-          '''
+        expect(controller.text, '''
 // comment1
 
 package mypackage;
@@ -145,8 +140,7 @@ import java.util.Arrays;
 
 {
 }
-''',
-        );
+''');
       });
 
       test('folds multiline comments at line 0', () {
@@ -156,17 +150,11 @@ import java.util.Arrays;
 
         controller.foldCommentAtLineZero();
 
-        expect(
-          controller.text,
-          '/*\n' + CommentImportSnippet.visible,
-        );
+        expect(controller.text, '/*\n' + CommentImportSnippet.visible);
       });
 
       test('does not fold if the comment is not on line 0', () {
-        const prefixes = [
-          '\n',
-          '{\n}\n',
-        ];
+        const prefixes = ['\n', '{\n}\n'];
 
         for (final prefix in prefixes) {
           final controller = createController(
@@ -184,11 +172,7 @@ import java.util.Arrays;
       });
 
       test('does nothing if no foldable comment blocks', () {
-        const texts = [
-          '',
-          'int n;\nint m;',
-          '{\n}\n',
-        ];
+        const texts = ['', 'int n;\nint m;', '{\n}\n'];
 
         for (final text in texts) {
           final controller = createController(text);
@@ -206,9 +190,7 @@ import java.util.Arrays;
 
         controller.foldImports();
 
-        expect(
-          controller.text,
-          '''
+        expect(controller.text, '''
 // comment1
 ///comment2
 
@@ -216,17 +198,11 @@ package mypackage;
 
 {
 }
-''',
-        );
+''');
       });
 
       test('does nothing if no import blocks', () {
-        const texts = [
-          '',
-          'int n;\nint m;',
-          '{\n}\n',
-          '//\n//\n',
-        ];
+        const texts = ['', 'int n;\nint m;', '{\n}\n', '//\n//\n'];
 
         for (final text in texts) {
           final controller = createController(text);
@@ -240,10 +216,7 @@ package mypackage;
 
     group('foldOutsideSections.', () {
       test('No blocks -> Do nothing', () {
-        const texts = [
-          '',
-          'int n;',
-        ];
+        const texts = ['', 'int n;'];
 
         const sectionLists = <List<String>>[
           [],
@@ -281,10 +254,7 @@ package mypackage;
 
         controller.foldOutsideSections([]);
 
-        expect(
-          controller.code.visibleText,
-          expected,
-        );
+        expect(controller.code.visibleText, expected);
       });
 
       test('Folds specific sections', () {
@@ -363,14 +333,10 @@ package mypackage;
           'nonexistent',
         ]);
 
-        expect(
-          controller.code.visibleText,
-          foldedVisible,
-        );
+        expect(controller.code.visibleText, foldedVisible);
       });
 
-      test(
-          'When the last foldable block is folded '
+      test('When the last foldable block is folded '
           'SHOULD NOT show characters other than `\n`', () {
         const initialText = '''
 aaaa:

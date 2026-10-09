@@ -80,7 +80,4 @@ class PopupController extends ChangeNotifier {
 }
 
 /// Possible directions of completions list navigation
-enum ScrollDirection {
-  up,
-  down,
-}
+enum ScrollDirection { up, down }

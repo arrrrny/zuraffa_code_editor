@@ -20,7 +20,8 @@ void main() {
           'readonly': [false, true, true],
         },
         {
-          'text': '''
+          'text':
+              '''
             readonly
             readonly //readonly
             readonly // a readonly b'''
@@ -40,10 +41,7 @@ void main() {
       ];
 
       for (final data in dataSets) {
-        final code = Code(
-          text: data['text']! as String,
-          language: _language,
-        );
+        final code = Code(text: data['text']! as String, language: _language);
 
         final readonly = data['readonly']! as List<bool>;
         for (int i = code.lines.lines.length; --i >= 0;) {
@@ -56,16 +54,13 @@ void main() {
       }
     });
 
-    test(
-      'Does not parse an unsupported language',
-      () {
-        const textWithReadonly = 'end of line // readonly';
+    test('Does not parse an unsupported language', () {
+      const textWithReadonly = 'end of line // readonly';
 
-        final code = Code(text: textWithReadonly, language: angelscript);
+      final code = Code(text: textWithReadonly, language: angelscript);
 
-        expect(code.lines.lines.first.isReadOnly, false);
-      },
-    );
+      expect(code.lines.lines.first.isReadOnly, false);
+    });
 
     test('Lines in read-only sections are read-only', () {
       const text = '''
@@ -99,10 +94,7 @@ public class MyClass {
         language: java,
       );
 
-      expect(
-        code.lines.lines.map((line) => line.isReadOnly),
-        expected,
-      );
+      expect(code.lines.lines.map((line) => line.isReadOnly), expected);
     });
 
     test('Lines in read-only sections are read-only for JS/TS Language', () {

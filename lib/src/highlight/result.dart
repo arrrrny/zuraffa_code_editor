@@ -42,9 +42,7 @@ extension MyResult on Result {
   }
 
   Result splitLines() {
-    return copyWith(
-      nodes: nodes?.splitLines(),
-    );
+    return copyWith(nodes: nodes?.splitLines());
   }
 
   Result copyWith({

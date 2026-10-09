@@ -7,9 +7,7 @@ class PlainCaseSensitiveSearchStrategy extends SearchStrategy {
   @override
   SearchResult searchPlain(String text, {required SearchSettings settings}) {
     final matches = settings.pattern
-        .allMatches(
-          text,
-        )
+        .allMatches(text)
         .map((match) => SearchMatch(start: match.start, end: match.end))
         .toList(growable: false);
 

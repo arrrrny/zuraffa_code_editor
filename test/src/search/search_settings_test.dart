@@ -8,8 +8,9 @@ import '../common/create_app.dart';
 
 void main() {
   group('SearchSettingsController', () {
-    testWidgets('Notification changes search result on CodeController',
-        (wt) async {
+    testWidgets('Notification changes search result on CodeController', (
+      wt,
+    ) async {
       const text = 'AaBb';
       const examples = [
         //
@@ -21,9 +22,7 @@ void main() {
             pattern: 'a',
           ),
           expectedResult: SearchResult(
-            matches: [
-              SearchMatch(start: 1, end: 2),
-            ],
+            matches: [SearchMatch(start: 1, end: 2)],
           ),
         ),
 
@@ -77,10 +76,7 @@ void main() {
     test('toggleCaseSensitivity()', () {
       final settingsController = SearchSettingsController();
 
-      expect(
-        settingsController.value,
-        SearchSettings.empty,
-      );
+      expect(settingsController.value, SearchSettings.empty);
 
       settingsController.toggleCaseSensitivity();
 
@@ -95,19 +91,13 @@ void main() {
 
       settingsController.toggleCaseSensitivity();
 
-      expect(
-        settingsController.value,
-        SearchSettings.empty,
-      );
+      expect(settingsController.value, SearchSettings.empty);
     });
 
     test('toggleIsRegExp()', () {
       final settingsController = SearchSettingsController();
 
-      expect(
-        settingsController.value,
-        SearchSettings.empty,
-      );
+      expect(settingsController.value, SearchSettings.empty);
 
       settingsController.toggleIsRegExp();
 
@@ -122,10 +112,7 @@ void main() {
 
       settingsController.toggleIsRegExp();
 
-      expect(
-        settingsController.value,
-        SearchSettings.empty,
-      );
+      expect(settingsController.value, SearchSettings.empty);
     });
   });
 }

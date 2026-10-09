@@ -28,14 +28,8 @@ aaaa
 aaaa
 aaaa
 ''',
-          initialSelection: TextSelection(
-            baseOffset: -1,
-            extentOffset: -1,
-          ),
-          expectedSelection: TextSelection(
-            baseOffset: -1,
-            extentOffset: -1,
-          ),
+          initialSelection: TextSelection(baseOffset: -1, extentOffset: -1),
+          expectedSelection: TextSelection(baseOffset: -1, extentOffset: -1),
         ),
         const _Example(
           'WHEN at the start of the first line '
@@ -55,14 +49,8 @@ aaaa
 aaaa
 aaaa
 ''',
-          initialSelection: TextSelection(
-            baseOffset: 0,
-            extentOffset: 0,
-          ),
-          expectedSelection: TextSelection(
-            baseOffset: 0,
-            extentOffset: 5,
-          ),
+          initialSelection: TextSelection(baseOffset: 0, extentOffset: 0),
+          expectedSelection: TextSelection(baseOffset: 0, extentOffset: 5),
         ),
         const _Example(
           'WHEN at the start of a non-first line '
@@ -82,14 +70,8 @@ aaaa
   aaaa
 aaaa
 ''',
-          initialSelection: TextSelection(
-            baseOffset: 7,
-            extentOffset: 7,
-          ),
-          expectedSelection: TextSelection(
-            baseOffset: 7,
-            extentOffset: 14,
-          ),
+          initialSelection: TextSelection(baseOffset: 7, extentOffset: 7),
+          expectedSelection: TextSelection(baseOffset: 7, extentOffset: 14),
         ),
         _Example(
           'WHEN at the middle of a line SHOULD modify that line',
@@ -108,14 +90,8 @@ aaaa
 aaaa
 aaaa
 ''',
-          initialSelection: TextSelection(
-            baseOffset: 4,
-            extentOffset: 4,
-          ),
-          expectedSelection: TextSelection(
-            baseOffset: 0,
-            extentOffset: 5,
-          ),
+          initialSelection: TextSelection(baseOffset: 4, extentOffset: 4),
+          expectedSelection: TextSelection(baseOffset: 0, extentOffset: 5),
         ),
         const _Example(
           'WHEN indented less than a full indent '
@@ -135,14 +111,8 @@ aaaa
 aaaa
 aaaa
 ''',
-          initialSelection: TextSelection(
-            baseOffset: 8,
-            extentOffset: 8,
-          ),
-          expectedSelection: TextSelection(
-            baseOffset: 7,
-            extentOffset: 12,
-          ),
+          initialSelection: TextSelection(baseOffset: 8, extentOffset: 8),
+          expectedSelection: TextSelection(baseOffset: 7, extentOffset: 12),
         ),
         _Example(
           'WHEN at the end of a line '
@@ -162,14 +132,8 @@ aaaa
 aaaa
 aaaa
 ''',
-          initialSelection: TextSelection(
-            baseOffset: 6,
-            extentOffset: 6,
-          ),
-          expectedSelection: TextSelection(
-            baseOffset: 0,
-            extentOffset: 5,
-          ),
+          initialSelection: TextSelection(baseOffset: 6, extentOffset: 6),
+          expectedSelection: TextSelection(baseOffset: 0, extentOffset: 5),
         ),
       ];
 
@@ -199,10 +163,7 @@ aaaa
           example.expectedSelection,
           reason: example.name,
         );
-        expect(
-          controller.code,
-          controller.historyController.lastCode,
-        );
+        expect(controller.code, controller.historyController.lastCode);
         expect(
           controller.value.selection,
           controller.historyController.lastSelection,
@@ -227,14 +188,8 @@ AAAA''',
 AAAA
     AAAA
 AAAA''',
-          initialSelection: TextSelection(
-            baseOffset: 0,
-            extentOffset: 24,
-          ),
-          expectedSelection: TextSelection(
-            baseOffset: 0,
-            extentOffset: 18,
-          ),
+          initialSelection: TextSelection(baseOffset: 0, extentOffset: 24),
+          expectedSelection: TextSelection(baseOffset: 0, extentOffset: 18),
         ),
         _Example(
           'WHEN unindented lines are selected '
@@ -254,14 +209,8 @@ AAAA
     AAAA
 AAAA
 ''',
-          initialSelection: TextSelection(
-            baseOffset: 0,
-            extentOffset: 22,
-          ),
-          expectedSelection: TextSelection(
-            baseOffset: 0,
-            extentOffset: 19,
-          ),
+          initialSelection: TextSelection(baseOffset: 0, extentOffset: 22),
+          expectedSelection: TextSelection(baseOffset: 0, extentOffset: 19),
         ),
         _Example(
           'Outdent SHOULD NOT unfold folded comment at line 0 '
@@ -296,9 +245,7 @@ a;
       ];
 
       for (final example in examples) {
-        final controller = CodeController(
-          language: java,
-        );
+        final controller = CodeController(language: java);
         controller.text = example.initialFullText;
         controller.foldCommentAtLineZero();
         controller.foldImports();
@@ -325,10 +272,7 @@ a;
           example.expectedSelection,
           reason: example.name,
         );
-        expect(
-          controller.code,
-          controller.historyController.lastCode,
-        );
+        expect(controller.code, controller.historyController.lastCode);
         expect(
           controller.value.selection,
           controller.historyController.lastSelection,

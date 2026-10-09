@@ -15,16 +15,16 @@ class LineNumberingBreakpoint with Equatable {
     required this.full,
     required this.visible,
     required this.spreadBefore,
-  })  : assert(
-          full >= visible,
-          'fullLineIndex must be >= visibleLineIndex, '
-          'given $full and $visible',
-        ),
-        assert(
-          spreadBefore < full - visible,
-          'A breakpoint must increase the previous spread. '
-          'Old=$spreadBefore, New=($full - $visible)',
-        );
+  }) : assert(
+         full >= visible,
+         'fullLineIndex must be >= visibleLineIndex, '
+         'given $full and $visible',
+       ),
+       assert(
+         spreadBefore < full - visible,
+         'A breakpoint must increase the previous spread. '
+         'Old=$spreadBefore, New=($full - $visible)',
+       );
 
   int get spread => full - visible;
 
@@ -66,13 +66,10 @@ class LineNumberingBreakpoint with Equatable {
   }
 
   @override
-  String toString() => 'LineNumberingBreakpoint: $full -> $visible '
+  String toString() =>
+      'LineNumberingBreakpoint: $full -> $visible '
       '(spreadBefore = $spreadBefore)';
 
   @override
-  List<Object> get props => [
-        full,
-        visible,
-        spreadBefore,
-      ];
+  List<Object> get props => [full, visible, spreadBefore];
 }

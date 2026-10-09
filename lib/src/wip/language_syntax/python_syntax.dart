@@ -26,8 +26,8 @@ Map<int, String> findPythonErrorTabs(String text) {
       do {
         if (lines[i].contains(RegExp("\"\"\".*\"\"\""))) break;
         i++;
-      } while (
-          (!lines[i].contains(RegExp("\"\"\""))) && (i < lines.length - 1));
+      } while ((!lines[i].contains(RegExp("\"\"\""))) &&
+          (i < lines.length - 1));
     }
 
     int lineLength = lines[i].length;
