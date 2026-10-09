@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../code/code.dart';
 
-class CodeHistoryRecord with EquatableMixin {
+class CodeHistoryRecord with Equatable {
   final Code code;
   final TextSelection selection;
 

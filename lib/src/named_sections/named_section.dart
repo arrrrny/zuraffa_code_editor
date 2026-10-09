@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../util/inclusive_range.dart';
 
-class NamedSection extends InclusiveRange with EquatableMixin {
+class NamedSection extends InclusiveRange with Equatable {
   /// Zero-based index of the line with the starting tag.
   final int firstLine;
 

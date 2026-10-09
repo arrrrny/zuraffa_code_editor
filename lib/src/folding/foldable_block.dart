@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 import '../util/inclusive_range.dart';
 import 'foldable_block_type.dart';
 
-class FoldableBlock extends InclusiveRange with EquatableMixin {
+class FoldableBlock extends InclusiveRange with Equatable {
   final int firstLine;
   final int lastLine;
   final FoldableBlockType type;
@@ -35,26 +35,11 @@ class FoldableBlock extends InclusiveRange with EquatableMixin {
 
   int get lineCount => lastLine - firstLine + 1;
 
-  bool get isComment {
-    // ignore: missing_enum_constant_in_switch
-    switch (type) {
-      case FoldableBlockType.singleLineComment:
-      case FoldableBlockType.multilineComment:
-        return true;
-    }
+  bool get isComment =>
+      type == FoldableBlockType.singleLineComment ||
+      type == FoldableBlockType.multilineComment;
 
-    return false;
-  }
-
-  bool get isImports {
-    // ignore: missing_enum_constant_in_switch
-    switch (type) {
-      case FoldableBlockType.imports:
-        return true;
-    }
-
-    return false;
-  }
+  bool get isImports => type == FoldableBlockType.imports;
 
   bool isSameLines(FoldableBlock other) {
     return firstLine == other.firstLine && lastLine == other.lastLine;

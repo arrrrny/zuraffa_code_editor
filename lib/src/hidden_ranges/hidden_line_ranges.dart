@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'line_numbering_breakpoint.dart';
 
-class HiddenLineRanges with EquatableMixin {
+class HiddenLineRanges with Equatable {
   final List<LineNumberingBreakpoint> breakpoints;
   final int fullLineCount;
 
