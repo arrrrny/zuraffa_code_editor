@@ -37,7 +37,7 @@ class CodeLine {
         text: text ?? this.text,
         textRange: textRange ?? this.textRange,
         isReadOnly: isReadOnly ?? this.isReadOnly,
-        indent: text == null ? 0 : _calculateIndent(text),
+        indent: text == null ? indent : _calculateIndent(text),
       );
 
   @override
