@@ -55,6 +55,29 @@ Empirically, the *unified* rule (`cutSelection` for both) breaks exactly the
 got `(25, 26)`) — that test is the reason for the guard, and it is not touched
 here.
 
+## Post-review adjustment
+
+The diff above shipped in `40925fc`. Review noted that the collapsed arm and
+the unfold arm had identical bodies, so the conditional collapsed to two arms:
+
+```diff
+       if (newValue.text != _code.visibleText) {
+-        if (newValue.text.length > _code.visibleText.length) {
++        if (!newValue.selection.isCollapsed &&
++            newValue.text.length > _code.visibleText.length) {
+           // Manually typed in a text that has become a hidden range.
+           newValue = newValue.replacedText(_code.visibleText);
+         } else {
+-          // Some folded block is unfolded.
++          // A paste, or a folded block is unfolded: the framework's caret
++          // offset is meaningful in the full text — keep it.
+           newValue = TextEditingValue(
+             text: _code.visibleText,
+             selection: _code.hiddenRanges.cutSelection(selectionSnapshot),
+```
+
+Behaviour identical to the three-arm shape; full suite still green.
+
 ## Verification
 
 See `tdd/verification.md`.

@@ -87,7 +87,7 @@ where the old collapse heuristic is correct. Splitting on
 `newValue.selection.isCollapsed` therefore fixes the paste without touching
 either pinned behaviour — confirmed empirically: the unified
 `cutSelection` rule breaks exactly the "deleting 2nd identical folded block"
-test, the narrowed rule keeps all 366 tests green.
+test, the narrowed rule keeps all 365 tests green.
 
 ## Acceptance criteria
 

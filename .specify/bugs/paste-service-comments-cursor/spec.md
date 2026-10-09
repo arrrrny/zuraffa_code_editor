@@ -43,5 +43,5 @@ start.
 ## Definition of done
 
 - RED → GREEN on the caret test; the two guards stay green on master.
-- Full suite 366/366, `dart analyze` clean, `dart format` clean.
+- Full suite 365/365, `dart analyze` clean, `dart format` clean.
 - Artifacts under `.specify/bugs/paste-service-comments-cursor/` and `tdd/`.

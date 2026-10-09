@@ -16,7 +16,7 @@ dart format --output=none lib test
 | RED (test file vs. unmodified master) | `00:00 +2 -1: Some tests failed.` — caret 60, expected 92 |
 | GREEN (unified `cutSelection` rule) | caret test green, but `code_controller_folding_editing_test.dart` "…2nd identical folded block" **red** (expected `collapsed(13)`, got `(25, 26)`) — rejected |
 | GREEN (narrowed `isCollapsed` rule) | `00:00 +3: All tests passed!` |
-| Full suite (on master `8fc9fc6` + fix) | `00:00 +366: All tests passed!` |
+| Full suite (on master `8fc9fc6` + fix) | `00:00 +365: All tests passed!` |
 | `dart analyze lib test` | `No issues found!` |
 | `dart format --output=none lib test` | `Formatted 204 files (0 changed)` |
 
@@ -35,15 +35,17 @@ Three mutations, each verified to break the right test:
 ## Production-code diff
 
 ```
-lib/src/code_field/code_controller.dart | 6 ++++-
+lib/src/code_field/code_controller.dart | 6 ++++--
 ```
 
-One new branch (6 lines) inside an existing conditional. No new public API, no
+The `length >` guard additionally requires a **collapsed** selection; a
+non-collapsed selection keeps `replacedText`. Post-review, the two identical
+round-trip arms were collapsed into a single `else`. No new public API, no
 new dependency, no change to `recoverSelection` / `cutSelection` /
 `replacedText`.
 
 ## Coverage
 
-New tests are the first direct coverage of the
-`newValue.selection.isCollapsed && length >` path of `CodeController`'s `value`
-setter. Bug fix, so the coverage gate is **not** bumped by this PR.
+New tests are the first direct coverage of the collapsed-caret round-trip path
+of `CodeController`'s `value` setter. Bug fix, so the coverage gate is **not**
+bumped by this PR.

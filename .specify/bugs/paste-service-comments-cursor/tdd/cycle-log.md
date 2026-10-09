@@ -62,7 +62,7 @@ if (newValue.selection.isCollapsed &&
 
 ```
 test/src/code_field/code_controller_paste_hidden_test.dart → 3/3
-flutter test → 366/366
+flutter test → 365/365
 dart analyze lib test → No issues found!
 dart format → clean
 ```
@@ -73,6 +73,10 @@ dart format → clean
   into the branch shape above. Considered hoisting it above the `if`, but the
   three branches assign different selections, so the current shape is the
   clearest.
+- Post-review: the first and third arms had identical bodies, so the
+  conditional collapsed to two arms — `!isCollapsed && length >` →
+  `replacedText`, else → the round trip. Behaviour identical; full suite
+  still green.
 - No comment added inside `lib/` beyond the branch condition itself — the two
   existing comments already say what their branch does, and the condition is
   self-describing. (The reasoning lives in `fix.md` / `assessment.md`, where a
