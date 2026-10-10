@@ -35,9 +35,9 @@ nothing, which reads as a broken public API.
 
 ## Acceptance criteria
 
-- [ ] Root cause identified (is the flag forwarded to the underlying `TextField`/`EditableText`?)
-- [ ] Either wrapping works with `wrap: true`, or the parameter is documented/honoured consistently
-- [ ] A regression test pins the resulting behavior
+- [x] Root cause identified (is the flag forwarded to the underlying `TextField`/`EditableText`?)
+- [x] Either wrapping works with `wrap: true`, or the parameter is documented/honoured consistently
+- [x] A regression test pins the resulting behavior
 
 ## Comments
 

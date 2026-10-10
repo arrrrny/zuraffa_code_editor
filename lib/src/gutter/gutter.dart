@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../code_field/code_controller.dart';
 import '../line_numbers/gutter_style.dart';
+import '../sizes.dart';
 import 'error.dart';
 import 'fold_toggle.dart';
 
@@ -18,16 +19,26 @@ class GutterWidget extends StatelessWidget {
     required this.codeController,
     required this.style,
     required this.scrollController,
+    this.rowHeights,
   });
 
   final CodeController codeController;
   final GutterStyle style;
   final ScrollController? scrollController;
 
+  /// Rendered height of every visible row, indexed by row (not by line).
+  ///
+  /// Null when the editor does not wrap: there every row is exactly one text
+  /// line high, which the shared text style already pins. When the editor
+  /// wraps, a logical line occupies several visual rows, so the gutter rows
+  /// must follow or the gutter's scroll extent no longer matches the code's
+  /// and the numbers drift off their lines.
+  final List<double>? rowHeights;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: codeFieldVerticalPadding),
       child: Padding(
         // User escape hatch for fine gutter alignment: applied outside the
         // columns so the whole number/error/folding grid shifts by exactly
@@ -59,10 +70,13 @@ class GutterWidget extends StatelessWidget {
 
     final tableRows = List.generate(
       code.hiddenLineRanges.visibleLineNumbers.length,
-      // ignore: prefer_const_constructors
       (i) => TableRow(
         // ignore: prefer_const_literals_to_create_immutables
-        children: [const SizedBox(), const SizedBox(), const SizedBox()],
+        children: [
+          _sized(const SizedBox(), i),
+          _sized(const SizedBox(), i),
+          _sized(const SizedBox(), i),
+        ],
       ),
     );
 
@@ -100,10 +114,13 @@ class GutterWidget extends StatelessWidget {
         continue;
       }
 
-      tableRows[lineIndex].children[_lineNumberColumn] = Text(
-        style.showLineNumbers ? '${i + 1}' : ' ',
-        style: style.textStyle,
-        textAlign: style.textAlign,
+      tableRows[lineIndex].children[_lineNumberColumn] = _sized(
+        Text(
+          style.showLineNumbers ? '${i + 1}' : ' ',
+          style: style.textStyle,
+          textAlign: style.textAlign,
+        ),
+        lineIndex,
       );
     }
   }
@@ -118,10 +135,13 @@ class GutterWidget extends StatelessWidget {
       if (lineIndex == null || lineIndex >= tableRows.length) {
         continue;
       }
-      tableRows[lineIndex].children[_issueColumn] = GutterErrorWidget(
-        issue,
-        style.errorPopupTextStyle ??
-            (throw Exception('Error popup style should never be null')),
+      tableRows[lineIndex].children[_issueColumn] = _sized(
+        GutterErrorWidget(
+          issue,
+          style.errorPopupTextStyle ??
+              (throw Exception('Error popup style should never be null')),
+        ),
+        lineIndex,
       );
     }
   }
@@ -137,12 +157,15 @@ class GutterWidget extends StatelessWidget {
 
       final isFolded = code.foldedBlocks.contains(block);
 
-      tableRows[lineIndex].children[_foldingColumn] = FoldToggle(
-        color: style.textStyle?.color,
-        isFolded: isFolded,
-        onTap: isFolded
-            ? () => codeController.unfoldAt(block.firstLine)
-            : () => codeController.foldAt(block.firstLine),
+      tableRows[lineIndex].children[_foldingColumn] = _sized(
+        FoldToggle(
+          color: style.textStyle?.color,
+          isFolded: isFolded,
+          onTap: isFolded
+              ? () => codeController.unfoldAt(block.firstLine)
+              : () => codeController.foldAt(block.firstLine),
+        ),
+        lineIndex,
       );
     }
 
@@ -154,15 +177,30 @@ class GutterWidget extends StatelessWidget {
         continue;
       }
 
-      tableRows[lineIndex].children[_foldingColumn] = FoldToggle(
-        color: style.textStyle?.color,
-        isFolded: true,
-        onTap: () => codeController.unfoldAt(block.firstLine),
+      tableRows[lineIndex].children[_foldingColumn] = _sized(
+        FoldToggle(
+          color: style.textStyle?.color,
+          isFolded: true,
+          onTap: () => codeController.unfoldAt(block.firstLine),
+        ),
+        lineIndex,
       );
     }
   }
 
   int? _lineIndexToTableRowIndex(int line) {
     return codeController.code.hiddenLineRanges.cutLineIndexIfVisible(line);
+  }
+
+  /// Pins [child]'s row to the height its code line renders at.
+  ///
+  /// A no-op unless wrapping row heights were handed in, so the unwrapped
+  /// layout — and every snapshot of it in the tests — is untouched.
+  Widget _sized(Widget child, int rowIndex) {
+    final height = rowHeights?.elementAtOrNull(rowIndex);
+    if (height == null) {
+      return child;
+    }
+    return SizedBox(height: height, width: double.infinity, child: child);
   }
 }

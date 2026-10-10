@@ -101,6 +101,13 @@ final _shortcutsIgnoredWhileComposing = <ShortcutActivator, Intent>{
   LogicalKeySet(LogicalKeyboardKey.tab): const TabKeyIntent(),
 };
 
+/// The vertical insets both the editor's `TextField` (`contentPadding`, set
+/// below) and the gutter's outer `Padding` carry — two edges of
+/// [codeFieldVerticalPadding]. Reading both paddings from that one constant
+/// keeps them from drifting apart, which would leave the gutter comparison in
+/// `_CodeFieldState._gutterRowExcess` unable to ever match.
+const _contentInsets = 2 * codeFieldVerticalPadding;
+
 class CodeField extends StatefulWidget {
   /// {@macro flutter.widgets.textField.minLines}
   final int? minLines;
@@ -261,6 +268,22 @@ class _CodeFieldState extends State<CodeField> {
   final _editorKey = GlobalKey();
   Offset? _editorOffset;
 
+  /// Width the editor's text is laid out at, taken from its own
+  /// `LayoutBuilder`. Only used to measure wrapped gutter rows.
+  double? _editorTextWidth;
+
+  /// The last wrapped-row measurement and the inputs it came from.
+  ///
+  /// Measuring the whole document is the costly half of the wrap path (one
+  /// `TextPainter` per line, up to nine times with the calibration) and
+  /// `_buildGutter` asks for it on every `build()`. The rows are a pure
+  /// function of the controller's text and the measured width, so a rebuild
+  /// that changes neither — every `setState` except a keystroke — reuses the
+  /// cached list instead of re-measuring the file.
+  String? _rowHeightsForText;
+  double? _rowHeightsForWidth;
+  List<double>? _cachedRowHeights;
+
   @override
   void initState() {
     super.initState();
@@ -369,11 +392,15 @@ class _CodeFieldState extends State<CodeField> {
       buf.add((k + 1).toString());
     }
 
-    // Find longest line
-    longestLine = '';
-    widget.controller.text.split('\n').forEach((line) {
-      if (line.length > longestLine.length) longestLine = line;
-    });
+    // Find longest line. Only the unwrapped path sizes the field to it, so
+    // skip the scan — a split of the whole document on every keystroke — when
+    // wrapping, where `_wrapInScrollView` never reads it.
+    if (!widget.wrap) {
+      longestLine = '';
+      widget.controller.text.split('\n').forEach((line) {
+        if (line.length > longestLine.length) longestLine = line;
+      });
+    }
 
     if (_isEditorBoxLaidOut) {
       final box = _editorKey.currentContext!.findRenderObject() as RenderBox;
@@ -398,6 +425,21 @@ class _CodeFieldState extends State<CodeField> {
     double minWidth,
     double maxHeight,
   ) {
+    if (widget.wrap) {
+      // Soft wrapping needs the field to be width-bounded: an `IntrinsicWidth`
+      // (below) sizes the field to its longest line instead, so the text never
+      // reflows and just scrolls horizontally, whatever the flag says.
+      return Padding(
+        padding: EdgeInsets.only(right: widget.padding.right),
+        child: widget.expands
+            ? codeField
+            : ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: maxHeight),
+                child: codeField,
+              ),
+      );
+    }
+
     final intrinsic = IntrinsicWidth(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -484,7 +526,9 @@ class _CodeFieldState extends State<CodeField> {
       scrollController: _codeScroll,
       decoration: const InputDecoration(
         isCollapsed: true,
-        contentPadding: EdgeInsets.symmetric(vertical: 16),
+        contentPadding: EdgeInsets.symmetric(
+          vertical: codeFieldVerticalPadding,
+        ),
         disabledBorder: InputBorder.none,
         border: InputBorder.none,
         focusedBorder: InputBorder.none,
@@ -503,6 +547,20 @@ class _CodeFieldState extends State<CodeField> {
       ).copyWith(textSelectionTheme: widget.textSelectionTheme),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
+          // The gutter is laid out before the editor in the same build pass,
+          // so it can only see a width measured in an earlier frame. Keep the
+          // measured one and rebuild after this frame so the gutter's wrapped
+          // rows follow the field's real width.
+          final textWidth = constraints.maxWidth - widget.padding.right;
+          if (widget.wrap && textWidth > 0 && textWidth != _editorTextWidth) {
+            _editorTextWidth = textWidth;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted && textWidth == _editorTextWidth) {
+                setState(() {});
+              }
+            });
+          }
+
           // Control horizontal scrolling
           return _wrapInScrollView(
             codeField,
@@ -577,7 +635,168 @@ class _CodeFieldState extends State<CodeField> {
       codeController: widget.controller,
       style: gutterStyle,
       scrollController: _numberScroll,
+      rowHeights: _wrappedRowHeights(textStyle),
     );
+  }
+
+  /// Height each visible code line renders at, or null when the editor does
+  /// not wrap (where every row is one line high and the shared style already
+  /// pins it).
+  ///
+  /// Wrapping is the one case the gutter has to be told about: a wrapped
+  /// logical line occupies several visual rows, so with the rows left at
+  /// one line high the gutter's scroll extent stops matching the code's and
+  /// the numbers drift off their lines. The width comes from the editor's own
+  /// `LayoutBuilder`, so the measurement mirrors the field's layout.
+  /// The result is memoised on (controller text, width) — see
+  /// [_rowHeightsForText] — because this runs from `build()` and re-measuring
+  /// every line of the file on every rebuild is the wrap path's dominant cost.
+  List<double>? _wrappedRowHeights(TextStyle codeTextStyle) {
+    final textWidth = _editorTextWidth;
+    if (!widget.wrap || textWidth == null) {
+      return null;
+    }
+
+    final text = widget.controller.text;
+    if (_rowHeightsForText == text && _rowHeightsForWidth == textWidth) {
+      return _cachedRowHeights;
+    }
+
+    final rows = _measureWrappedRows(codeTextStyle, textWidth);
+    final code = _codePosition;
+    if (code == null || !code.hasContentDimensions) {
+      // The editor has no measurable extent yet (mid-frame, or its very first
+      // layout): return the plain measurement but leave the cache unset, so
+      // the calibration still gets its chance on the following build rather
+      // than being frozen out of the first frame's result.
+      return rows;
+    }
+
+    var best = rows;
+    final excess = _gutterRowExcess(rows);
+
+    if (excess.abs() >= 0.5) {
+      // The editor reserves a few logical pixels of its own insets that the
+      // `LayoutBuilder` width knows nothing about, so the measured rows can
+      // fall either side of the field's real wrapping and the two scroll views
+      // disagree about how long the content is. Search the adjacent widths —
+      // the gutter is fixed width, so this never feeds back into the layout —
+      // and keep the set of rows that makes the heights agree again.
+      //
+      // LIMITATION: the objective is the *sum* of the measured rows against
+      // the editor's own extent, not each line's start. Two lines that err in
+      // opposite directions cancel in that sum, so the search can settle on a
+      // width whose totals match while individual numbers are still off by a
+      // row. Comparing per-line would need the editor's own caret origins,
+      // which only its `RenderEditable` exposes and which lag a frame behind
+      // this build-time measurement, so the sum is what the width search has;
+      // `wrap_true_test.dart`'s per-line alignment test pins the property the
+      // gutter actually relies on.
+      var bestExcess = excess;
+      var low = textWidth - 24;
+      var high = textWidth;
+
+      for (var attempt = 0; attempt < 8; attempt++) {
+        final mid = (low + high) / 2;
+        if (mid <= 0) {
+          break;
+        }
+        final candidate = _measureWrappedRows(codeTextStyle, mid);
+        final delta = _gutterRowExcess(candidate);
+        if (delta.abs() < bestExcess.abs()) {
+          best = candidate;
+          bestExcess = delta;
+        }
+        if (delta.abs() < 0.5) {
+          break;
+        }
+        if (delta.sign == excess.sign) {
+          high = mid;
+        } else {
+          low = mid;
+        }
+      }
+    }
+
+    _rowHeightsForText = text;
+    _rowHeightsForWidth = textWidth;
+    return _cachedRowHeights = best;
+  }
+
+  /// The code scrollable's position, when exactly one is attached.
+  ScrollPosition? get _codePosition {
+    if (_codeScroll == null || _codeScroll!.positions.length != 1) {
+      return null;
+    }
+    return _codeScroll!.position;
+  }
+
+  /// How much taller (positive) or shorter (negative) the visible rows are
+  /// than the editor's own text.
+  ///
+  /// Both scroll views carry `_contentInsets` of vertical padding (the
+  /// editor's `contentPadding`, the gutter's outer `Padding`) read from
+  /// [codeFieldVerticalPadding], so those cancel and only the rows are left to
+  /// disagree.
+  double _gutterRowExcess(List<double> rows) {
+    final code = _codePosition;
+    if (code == null || !code.hasContentDimensions) {
+      return 0;
+    }
+
+    final rowSum = rows.fold<double>(0, (sum, row) => sum + row);
+    final codeTextHeight =
+        code.maxScrollExtent + code.viewportDimension - _contentInsets;
+
+    return rowSum - codeTextHeight;
+  }
+
+  List<double> _measureWrappedRows(TextStyle style, double textWidth) {
+    final visibleLines = widget
+        .controller
+        .code
+        .hiddenLineRanges
+        .visibleLineNumbers
+        .toList();
+    // A degenerate style can lay a line out at zero height; the row must
+    // never collapse below a real line or the gutter would grind against it.
+    final minRowHeight = _singleLineHeight(style);
+
+    return List.generate(visibleLines.length, (row) {
+      final line = _withoutLineBreak(
+        widget.controller.code.lines[visibleLines[row]].text,
+      );
+      final measured = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: TextSpan(text: line, style: style),
+      )..layout(maxWidth: textWidth);
+
+      final height = measured.height;
+      measured.dispose();
+      return max(height, minRowHeight);
+    });
+  }
+
+  /// [CodeLine.text] keeps its trailing line break; measuring one with it
+  /// laid out as a paragraph yields two rows for every line.
+  String _withoutLineBreak(String line) {
+    if (line.endsWith('\n')) {
+      line = line.substring(0, line.length - 1);
+    }
+    if (line.endsWith('\r')) {
+      line = line.substring(0, line.length - 1);
+    }
+    return line;
+  }
+
+  double _singleLineHeight(TextStyle style) {
+    final measured = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: TextSpan(text: '', style: style),
+    )..layout();
+    final height = measured.height;
+    measured.dispose();
+    return height;
   }
 
   void _updatePopupOffset() {
@@ -602,11 +821,24 @@ class _CodeFieldState extends State<CodeField> {
     });
   }
 
+  /// The whole text laid out the way the field lays it out.
+  ///
+  /// With `wrap` set the editor reflows its text to the field's width, so the
+  /// caret offsets this painter feeds to the autocomplete popup must come from
+  /// a *bounded* layout too: unbounded, a long wrapped line's caret sits
+  /// several visual rows away from where the field actually draws it.
   TextPainter _getTextPainter(String text) {
-    return TextPainter(
+    final painter = TextPainter(
       textDirection: TextDirection.ltr,
       text: TextSpan(text: text, style: textStyle),
-    )..layout();
+    );
+    final maxWidth = _editorTextWidth;
+    if (widget.wrap && maxWidth != null && maxWidth > 0) {
+      painter.layout(maxWidth: maxWidth);
+    } else {
+      painter.layout();
+    }
+    return painter;
   }
 
   Offset _getCaretOffset(TextPainter textPainter) {
