@@ -115,12 +115,13 @@ class _TrieSearchTree {
     //Iterate through string and add/progress through nodes.
     for (var i = 0; i < word.length; i++) {
       var x = TrieNode(word[i], false);
-      if (!base.children.contains(x)) {
+      final existing = base.children.indexOf(x);
+      if (existing < 0) {
         // x is added to base.children
         base.children.add(x);
       } else {
         // x points to base.children version
-        x = base.children.where((e) => e == x).first;
+        x = base.children[existing];
       }
       if (i == word.length - 1) {
         x.lastInsert = DateTime.now().millisecondsSinceEpoch;
@@ -141,26 +142,25 @@ class _TrieSearchTree {
     var base = root;
     for (var i = 0; i < prefix.length; i++) {
       var x = TrieNode(prefix[i], false);
-      if (base.children.contains(x)) {
-        base = base.children[base.children.indexOf(x)];
-      } else {
+      final existing = base.children.indexOf(x);
+      if (existing < 0) {
         return [];
       }
+      base = base.children[existing];
     }
     var returner = <TrieString>[];
     _suggestRec(base, prefix, returner);
 
+    // A total order: score first, DFS position as the tiebreak, so the result
+    // never depends on List.sort's stability.
+    final dfsIndex = <TrieString, int>{
+      for (var i = 0; i < returner.length; i++) returner[i]: i,
+    };
     returner.sort((TrieString a, TrieString b) {
-      var sortA = sort(SortValue(a.lastInsert, a.hits));
-      var sortB = sort(SortValue(b.lastInsert, b.hits));
-
-      if (sortA < sortB) {
-        return 1;
-      } else if (sortA == sortB) {
-        return 0;
-      } else {
-        return -1;
-      }
+      final byScore = sort(SortValue(b.lastInsert, b.hits))
+          .compareTo(sort(SortValue(a.lastInsert, a.hits)));
+      if (byScore != 0) return byScore;
+      return dfsIndex[a]!.compareTo(dfsIndex[b]!);
     });
     return returner.map((e) => e.value).toList();
   }
@@ -178,8 +178,9 @@ class _TrieSearchTree {
     var base = root;
     for (var i = 0; i < word.length; i++) {
       var x = TrieNode(word[i], false);
-      if (!base.children.contains(x)) return false;
-      base = base.children[base.children.indexOf(x)];
+      final existing = base.children.indexOf(x);
+      if (existing < 0) return false;
+      base = base.children[existing];
     }
     return base.hits > 0;
   }

@@ -54,6 +54,19 @@ void main() {
       // keeps trie order — the order the words were first entered.
       expect(ac.suggest(''), ['beta', 'alpha', 'gamma']);
     });
+
+    test('ties keep first-entered order past the stable-sort threshold', () {
+      // List.sort is only stable below 32 elements, so 40 equal-hit entries
+      // force the unstable path; the DFS-position tiebreak is what keeps the
+      // first-entered order here.
+      final words = List.generate(
+        40,
+        (i) => 'word${i.toString().padLeft(2, '0')}',
+      );
+      final ac = engine(words);
+
+      expect(ac.suggest(''), words);
+    });
   });
 
   group('AutoComplete.enterList', () {
