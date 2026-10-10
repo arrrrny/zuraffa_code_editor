@@ -10,6 +10,10 @@ import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 /// `LinkedScrollControllerGroup` as the editor, so the two have to stay glued:
 /// while the code scrolls down by any amount, the gutter scrolls by the same
 /// amount and keeps showing the numbers of the lines that are on screen.
+///
+/// The drag below is the input path neither `page_scroll_test.dart` (keyboard
+/// paging) nor `wrap_true_test.dart` (jumps) drives; the jump tests stay here
+/// beside it to pin the clamp-to-bottom case, wrapped and unwrapped.
 void main() {
   ScrollPosition editorPosition(WidgetTester tester) => tester
       .state<ScrollableState>(
@@ -34,8 +38,13 @@ void main() {
     required int lines,
     bool wrap = false,
   }) async {
+    // When `wrap` is on these lines must be long enough to wrap at 400px,
+    // or the multi-row measurement path is never exercised.
+    final String Function(int) body = wrap
+        ? (i) => 'line $i ${'y' * 80}'
+        : (i) => 'line $i';
     final controller = CodeController(
-      text: '${List.generate(lines, (i) => 'line $i').join('\n')}\n',
+      text: '${List.generate(lines, body).join('\n')}\n',
     );
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -104,6 +113,11 @@ void main() {
     final editor = editorPosition(tester);
     final gutter = gutterPosition(tester);
 
+    expect(
+      editor.maxScrollExtent,
+      greaterThan(0),
+      reason: 'the fixture must overflow, or both sides are pinned at 0',
+    );
     expect(gutter.pixels, closeTo(editor.pixels, 1));
     expect(
       gutter.pixels,
@@ -122,6 +136,12 @@ void main() {
 
     final editor = editorPosition(tester);
     final gutter = gutterPosition(tester);
+
+    expect(
+      editor.maxScrollExtent,
+      greaterThan(0),
+      reason: 'the fixture must overflow, or both sides are pinned at 0',
+    );
     expect(gutter.pixels, closeTo(editor.pixels, 1));
   });
 }
