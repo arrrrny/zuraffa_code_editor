@@ -14,7 +14,7 @@ import '../common/create_app.dart';
 /// the editor's indent otherwise.
 ///
 /// The popup has to be in its showing state for these to mean anything, so each
-/// test seeds a caret first: the field's own controller starts with an
+/// test seeds a caret first: the field's own controller starts with a
 /// `TextSelection.invalid`, and the framework's first value round-trip reads as a
 /// selection change, which `CodeController.value`'s setter answers by hiding the
 /// popup again. Setting a real selection before `show()` leaves nothing for that
@@ -96,11 +96,12 @@ void main() {
       expect(controller.popupController.shouldShow, isFalse);
     });
 
-    testWidgets('an empty suggestion list is not an acceptance', (wt) async {
+    testWidgets('a disabled popup is not an acceptance', (wt) async {
       final controller = await pumpEditor(wt);
-      // `PopupController.show` treats an empty list as "show everything", so the
-      // field never puts one up; `generateSuggestions` hides instead. Pin the
-      // indent fallback from the same state the field would be in.
+      // `PopupController.show` has no emptiness branch — with `enabled` true it
+      // sets `shouldShow` for any list. The field's empty-results guard lives in
+      // `generateSuggestions` (show when non-empty, hide otherwise); this test
+      // pins the disabled-popup path instead.
       controller.popupController.enabled = false;
       controller.popupController.show(['alpha']);
       await wt.pumpAndSettle();

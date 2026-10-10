@@ -9,6 +9,6 @@
    `onEnterKeyAction` against drift.
 4. `Tab inserts the editor indent` — the fallback path. Red if the indent is
    ever removed, which is the regression in the other direction.
-5. `an empty suggestion list is not an acceptance` — `PopupController.show`
+5. `a disabled popup is not an acceptance` — `PopupController.show`
    early-returns while `enabled` is false, so "showing" is not just "show was
    called".
