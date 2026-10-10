@@ -74,5 +74,67 @@ void main() {
         expect(breakpoint.cutLineIndexIfVisible(200), 112);
       });
     });
+
+    group('derived spread values', () {
+      const breakpoint = LineNumberingBreakpoint(
+        full: 100,
+        visible: 12,
+        spreadBefore: 4,
+      );
+
+      test('spread is full minus visible', () {
+        expect(breakpoint.spread, 88);
+      });
+
+      test('addedSpread excludes what was already spread before', () {
+        expect(breakpoint.addedSpread, 84);
+      });
+
+      test('fullBefore is the last full line on the old numbering', () {
+        expect(breakpoint.fullBefore, 16);
+      });
+
+      test('a zero spreadBefore keeps the breakpoint on the first line', () {
+        const breakpoint = LineNumberingBreakpoint(
+          full: 10,
+          visible: 8,
+          spreadBefore: 0,
+        );
+
+        expect(breakpoint.spread, 2);
+        expect(breakpoint.addedSpread, 2);
+        expect(breakpoint.fullBefore, 8);
+      });
+    });
+
+    group('toString and props', () {
+      const breakpoint = LineNumberingBreakpoint(
+        full: 100,
+        visible: 12,
+        spreadBefore: 4,
+      );
+
+      test('toString names the mapping', () {
+        expect(
+          breakpoint.toString(),
+          'LineNumberingBreakpoint: 100 -> 12 (spreadBefore = 4)',
+        );
+      });
+
+      test('props are the three coordinates', () {
+        expect(breakpoint.props, [100, 12, 4]);
+      });
+
+      test('equality follows props', () {
+        expect(
+          breakpoint,
+          const LineNumberingBreakpoint(
+            full: 100,
+            visible: 12,
+            spreadBefore: 4,
+          ),
+        );
+      });
+    });
   });
 }
