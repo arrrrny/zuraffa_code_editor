@@ -108,4 +108,4 @@ both halves, and the redundant assertion is gone. The two-line sub-shape
 than silently widened around: there `startOfRange == closerOnItsOwnRow`, so no
 narrow guard can give the shared line its own row.
 
-Green: `flutter test` — 508 tests, `dart analyze` clean, `dart format` clean.
+Green: `flutter test` — 509 tests, `dart analyze` clean, `dart format` clean.
