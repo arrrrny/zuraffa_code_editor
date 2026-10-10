@@ -67,13 +67,16 @@ class GutterWidget extends StatelessWidget {
 
     // The numbers are a flex column, so they take whatever the requested width
     // leaves after the fixed columns and the margin to the code — and never
-    // less than the widest visible number needs to render on one line. A
-    // number that does not fit wraps, and a wrapped number is twice as tall as
-    // the line it labels: every row past it doubles in pitch, the gutter's
-    // scroll extent stops matching the code's, and the rows on screen end up
-    // with no number over them (#18).
+    // less than the widest visible number needs to render on one line. The
+    // fixed columns are subtracted at their full width, not just the visible
+    // ones: hiding a column frees its width for the code area — the container
+    // below shrinks by it — without ever narrowing the numbers, which is the
+    // geometry this gutter has always had. A number that does not fit wraps,
+    // and a wrapped number is twice as tall as the line it labels: every row
+    // past it doubles in pitch, the gutter's scroll extent stops matching the
+    // code's, and the rows on screen end up with no number over them (#18).
     final numberColumnWidth = math.max(
-      style.width - issueColumnWidth - foldingColumnWidth - style.margin,
+      style.width - _issueColumnWidth - _foldingColumnWidth - style.margin,
       _widestNumberWidth(),
     );
 
@@ -108,7 +111,7 @@ class GutterWidget extends StatelessWidget {
           : null,
       child: Table(
         columnWidths: {
-          _lineNumberColumn: FlexColumnWidth(),
+          _lineNumberColumn: const FlexColumnWidth(),
           _issueColumn: FixedColumnWidth(issueColumnWidth),
           _foldingColumn: FixedColumnWidth(foldingColumnWidth),
         },
@@ -122,28 +125,34 @@ class GutterWidget extends StatelessWidget {
   ///
   /// Zero when the numbers are hidden, or when there is nothing to number, so
   /// the requested width is left untouched in both cases.
+  ///
+  /// The widest number is the largest one: [visibleLineNumbers] is built in
+  /// ascending order, so `.last` is the maximum, and a decimal string only
+  /// grows with its digit count. That last step assumes the digits are the same
+  /// width — true for the monospace font a code editor renders with, since the
+  /// number style inherits the code's `fontFamily` (see `_buildGutter` in
+  /// `code_field.dart`). Under a proportional font a shorter number could be
+  /// wider; the number's `softWrap: false, maxLines: 1` (see
+  /// [_fillLineNumbers]) still keeps every row one line tall, so that case
+  /// clips a digit rather than reintroducing the #18 desync.
   double _widestNumberWidth() {
     if (!style.showLineNumbers) {
       return 0.0;
     }
 
-    var widest = -1;
-    for (final number
-        in codeController.code.hiddenLineRanges.visibleLineNumbers) {
-      if (number > widest) {
-        widest = number;
-      }
-    }
-    if (widest < 0) {
+    final numbers = codeController.code.hiddenLineRanges.visibleLineNumbers;
+    if (numbers.isEmpty) {
       return 0.0;
     }
 
     final painter = TextPainter(
-      text: TextSpan(text: '${widest + 1}', style: style.textStyle),
+      text: TextSpan(text: '${numbers.last + 1}', style: style.textStyle),
       textDirection: TextDirection.ltr,
       maxLines: 1,
     )..layout();
-    return painter.width;
+    final width = painter.width;
+    painter.dispose();
+    return width;
   }
 
   void _fillLineNumbers(List<TableRow> tableRows) {

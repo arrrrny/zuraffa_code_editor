@@ -101,7 +101,7 @@ EXEMPT_LINES: Dict[str, Dict[int, str]] = {
     # the second loop below, which adds a toggle for every folded block — so the
     # lambda built here is discarded before it can ever be tapped.
     "lib/src/gutter/gutter.dart": {
-        212: "the folded-block loop below overwrites this toggle",
+        221: "the folded-block loop below overwrites this toggle",
     },
     # `_getErrorPopup()` is called from the `MouseRegion.onEnter` handler: a
     # widget can only receive an enter event (be hit-tested) after it has been

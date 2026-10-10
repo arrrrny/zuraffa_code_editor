@@ -44,6 +44,7 @@ void main() {
   Future<CodeController> pumpLongFile(
     WidgetTester tester, {
     required int lines,
+    GutterStyle gutterStyle = const GutterStyle(),
   }) async {
     final controller = CodeController(
       text: '${List.generate(lines, (i) => 'int value$i = $i;').join('\n')}\n',
@@ -55,7 +56,7 @@ void main() {
           body: SizedBox(
             height: 528,
             width: 400,
-            child: CodeField(controller: controller),
+            child: CodeField(controller: controller, gutterStyle: gutterStyle),
           ),
         ),
       ),
@@ -155,5 +156,40 @@ void main() {
             'numbers fit inside it',
       );
     });
+
+    testWidgets(
+      'a hidden column frees its width for the code, not the numbers',
+      (wt) async {
+        // The requested 80 px is the gutter's full width, with every column
+        // present. Hiding the 16 px folding column hands that 16 px to the code
+        // area and leaves the 38 px number column exactly as it was — the
+        // geometry this gutter has always had. Pinned so a hidden-column style
+        // cannot silently shift the code area.
+        await pumpLongFile(
+          wt,
+          lines: 40,
+          gutterStyle: const GutterStyle(showFoldingHandles: false),
+        );
+
+        final container = wt.renderObject<RenderBox>(
+          find
+              .descendant(
+                of: find.byType(GutterWidget),
+                matching: find.byType(Container),
+              )
+              .first,
+        );
+        expect(container.size.width, closeTo(64.0, 0.001));
+
+        final table = wt.renderObject<RenderBox>(
+          find.descendant(
+            of: find.byType(GutterWidget),
+            matching: find.byType(Table),
+          ),
+        );
+        // 64 − 10 margin: the numbers keep the same 38 px they get by default.
+        expect(table.size.width, closeTo(54.0, 0.001));
+      },
+    );
   });
 }
