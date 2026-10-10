@@ -53,6 +53,23 @@
   shares its prefix. `pubspec.yaml` now declares all six platforms explicitly,
   so the support cannot silently regress when a dependency that reaches
   `dart:io` is added.
+- **Right-to-left text direction support**
+  ([issue #14](https://github.com/arrrrny/zuraffa_code_editor/issues/14)):
+  `CodeField` gained a `textDirection` parameter. Left null it resolves the
+  ambient `Directionality`, so an Arabic locale already renders right to left
+  with no configuration — text, caret movement, the gutter (which flips to the
+  right edge with the text) and the platform's bidi reordering of mixed
+  Latin/Arabic runs. Set it to force a direction for a right-to-left snippet
+  inside a left-to-right app.
+
+  The defect this fixes was in the measurement, not the rendering: every
+  `TextPainter` the field builds hardcoded `TextDirection.ltr`, so in an RTL
+  field the autocomplete popup was positioned where the caret *would* be if the
+  text ran left to right — the far side of the editor. The resolved direction now
+  reaches the `TextField` and the caret painter that positions the popup. The
+  row-height painters stay `ltr` deliberately: a paragraph's direction moves
+  text horizontally, never vertically. Pinned by
+  `test/src/code_field/text_direction_test.dart`.
 
 - **HTML is reachable and documented as a first-class language**
   ([issue #40](https://github.com/arrrrny/zuraffa_code_editor/issues/40)):
