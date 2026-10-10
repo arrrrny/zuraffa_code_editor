@@ -26,6 +26,7 @@ behind the reported stack never happens.
 
 ## Residual
 
-`code_field.dart:312-313` keeps the unguarded `!`s. Hardening them needs a
-reachable null state to test, which none of the above provides; recorded in
-spec.md rather than shipped blind.
+`code_field.dart:312-313` kept the unguarded `!`s in the first revision. The
+review follow-up on this branch replaced them with `rebuild()`'s
+`currentContext` guard once the review showed the recorded gate rationale for
+the deferral did not hold; recorded in `spec.md` and `fix.md`.

@@ -1,7 +1,9 @@
 # #26 — fix record
 
-**No code change was made.** The fix for this report already exists on this
-fork, ahead of the point where the reporter ran into it.
+**Verified, then hardened on review.** The reported crash does not reproduce
+on this fork; the tests ship as the deliverable, and the review round applied
+the same `currentContext` guard `rebuild()` carries to the `initState`
+callback — see "Review follow-up" below.
 
 ## What the report blames
 
@@ -35,14 +37,19 @@ builds only the tab that is on screen — the widget-tree probe counted one
 
 `test/src/code_field/tabbarview_multiple_codefields_test.dart` — three guard
 tests: switching tabs forward and back, a never-shown tab (`initialIndex` on
-the last of four), and dropping a tab while another is on screen. Each asserts
-`takeException()` stays null. They exist so that a future change to the popup
-positioning path fails a test rather than a user's app.
+the last of four), and dropping a tab while another is on screen with its
+autocomplete popup open. Each asserts `takeException()` stays null. They exist
+so that a future change to the popup positioning path fails a test rather
+than a user's app.
 
-## Deliberately left alone
+## Review follow-up: the unguarded read is gone
 
-`code_field.dart:312-313` keeps the unguarded `!`s. Hardening them needs a
-reachable null state to test, and no container tried produces one. Under this
-repo's 100 % line-coverage gate, untested guard branches would have to be
-exempted with a proof comment that asserts unreachability — the opposite of
-what the reviewer would want to see. Recorded as an open item in `spec.md`.
+The first revision left `code_field.dart:312-313` unguarded, recorded under
+"the 100 % line-coverage gate". The automated review corrected that record:
+the gate (`tool/coverage_gate.py`) measures **line** coverage and exempts
+whole files (`EXEMPT_FILES`) and individual provably-dead lines
+(`EXEMPT_LINES`) — there is no branch-proof mechanism — and the guard's added
+lines all execute on the non-null path the tests already take. The callback
+now carries the same `currentContext` guard as `rebuild()`, so the named site
+is guarded like its twin and the report's crash shape is closed off rather
+than merely unobserved in the containers tried here.

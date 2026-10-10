@@ -309,9 +309,13 @@ class _CodeFieldState extends State<CodeField> {
       if (!mounted) {
         return;
       }
-      final double width = _codeFieldKey.currentContext!.size!.width;
-      final double height = _codeFieldKey.currentContext!.size!.height;
-      windowSize = Size(width, height);
+      // Same guard as rebuild(): currentContext was seen null in tests.
+      final context = _codeFieldKey.currentContext;
+      if (context != null) {
+        final double width = context.size!.width;
+        final double height = context.size!.height;
+        windowSize = Size(width, height);
+      }
     });
     _onTextChanged();
   }

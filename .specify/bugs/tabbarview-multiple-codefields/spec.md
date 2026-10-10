@@ -1,6 +1,7 @@
 # #26 — Multiple CodeFields in a TabBarView crash with a null-check error
 
-- **Status:** verified not reproducible on this fork; guard test added
+- **Status:** verified not reproducible on this fork; guard tests added and the
+  named site hardened on review to match `rebuild()`
 - **Label:** `bug`
 - **Source:** synced from upstream `akvelon/flutter-code-editor#174`
 - **Reported symptom:** `Null check operator used on a null value` from
@@ -23,7 +24,9 @@ WidgetsBinding.instance.addPostFrameCallback((_) {
 ```
 
 Two null-check operators: one on the `GlobalKey`'s context, one on the render
-box's size.
+box's size. (The review follow-up below replaced the first of the two with the
+same `currentContext` guard `rebuild()` already carries; the block above is
+the code as reported.)
 
 ## What this fork already has
 
@@ -55,7 +58,8 @@ shape).
    back, `takeException()` stays null.
 2. **a tab that is never shown** — `initialIndex: 3` of four, so the earlier
    fields are the ones the report says crash.
-3. **dropping a tab while another is on screen** — rebuild with fewer tabs.
+3. **dropping a tab while another is on screen** — rebuild with fewer tabs
+   while the on-screen field's autocomplete popup is open.
 
 Also probed and found not to reproduce: `IndexedStack` with an inactive index,
 an `Offstage` sibling, and two CodeFields in a `Column`. A widget-tree probe
@@ -66,17 +70,20 @@ null read never happens on this fork.
 
 ## Conclusion
 
-No source change is warranted: the reported stack's crash shape does not
-reproduce, and the site is one of a family whose other members are already
-guarded here. The test lands as a guard on the `TabBarView` case so a future
-change to the popup positioning path gets caught with a real failing test
-rather than a user's stack trace.
+The reported stack's crash shape does not reproduce, and the site is one of a
+family whose other members were already guarded here; the review follow-up
+has since brought it in line with them. The tests land as a guard on the
+`TabBarView` case so a future change to the popup positioning path gets
+caught with a real failing test rather than a user's stack trace.
 
-## Residual risk worth recording
+## Review follow-up
 
-`code_field.dart:312-313` still carries the unguarded `!`s. Making it as safe
-as its twin in `rebuild()` is a two-line change, but each guard branch it adds
-has to be reachable from a test under this repo's 100% coverage gate, and I
-could not build a state in which `currentContext` is null or `size` is null.
-Left alone deliberately rather than shipped untested; a reproduction of the
-guard would close both.
+The first revision left `code_field.dart:312-313` unguarded, recording the
+rationale that a guard added lines that could not be exercised under this
+repo's coverage gate. The automated review showed the rationale did not match
+the tooling: `tool/coverage_gate.py` measures **line** coverage and exempts
+whole files (`EXEMPT_FILES`) or individual dead lines (`EXEMPT_LINES`) — there
+is no branch-proof mechanism — and the guard's added lines all run on the
+non-null path the tests already take. The callback now carries the same
+`currentContext` guard as `rebuild()`, so the named site has no unguarded
+context read left.
