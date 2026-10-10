@@ -16,13 +16,10 @@ class PageScrollIntent extends Intent {
 }
 
 class PageScrollAction extends Action<PageScrollIntent> {
-  PageScrollAction({required this.scrollController, required this.pageHeight});
+  PageScrollAction({required this.scrollController});
 
   /// The field's vertical scroll controller, linked to the gutter's.
   final ScrollController? scrollController;
-
-  /// The height of one page — the editor box's height.
-  final double Function() pageHeight;
 
   @override
   Object? invoke(PageScrollIntent intent) {
@@ -32,7 +29,10 @@ class PageScrollAction extends Action<PageScrollIntent> {
     }
 
     final position = controller.position;
-    final height = pageHeight();
+    // The text viewport, not the whole editor box: the field's
+    // InputDecorator pads the box vertically, and one page must be
+    // exactly what the user can see.
+    final height = position.viewportDimension;
     if (height <= 0) {
       return null;
     }

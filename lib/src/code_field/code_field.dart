@@ -499,10 +499,7 @@ class _CodeFieldState extends State<CodeField> {
       // Scrolling is a view concern, so this one is wired by the state —
       // the action needs the field's own scroll controller, which lives
       // here rather than on the controller.
-      PageScrollIntent: PageScrollAction(
-        scrollController: _codeScroll,
-        pageHeight: () => _editorKey.currentContext?.size?.height ?? 0,
-      ),
+      PageScrollIntent: PageScrollAction(scrollController: _codeScroll),
     };
 
     return FocusableActionDetector(
