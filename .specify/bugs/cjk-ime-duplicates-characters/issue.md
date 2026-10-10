@@ -4,7 +4,7 @@
 - **Fetched**: 2026-10-09
 - **Issue**: 41
 - **URL**: https://github.com/arrrrny/zuraffa_code_editor/issues/41
-- **State**: open
+- **State**: closed (2026-10-10 — fixed by PR #44; the IME-composition guards in `CodeController.value`/`onKey`/`onEnterKeyAction` plus `_shortcutsIgnoredWhileComposing` stop the editor transforms that duplicated or dropped composing characters)
 - **Severity**: unknown
 - **Author**: arrrrny
 - **Labels**: bug
