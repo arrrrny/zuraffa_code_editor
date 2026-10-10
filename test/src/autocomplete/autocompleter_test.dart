@@ -1,5 +1,6 @@
 import 'package:zuraffa_code_editor/src/autocomplete/autocompleter.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:highlight/highlight_core.dart';
 import 'package:highlight/languages/dart.dart';
 import 'package:highlight/languages/java.dart';
 
@@ -108,6 +109,30 @@ void main() {
 
       expect(wrongCaseResults, ['false', 'final', 'finally', 'float', 'for']);
       expect(results, ['false', 'final', 'float', 'for']);
+    });
+
+    test('Reports the blacklist back as a list', () {
+      final obj = Autocompleter();
+
+      expect(obj.blacklist, isEmpty);
+
+      obj.blacklist = ['a', 'b'];
+      expect(obj.blacklist, ['a', 'b']);
+    });
+
+    test('Rejects a mode whose keywords are neither a String nor a Map', () {
+      final obj = Autocompleter();
+
+      expect(
+        () => obj.mode = Mode(keywords: 42),
+        throwsA(
+          isA<Exception>().having(
+            (e) => e.toString(),
+            'message',
+            contains('Unknown keywords type'),
+          ),
+        ),
+      );
     });
   });
 }

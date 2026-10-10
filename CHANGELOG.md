@@ -1,5 +1,49 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **`tool/coverage_gate.py` gained a line-level exemption mechanism.**
+  `EXEMPT_LINES` removes individual unreachable lines from both the numerator
+  and the denominator of the file they sit in — the same contract
+  `EXEMPT_FILES` has always had for whole files — and a stale-entry check warns
+  when a listed line no longer matches anything in `lcov.info`. Every entry
+  carries its proof in the comment above it, and the list is meant to stay
+  short: if an exempted line becomes reachable, the test that reaches it is
+  added and the entry dropped.
+
+- **22 new test files** closing the reachable coverage gaps left over from the
+  previous rounds: the autocompleter's blacklist and unknown-keyword paths, all
+  six `Action` delegates of the code field, the tab modifier, `TextSelection`
+  extension, named sections, `AbstractAnalyzer.dispose`, the single-line
+  comment parser, `KeyEventExtension`, the fallback foldable block parser and
+  the parser factory, the gutter fold toggles, the hidden range sort tie-break,
+  `SearchNavigationState.copyWith`, the search bar's close icon, the CRLF row
+  measurement of a wrapped field, and — new in this round — the gestural surface
+  of the completion popup (a tap moves the selection and returns focus, a
+  double tap commits the word) plus the recomputation of the search navigation
+  index after a mid-search edit.
+
+### Fixed
+
+- **`dart analyze` warnings in the new tests** — unused imports removed.
+
+### Changed
+
+- **The coverage gate ratchets to 100%.** The measured value is
+  `100.00% (3089/3089 lines over 102 files)`; 13 lines are exempted
+  individually as provably unreachable (dead branches, defensive guards, the
+  `ItemScrollController` assignment in `Popup` that can never observe an
+  attached controller, and the fold-toggle lambda that the second loop of
+  `Gutter._fillFoldToggles` always overwrites). `--min 97.7` becomes `--min 100`
+  in `.github/workflows/dart.yaml`.
+
+- **Generated artifacts are no longer versioned.** `coverage/lcov.info` and the
+  `example/ios/Flutter/ephemeral/` output of `flutter pub get` are untracked
+  and added to `.gitignore`, so a local coverage run or a plugin re-resolution
+  cannot show up as a source change.
+
 ## 0.1.2
 
 ### Fixed

@@ -62,14 +62,17 @@ jobs:
       # Ratchet: the number only ever rises, and only in the PR that adds the
       # tests behind it — the step below refuses a PR that lowers it.
       # Measured on this branch with a fresh coverage run and the CI helper:
-      # 97.89% (2920/2983 lines). Unreachable files are exempted (see
+      # 100.00% (3089/3089 lines). Unreachable files are exempted (see
       # EXEMPT_FILES in tool/coverage_gate.py): the CI helper imports every
       # file under lib/, so dead/wip modules the package never references
-      # would otherwise drag the number down. The gate sits just under the
-      # measured value so master is green and every coverage PR raises it.
+      # would otherwise drag the number down. 13 individual lines are exempted
+      # the same way (see EXEMPT_LINES): each is a provably unreachable guard
+      # or dead branch, and every entry carries its proof in the comment above
+      # it. The gate is pinned to the measured value: a new uncovered line must
+      # be covered, or proved dead via EXEMPT_LINES/EXEMPT_FILES.
       - name: Coverage gate
         run: |
-          python3 tool/coverage_gate.py --min 97.7
+          python3 tool/coverage_gate.py --min 100
           # Mechanical ratchet: fail a PR that lowers the gate below the base
           # branch's value. GITHUB_BASE_REF is empty on push events, where
           # there is nothing to compare against. Both sides are read with the
