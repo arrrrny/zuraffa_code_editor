@@ -92,6 +92,12 @@ final _shortcutsIgnoredWhileComposing = <ShortcutActivator, Intent>{
   LogicalKeySet(LogicalKeyboardKey.tab): const TabKeyIntent(),
 };
 
+/// The vertical insets both the editor's `TextField` (`contentPadding`, set
+/// below) and the gutter's outer `Padding` carry: 16 on each edge. They are
+/// the same, so when comparing the two scroll extents they cancel and only
+/// the row heights are left to disagree.
+const _contentInsets = 32.0;
+
 class CodeField extends StatefulWidget {
   /// {@macro flutter.widgets.textField.minLines}
   final int? minLines;
@@ -238,6 +244,10 @@ class _CodeFieldState extends State<CodeField> {
   final _editorKey = GlobalKey();
   Offset? _editorOffset;
 
+  /// Width the editor's text is laid out at, taken from its own
+  /// `LayoutBuilder`. Only used to measure wrapped gutter rows.
+  double? _editorTextWidth;
+
   @override
   void initState() {
     super.initState();
@@ -375,6 +385,21 @@ class _CodeFieldState extends State<CodeField> {
     double minWidth,
     double maxHeight,
   ) {
+    if (widget.wrap) {
+      // Soft wrapping needs the field to be width-bounded: an `IntrinsicWidth`
+      // (below) sizes the field to its longest line instead, so the text never
+      // reflows and just scrolls horizontally, whatever the flag says.
+      return Padding(
+        padding: EdgeInsets.only(right: widget.padding.right),
+        child: widget.expands
+            ? codeField
+            : ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: maxHeight),
+                child: codeField,
+              ),
+      );
+    }
+
     final intrinsic = IntrinsicWidth(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -474,6 +499,20 @@ class _CodeFieldState extends State<CodeField> {
       ).copyWith(textSelectionTheme: widget.textSelectionTheme),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
+          // The gutter is laid out before the editor in the same build pass,
+          // so it can only see a width measured in an earlier frame. Keep the
+          // measured one and rebuild after this frame so the gutter's wrapped
+          // rows follow the field's real width.
+          final textWidth = constraints.maxWidth - widget.padding.right;
+          if (widget.wrap && textWidth > 0 && textWidth != _editorTextWidth) {
+            _editorTextWidth = textWidth;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted && textWidth == _editorTextWidth) {
+                setState(() {});
+              }
+            });
+          }
+
           // Control horizontal scrolling
           return _wrapInScrollView(
             codeField,
@@ -540,7 +579,139 @@ class _CodeFieldState extends State<CodeField> {
       codeController: widget.controller,
       style: gutterStyle,
       scrollController: _numberScroll,
+      rowHeights: _wrappedRowHeights(textStyle),
     );
+  }
+
+  /// Height each visible code line renders at, or null when the editor does
+  /// not wrap (where every row is one line high and the shared style already
+  /// pins it).
+  ///
+  /// Wrapping is the one case the gutter has to be told about: a wrapped
+  /// logical line occupies several visual rows, so with the rows left at
+  /// one line high the gutter's scroll extent stops matching the code's and
+  /// the numbers drift off their lines. The width comes from the editor's own
+  /// `LayoutBuilder`, so the measurement mirrors the field's layout.
+  List<double>? _wrappedRowHeights(TextStyle codeTextStyle) {
+    final textWidth = _editorTextWidth;
+    if (!widget.wrap || textWidth == null) {
+      return null;
+    }
+
+    var rows = _measureWrappedRows(codeTextStyle, textWidth);
+    final excess = _gutterRowExcess(rows);
+    if (excess.abs() < 0.5 || _codePosition == null) {
+      return rows;
+    }
+
+    // The editor reserves a few logical pixels of its own insets that the
+    // `LayoutBuilder` width knows nothing about, so the measured rows can
+    // fall either side of the field's real wrapping and the two scroll views
+    // disagree about how long the content is. Search the adjacent widths —
+    // the gutter is fixed width, so this never feeds back into the layout —
+    // and keep the set of rows that makes the heights agree again.
+    var best = rows;
+    var bestExcess = excess;
+    var low = textWidth - 24;
+    var high = textWidth;
+
+    for (var attempt = 0; attempt < 8; attempt++) {
+      final mid = (low + high) / 2;
+      if (mid <= 0) {
+        break;
+      }
+      final candidate = _measureWrappedRows(codeTextStyle, mid);
+      final delta = _gutterRowExcess(candidate);
+      if (delta.abs() < bestExcess.abs()) {
+        best = candidate;
+        bestExcess = delta;
+      }
+      if (delta.abs() < 0.5) {
+        break;
+      }
+      if (delta.sign == excess.sign) {
+        high = mid;
+      } else {
+        low = mid;
+      }
+    }
+
+    return best;
+  }
+
+  /// The code scrollable's position, when exactly one is attached.
+  ScrollPosition? get _codePosition {
+    if (_codeScroll == null || _codeScroll!.positions.length != 1) {
+      return null;
+    }
+    return _codeScroll!.position;
+  }
+
+  /// How much taller (positive) or shorter (negative) the visible rows are
+  /// than the editor's own text.
+  ///
+  /// Both scroll views carry the same 32 logical pixels of vertical insets
+  /// (the editor's `contentPadding`, the gutter's outer `Padding`), so those
+  /// cancel and only the rows are left to disagree.
+  double _gutterRowExcess(List<double> rows) {
+    final code = _codePosition;
+    if (code == null || !code.hasContentDimensions) {
+      return 0;
+    }
+
+    final rowSum = rows.fold<double>(0, (sum, row) => sum + row);
+    final codeTextHeight =
+        code.maxScrollExtent + code.viewportDimension - _contentInsets;
+
+    return rowSum - codeTextHeight;
+  }
+
+  List<double> _measureWrappedRows(TextStyle style, double textWidth) {
+    final visibleLines = widget
+        .controller
+        .code
+        .hiddenLineRanges
+        .visibleLineNumbers
+        .toList();
+    // A degenerate style can lay a line out at zero height; the row must
+    // never collapse below a real line or the gutter would grind against it.
+    final minRowHeight = _singleLineHeight(style);
+
+    return List.generate(visibleLines.length, (row) {
+      final line = _withoutLineBreak(
+        widget.controller.code.lines[visibleLines[row]].text,
+      );
+      final measured = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: TextSpan(text: line, style: style),
+      )..layout(maxWidth: textWidth);
+
+      final height = measured.height;
+      measured.dispose();
+      return max(height, minRowHeight);
+    });
+  }
+
+  /// [CodeLine.text] keeps its trailing line break; measuring one with it
+  /// laid out as a paragraph yields two rows for every line.
+  String _withoutLineBreak(String line) {
+    if (line.endsWith('\n')) {
+      line = line.substring(0, line.length - 1);
+    }
+    if (line.endsWith('\r')) {
+      line = line.substring(0, line.length - 1);
+    }
+    return line;
+  }
+
+  double _singleLineHeight(TextStyle style) {
+    final measured = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: TextSpan(text: '', style: style),
+    )..layout();
+    final height = measured.height;
+    measured.dispose();
+    return height;
   }
 
   void _updatePopupOffset() {
