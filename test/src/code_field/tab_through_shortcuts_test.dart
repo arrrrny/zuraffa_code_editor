@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:zuraffa_code_editor/src/code_field/actions/comment_uncomment.dart';
+import 'package:zuraffa_code_editor/src/code_field/actions/copy.dart';
 import 'package:zuraffa_code_editor/src/code_field/actions/dismiss.dart';
 import 'package:zuraffa_code_editor/src/code_field/actions/enter_key.dart';
 import 'package:zuraffa_code_editor/src/code_field/actions/indent.dart';
 import 'package:zuraffa_code_editor/src/code_field/actions/outdent.dart';
+import 'package:zuraffa_code_editor/src/code_field/actions/redo.dart';
 import 'package:zuraffa_code_editor/src/code_field/actions/search.dart';
 import 'package:zuraffa_code_editor/src/code_field/actions/tab.dart';
+import 'package:zuraffa_code_editor/src/code_field/actions/undo.dart';
 import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -46,7 +49,7 @@ extension on LogicalKeyboardKey {
     LogicalKeyboardKey.arrowUp => PhysicalKeyboardKey.arrowUp,
     LogicalKeyboardKey.arrowDown => PhysicalKeyboardKey.arrowDown,
     LogicalKeyboardKey.keyF => PhysicalKeyboardKey.keyF,
-    _ => PhysicalKeyboardKey.tab,
+    _ => throw UnimplementedError('map the physical key for $this'),
   };
 }
 
@@ -65,13 +68,16 @@ void main() {
       );
     });
 
-    test('Shift+Tab is ignored too, modifiers and all', () {
+    testWidgets('Shift+Tab is ignored too, modifiers and all', (wt) async {
+      final controller = controllerFor();
+
       // The raw path does not inspect modifiers at all: Shift+Tab reaches it as
       // the same logical Tab key, and it still declines to own it.
-      expect(
-        controllerFor().onKey(_key(LogicalKeyboardKey.tab)),
-        KeyEventResult.ignored,
-      );
+      await wt.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      final result = controller.onKey(_key(LogicalKeyboardKey.tab));
+      await wt.sendKeyUpEvent(LogicalKeyboardKey.shift);
+
+      expect(result, KeyEventResult.ignored);
     });
 
     test('Enter is ignored', () {
@@ -94,11 +100,13 @@ void main() {
       );
     });
 
-    test('while composing, every key is ignored', () {
+    testWidgets('while composing, every key is ignored — Ctrl+F included', (
+      wt,
+    ) async {
       // Composition is owned by the platform; while it is in progress the raw
       // path declines every key, including Ctrl+F, so it cannot corrupt the
       // composing text.
-      final controller = controllerFor();
+      final controller = await pumpController(wt, 'void main()');
 
       controller.value = const TextEditingValue(
         text: 'void main()',
@@ -114,10 +122,13 @@ void main() {
         controller.onKey(_key(LogicalKeyboardKey.enter)),
         KeyEventResult.ignored,
       );
-      expect(
-        controller.onKey(_key(LogicalKeyboardKey.keyF)),
-        KeyEventResult.ignored,
-      );
+
+      await wt.sendKeyDownEvent(LogicalKeyboardKey.control);
+      final result = controller.onKey(_key(LogicalKeyboardKey.keyF));
+      await wt.sendKeyUpEvent(LogicalKeyboardKey.control);
+
+      expect(result, KeyEventResult.ignored);
+      expect(controller.searchController.shouldShow, isFalse);
     });
   });
 
@@ -160,6 +171,9 @@ void main() {
       expect(actions[CommentUncommentIntent], isA<CommentUncommentAction>());
       expect(actions[SearchIntent], isA<SearchAction>());
       expect(actions[DismissIntent], isA<CustomDismissAction>());
+      expect(actions[CopySelectionTextIntent], isA<CopyAction>());
+      expect(actions[UndoTextIntent], isA<UndoAction>());
+      expect(actions[RedoTextIntent], isA<RedoAction>());
     });
 
     test('the actions share the controller that dispatches them', () {

@@ -8,8 +8,11 @@
 3. `Enter is ignored` — RED if `onKey` grows an Enter branch.
 4. `an upward or downward arrow outside the popup is ignored` — pins the
    boundary of the raw path: the arrows are only owned while the popup shows.
-5. `while composing, every key is ignored` — RED if the composing early-return
-   in `onKey` is removed.
+5. `while composing, every key is ignored — Ctrl+F included` — RED if the
+   composing early-return in `onKey` is removed. Only the Ctrl+F leg can see
+   that fault: Tab and Enter have no raw branch to fire either way, so the ctrl
+   held down through the framework is what turns the guard's absence red —
+   without the guard, `isCtrlF` opens the search mid-composition.
 6. `Ctrl+F is the one shortcut the raw path owns and it opens the search` — RED
    if the `isCtrlF` branch in `_onKeyDownRepeat` is removed. Guards against the
    file reading as "onKey is empty", which would be a claim about the code that
