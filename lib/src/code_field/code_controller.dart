@@ -477,6 +477,15 @@ class CodeController extends TextEditingController {
         return;
       }
 
+      // A tab is not an editor transform: it is a character no font the editor
+      // can rely on draws (flutter/flutter#79153), so it is converted here too,
+      // where the rest of the value setter converts it. This must precede the
+      // hidden-ranges early return below, which would otherwise pass a raw tab
+      // straight through whenever a block is folded.
+      if (_isTabReplacementEnabled && hasTextChanged) {
+        newValue = newValue.tabsToSpaces(params.tabSpaces);
+      }
+
       // Rebuilding the full text from the visible text would silently drop
       // folded content; the diff path maps the edit into the full text.
       if (hasTextChanged && code.hiddenRanges.ranges.isNotEmpty) {
