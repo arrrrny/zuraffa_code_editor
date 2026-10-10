@@ -30,10 +30,7 @@ void main() {
       const style = GutterStyle(
         errorPopupTextStyle: TextStyle(fontWeight: FontWeight.w700),
       );
-      expect(
-        style.copyWith().errorPopupTextStyle?.fontWeight,
-        FontWeight.w700,
-      );
+      expect(style.copyWith().errorPopupTextStyle?.fontWeight, FontWeight.w700);
     });
   });
 
