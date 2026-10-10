@@ -437,12 +437,15 @@ class _CodeFieldState extends State<CodeField> {
         styles?[rootKey]?.backgroundColor ??
         DefaultStyles.backgroundColor;
 
-    _popupBackground =
-        widget.autocompleteBackground ?? _backgroundCol ?? themeData.cardColor;
-
     if (widget.decoration != null) {
       _backgroundCol = null;
     }
+
+    // Resolved after the nulling above on purpose: `_backgroundCol` is
+    // non-null until then, so resolving earlier would strand the popup on
+    // `DefaultStyles.backgroundColor` and never reach the card colour.
+    _popupBackground =
+        widget.autocompleteBackground ?? _backgroundCol ?? themeData.cardColor;
 
     final defaultTextStyle = TextStyle(
       color: styles?[rootKey]?.color ?? DefaultStyles.textColor,

@@ -71,17 +71,24 @@ Future<CodeController> _pumpFieldWithPopup(
 
 void main() {
   group('Autocomplete popup background', () {
-    testWidgets('falls back to an opaque colour when a decoration is set', (
-      tester,
-    ) async {
-      await _pumpFieldWithPopup(
-        tester,
-        decoration: const BoxDecoration(color: Color(0xffabcdef)),
-      );
+    testWidgets(
+      'falls back to the theme card colour when a decoration is set',
+      (tester) async {
+        await _pumpFieldWithPopup(
+          tester,
+          decoration: const BoxDecoration(color: Color(0xffabcdef)),
+        );
 
-      expect(_popupBackground(tester), isNotNull);
-      expect(_popupBackground(tester)!.a, 1.0);
-    });
+        final background = _popupBackground(tester);
+
+        expect(background, isNotNull);
+        expect(background!.a, 1.0);
+        expect(
+          background,
+          Theme.of(tester.element(find.byType(CodeField))).cardColor,
+        );
+      },
+    );
 
     testWidgets('an explicit autocompleteBackground wins over both', (
       tester,
