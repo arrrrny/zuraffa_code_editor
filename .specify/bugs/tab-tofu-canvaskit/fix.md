@@ -66,8 +66,9 @@ The tab then renders as tofu in exactly the situation the issue reports.
 
 ## Tests
 
-`test/src/code_field/tab_tofu_canvaskit_test.dart` — four tests: load, Tab
-keypress, a tab arriving while composing, and a tab committed by composition.
+`test/src/code_field/tab_tofu_canvaskit_test.dart` — five tests: load, a tab
+arriving in a platform value update, a tab arriving while composing, a tab
+committed by composition, and the no-`TabModifier` opt-out.
 
 `test/src/code_field/tabs_to_spaces_test.dart` — three tests: a selection past
 the end of the text, a composing range past the end, and a composing range that

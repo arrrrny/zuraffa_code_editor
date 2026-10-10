@@ -14,7 +14,7 @@ void main() {
       controller.dispose();
     });
 
-    test('The Tab keypress inserts spaces, not a tab', () {
+    test('A tab arriving in a platform value update is converted', () {
       final controller = createController('ab');
       controller.selection = const TextSelection.collapsed(offset: 1);
 

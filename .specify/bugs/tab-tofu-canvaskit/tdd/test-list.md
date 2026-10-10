@@ -5,7 +5,7 @@ Status: **verification found a live gap; source change landed.**
 | # | Test | Kind | State |
 |---|------|------|-------|
 | 1 | `Loading text with tabs converts them to spaces` | regression guard (already covered by `code_controller_tab_test.dart`) | green |
-| 2 | `The Tab keypress inserts spaces, not a tab` | regression guard | green |
+| 2 | `A tab arriving in a platform value update is converted` | regression guard | green |
 | 3 | `A tab delivered by the platform while composing is converted` | **fault-detecting** | green |
 | 4 | `A tab inside committed composing text is converted` | **fault-detecting** | green |
 | 5 | `Without TabModifier the tabs are left to the consumer` | documents the opt-out | green |

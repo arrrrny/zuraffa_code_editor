@@ -230,8 +230,9 @@ void main() {
         expect(
           value.composing,
           TextRange(
-            start: composingStart + tabsBefore(composingStart) * 1,
-            end: composingEnd + tabsBefore(composingEnd) * 1,
+            start:
+                composingStart + tabsBefore(composingStart) * (_spaceCount - 1),
+            end: composingEnd + tabsBefore(composingEnd) * (_spaceCount - 1),
           ),
         );
       });
