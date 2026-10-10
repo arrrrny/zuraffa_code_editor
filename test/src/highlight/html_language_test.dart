@@ -98,6 +98,43 @@ void main() {
 
       expect(_plainText(controller.code.highlighted!), _html);
     });
+
+    // The README documents this asymmetry, so the test pins it. The mode
+    // declares sub-languages and resolves only the `php` one; `<script>` and
+    // `<style>` bodies come out as markup even with `javascript` and `css`
+    // registered. If a `highlight` release fixes the tag-mode matching, the
+    // bodies start being re-parsed and this test goes red to make the README
+    // and the CHANGELOG entry say so.
+    testWidgets('re-parses a php body but leaves script and style bodies '
+        'as markup', (wt) async {
+      final php = await pumpController(wt, '<?php echo 1; ?>', language: xml);
+      expect(
+        _classified(php.code.highlighted!).map((node) => node.$1),
+        contains('php'),
+      );
+
+      final script = await pumpController(
+        wt,
+        '<script>var a = 1;</script>',
+        language: xml,
+      );
+      expect(_classified(script.code.highlighted!), [
+        ('tag', '<script>'),
+        ('tag', '</script>'),
+        ('name', 'script'),
+      ]);
+
+      final style = await pumpController(
+        wt,
+        '<style>.b { color: red; }</style>',
+        language: xml,
+      );
+      expect(_classified(style.code.highlighted!), [
+        ('tag', '<style>'),
+        ('tag', '</style>'),
+        ('name', 'style'),
+      ]);
+    });
   });
 
   group('highlight xml mode', () {
