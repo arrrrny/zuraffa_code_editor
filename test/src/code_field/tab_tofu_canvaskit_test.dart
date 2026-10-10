@@ -88,6 +88,7 @@ void main() {
       (WidgetTester wt) async {
         final controller = await pumpController(wt, MethodSnippet.full);
         controller.foldAt(1);
+        expect(controller.code.hiddenRanges.ranges, isNotEmpty);
 
         final end = _methodSnippetLength;
         controller.value = TextEditingValue(
@@ -97,7 +98,6 @@ void main() {
         );
 
         expect(controller.text.contains('\t'), isFalse);
-        expect(controller.value.text.contains('\t'), isFalse);
       },
     );
   });
