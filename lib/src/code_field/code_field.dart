@@ -14,6 +14,7 @@ import 'actions/comment_uncomment.dart';
 import 'actions/enter_key.dart';
 import 'actions/indent.dart';
 import 'actions/outdent.dart';
+import 'actions/page_scroll.dart';
 import 'actions/search.dart';
 import 'actions/tab.dart';
 import 'code_controller.dart';
@@ -77,6 +78,14 @@ final _shortcuts = <ShortcutActivator, Intent>{
       const SearchIntent(),
   const SingleActivator(LogicalKeyboardKey.keyF, meta: true):
       const SearchIntent(),
+
+  // Page Up / Down: scroll the editor by one viewport
+  const SingleActivator(LogicalKeyboardKey.pageDown): const PageScrollIntent(
+    forward: true,
+  ),
+  const SingleActivator(LogicalKeyboardKey.pageUp): const PageScrollIntent(
+    forward: false,
+  ),
 };
 
 // Shortcuts that must not fire while an IME composition is in progress,
@@ -485,8 +494,16 @@ class _CodeFieldState extends State<CodeField> {
       ),
     );
 
+    final actions = <Type, Action<Intent>>{
+      ...widget.controller.actions,
+      // Scrolling is a view concern, so this one is wired by the state —
+      // the action needs the field's own scroll controller, which lives
+      // here rather than on the controller.
+      PageScrollIntent: PageScrollAction(scrollController: _codeScroll),
+    };
+
     return FocusableActionDetector(
-      actions: widget.controller.actions,
+      actions: actions,
       shortcuts: shortcuts,
       child: Container(
         decoration: widget.decoration,
