@@ -16,6 +16,26 @@
   `test/src/code_field/tab_through_shortcuts_test.dart` pins — a regression that
   moved Tab back into a raw handler would leave every behavioural test green,
   because the observable effect of a Tab is identical either way.
+- **Web is a genuinely supported platform**
+  ([issue #23](https://github.com/arrrrny/zuraffa_code_editor/issues/23)):
+  `autotrie`, the one dependency in the graph that reported no `platform:web`,
+  is replaced by an in-house engine at
+  `lib/src/autocomplete/auto_complete.dart`. `autotrie`'s only entry point
+  re-exports `src/autotrie_base.dart`, whose first line is `import 'dart:io'`,
+  and `dart:io` has no web implementation — that single import is why pub.dev
+  listed `android, ios, linux, macos, windows` and not `web`, and why a web
+  build of anything reaching the autocompleter failed to compile. The two
+  methods that need it, `AutoComplete.fromFile` and `AutoComplete.persist`,
+  are file-persistence helpers with no caller in this package, so the port
+  carries the in-memory surface only and `hive` leaves the graph with
+  `autotrie`. Pinned by `test/src/autocomplete/auto_complete_test.dart`
+  (36 tests); the port corrects two `autotrie` defects that cannot be fixed
+  upstream, both unreachable from `Autocompleter`: `contains` now reports
+  entered words rather than surviving prefix paths, and `delete` now clears the
+  hit of the word it removes instead of leaving it suggested when a longer word
+  shares its prefix. `pubspec.yaml` now declares all six platforms explicitly,
+  so the support cannot silently regress when a dependency that reaches
+  `dart:io` is added.
 
 - **HTML is reachable and documented as a first-class language**
   ([issue #40](https://github.com/arrrrny/zuraffa_code_editor/issues/40)):

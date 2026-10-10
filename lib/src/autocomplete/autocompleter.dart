@@ -1,4 +1,4 @@
-import 'package:autotrie/autotrie.dart';
+import 'auto_complete.dart';
 import 'package:highlight/highlight_core.dart';
 
 import '../code/reg_exp.dart';
@@ -114,8 +114,9 @@ class Autocompleter {
     if (indexedWords != null && indexedWords.every(words.contains)) {
       ac.enterList(words.difference(indexedWords).toList(growable: false));
     } else {
-      // Only a rebuild drops a word here: `AutoComplete.delete` keeps a word in
-      // the index when it is the prefix of another one.
+      // The incremental path above only ever adds words. Reaching this branch
+      // means at least one indexed word left the document, and only a rebuild
+      // drops it from the index.
       ac.clearEntries();
       ac.enterList(words.toList(growable: false));
     }
