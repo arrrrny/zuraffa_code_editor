@@ -3,7 +3,7 @@
 The deliverable is behaviour: a tag line that carries nothing but the visible
 section's tag disappears from the presented section, line break included.
 
-`test/src/code/code_visible_section_tag_lines_test.dart` (11 tests, Code
+`test/src/code/code_visible_section_tag_lines_test.dart` (12 tests, Code
 level, no widget harness):
 
 1. `the tag lines are cut from the presented section` — the acceptance
@@ -32,7 +32,12 @@ level, no widget harness):
     hides only itself. `SingleLineComment.isReadonly` matches the *exact* word
     `readonly`, so `// endreadonly` is not a read-only marker at all; the
     document here uses a real one.
-11. `the cut survives a selection round trip` — a selection over the whole
+11. `the cut covers a CRLF line break too` — a single-line comment's content
+    runs up to the `\n`, so the `\r` of a CRLF break belongs to the comment and
+    the `\n` after it is the line break the cut consumes. Without that
+    accident of the parser, a CRLF document would keep a `\r` remnant on each
+    tag line; this pins it.
+12. `the cut survives a selection round trip` — a selection over the whole
     presented section recovers to a full-document selection that cuts back to
     the very same visible selection. This is the regression risk of widening
     the range: every character after it moves, so the visible ↔ full mapping
