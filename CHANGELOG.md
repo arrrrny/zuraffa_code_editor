@@ -16,6 +16,23 @@
   `test/src/code_field/tab_through_shortcuts_test.dart` pins — a regression that
   moved Tab back into a raw handler would leave every behavioural test green,
   because the observable effect of a Tab is identical either way.
+- **Outdent on Backspace, and a modifier hook that can carry it**
+  ([issue #21](https://github.com/arrrrny/zuraffa_code_editor/issues/21)):
+  pressing Backspace inside a line's leading whitespace now removes one indent
+  level instead of one space, and the modifier that does it is shipped in
+  `CodeController.defaultCodeModifiers`. Supplying your own `modifiers` list
+  without `OutdentModifier` keeps the plain one-character delete.
+
+  This needed a new hook, because the one the reporter reached for cannot work:
+  a `CodeModifier` is keyed on the character that was **typed**, and a backspace
+  removes a character rather than inserting one, so no key was ever produced and
+  no modifier — on any character — could fire. `CodeModifier` now takes an
+  optional `deletesChar`, and `CodeController` keeps a second map for those
+  modifiers, keyed on the character that was removed. The dispatch is guarded by
+  a single-character collapsed deletion, and a backspace over real code is still
+  a one-character delete: the modifier declines any line whose leading run is not
+  all spaces. A deletion cannot cross a read-only range or a folded block either
+  — the modifier's result is folded into the value before those guards run.
 - **Web is a genuinely supported platform**
   ([issue #23](https://github.com/arrrrny/zuraffa_code_editor/issues/23)):
   `autotrie`, the one dependency in the graph that reported no `platform:web`,

@@ -21,6 +21,7 @@ export 'src/code_field/text_editing_value.dart';
 export 'src/code_modifiers/close_block_code_modifier.dart';
 export 'src/code_modifiers/code_modifier.dart';
 export 'src/code_modifiers/indent_code_modifier.dart';
+export 'src/code_modifiers/outdent_code_modifier.dart';
 export 'src/code_modifiers/tab_code_modifier.dart';
 
 export 'src/code_theme/code_theme.dart';
