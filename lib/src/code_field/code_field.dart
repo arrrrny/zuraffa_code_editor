@@ -159,6 +159,13 @@ class CodeField extends StatefulWidget {
   final TextSelectionThemeData? textSelectionTheme;
   final FocusNode? focusNode;
 
+  /// The background colour of the autocomplete suggestion popup.
+  ///
+  /// Defaults to [background] (the editor's own background) when no
+  /// [decoration] is given, and to the theme's card colour otherwise, so the
+  /// popup is never transparent just because the field is decorated.
+  final Color? autocompleteBackground;
+
   @Deprecated('Use gutterStyle instead')
   final bool? lineNumbers;
 
@@ -174,6 +181,7 @@ class CodeField extends StatefulWidget {
     this.wrap = false,
     this.background,
     this.decoration,
+    this.autocompleteBackground,
     this.textStyle,
     this.smartDashesType = SmartDashesType.disabled,
     this.smartQuotesType = SmartQuotesType.disabled,
@@ -243,6 +251,12 @@ class _CodeFieldState extends State<CodeField> {
   Size? windowSize;
   late TextStyle textStyle;
   Color? _backgroundCol;
+
+  /// Resolved background of the suggestion popup, recomputed in `build` from
+  /// [CodeField.autocompleteBackground], then `_backgroundCol`, then the
+  /// theme's card colour. Unlike `_backgroundCol` it is never null, so the
+  /// popup stays opaque while the field itself is painted by a decoration.
+  late Color _popupBackground;
 
   final _editorKey = GlobalKey();
   Offset? _editorOffset;
@@ -435,6 +449,12 @@ class _CodeFieldState extends State<CodeField> {
     if (widget.decoration != null) {
       _backgroundCol = null;
     }
+
+    // Resolved after the nulling above on purpose: `_backgroundCol` is
+    // non-null until then, so resolving earlier would strand the popup on
+    // `DefaultStyles.backgroundColor` and never reach the card colour.
+    _popupBackground =
+        widget.autocompleteBackground ?? _backgroundCol ?? themeData.cardColor;
 
     final defaultTextStyle = TextStyle(
       color: styles?[rootKey]?.color ?? DefaultStyles.textColor,
@@ -712,7 +732,7 @@ class _CodeFieldState extends State<CodeField> {
           controller: widget.controller.popupController,
           editingWindowSize: windowSize!,
           style: textStyle,
-          backgroundColor: _backgroundCol,
+          backgroundColor: _popupBackground,
           parentFocusNode: _focusNode!,
           editorOffset: _editorOffset,
         );

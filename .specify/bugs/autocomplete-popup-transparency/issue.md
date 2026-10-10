@@ -29,8 +29,8 @@ crash.
 
 ## Acceptance criteria
 
-- [ ] The popup's background opacity is configurable (or the styling is lifted from the theme)
-- [ ] A test pins the default and the configured appearance
+- [x] The popup's background opacity is configurable (or the styling is lifted from the theme)
+- [x] A test pins the default and the configured appearance
 
 ## Comments
 
