@@ -100,6 +100,27 @@ Language can be dynamically changed on a controller:
 controller.setLanguage(go, DefaultLocalAnalyzer());
 ```
 
+#### Markup: HTML is highlighted by the `xml` mode
+
+`highlight` defines no `html` mode of its own. HTML — together with `xhtml`,
+`rss`, `atom`, `xjb`, `xsd`, `xsl`, `plist`, `wsf` and `svg` — is listed among
+the aliases of its `xml` mode, and that mode is what parses it: doctype,
+element names, attributes, attribute values, comments and entity references all
+come out classified. So to edit HTML, import and use `xml`:
+
+```dart
+import 'package:highlight/languages/xml.dart'; // Highlights HTML too.
+
+final controller = CodeController(
+  text: '<!DOCTYPE html>...',
+  language: xml,
+);
+```
+
+Inside `<script>` and `<style>` bodies the text is left as markup rather than
+re-parsed as JavaScript or CSS, because `highlight`'s `xml` mode declares no
+embedded sub-language for them.
+
 
 ### Code Blocks Folding 
 
