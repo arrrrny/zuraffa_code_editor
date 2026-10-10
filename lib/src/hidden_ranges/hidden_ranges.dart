@@ -121,6 +121,13 @@ class HiddenRanges {
       return null;
     }
 
+    // With nothing hidden there is nothing to cut, and rebuilding the tree
+    // would only produce a structurally identical copy of it — a full walk of
+    // every node once per keystroke for an editor that hides nothing.
+    if (ranges.isEmpty) {
+      return highlighted;
+    }
+
     int fullChar = 0;
 
     String? cutHighlightedString(String? nodeValue) {

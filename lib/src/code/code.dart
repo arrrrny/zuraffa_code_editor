@@ -602,6 +602,13 @@ class Code {
       hiddenRanges: hiddenRanges,
     );
 
+    // Folding that hides exactly what was already hidden leaves the visible text
+    // and its highlighting alone, and the visible highlight depends on nothing
+    // else. This is the case on every edit of a document with nothing folded:
+    // `foldedAs` reassembles the code, matches no blocks, and would otherwise
+    // cut and re-split the whole highlight tree a second time per keystroke.
+    final visibleUnchanged = hiddenRanges == this.hiddenRanges;
+
     return Code._(
       text: text,
       foldableBlocks: foldableBlocks,
@@ -613,10 +620,12 @@ class Code {
       invalidBlocks: invalidBlocks,
       lines: lines,
       namedSections: namedSections,
-      visibleHighlighted: hiddenRanges
-          .cutHighlighted(highlighted)
-          ?.splitLines(),
-      visibleText: hiddenRanges.cutString(text),
+      visibleHighlighted: visibleUnchanged
+          ? visibleHighlighted
+          : hiddenRanges.cutHighlighted(highlighted)?.splitLines(),
+      visibleText: visibleUnchanged
+          ? visibleText
+          : hiddenRanges.cutString(text),
       visibleSectionNames: visibleSectionNames,
     );
   }

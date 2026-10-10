@@ -10,6 +10,7 @@ class Autocompleter {
   final _keywordsAutocomplete = AutoComplete(engine: SortEngine.entriesOnly());
   final _textAutocompletes = <Object, AutoComplete>{};
   final _lastTexts = <Object, String>{};
+  final _indexedWords = <Object, Set<String>>{};
   Set<String> _blacklistSet = const {};
 
   static final _whitespacesRe = RegExp(r'\s+');
@@ -77,6 +78,7 @@ class Autocompleter {
     if (text == null) {
       _textAutocompletes.remove(key);
       _lastTexts.remove(key);
+      _indexedWords.remove(key);
       return;
     }
 
@@ -85,7 +87,7 @@ class Autocompleter {
     }
 
     final ac = _getOrCreateTextAutoComplete(key);
-    _updateText(ac, text);
+    _updateText(ac, key, text);
     _lastTexts[key] = text;
   }
 
@@ -99,16 +101,35 @@ class Autocompleter {
     return result;
   }
 
-  void _updateText(AutoComplete ac, String text) {
-    ac.clearEntries();
-    ac.enterList(
-      text
-          // https://github.com/akvelon/flutter-code-editor/issues/61
-          //.split(RegExps.wordSplit)
-          .split(RegExp(RegExps.wordSplit.pattern))
-          .where((t) => t.isNotEmpty)
-          .toList(growable: false),
-    );
+  /// Indexes the words of [text] for [key] into [ac].
+  ///
+  /// Typing one character changes at most a couple of the document's words, so
+  /// only the words that appeared are entered. Every word of the document used
+  /// to be re-entered on every keystroke, which made the cost of a keystroke
+  /// grow with the size of the file.
+  void _updateText(AutoComplete ac, Object key, String text) {
+    final words = _splitWords(text);
+    final indexedWords = _indexedWords[key];
+
+    if (indexedWords != null && indexedWords.every(words.contains)) {
+      ac.enterList(words.difference(indexedWords).toList(growable: false));
+    } else {
+      // Only a rebuild drops a word here: `AutoComplete.delete` keeps a word in
+      // the index when it is the prefix of another one.
+      ac.clearEntries();
+      ac.enterList(words.toList(growable: false));
+    }
+
+    _indexedWords[key] = words;
+  }
+
+  Set<String> _splitWords(String text) {
+    return text
+        // https://github.com/akvelon/flutter-code-editor/issues/61
+        //.split(RegExps.wordSplit)
+        .split(RegExp(RegExps.wordSplit.pattern))
+        .where((t) => t.isNotEmpty)
+        .toSet();
   }
 
   /// Sets additional words to suggest.

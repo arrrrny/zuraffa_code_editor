@@ -144,6 +144,19 @@ void main() {
           '  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">mai</span><span class="hljs-params"></span></span><span class="hljs-comment"></span>}\n',
         );
       });
+
+      test('Nothing hidden -> returned as is', () {
+        final highlighted = highlight.parse(_text, language: 'java');
+        final nothingHidden = HiddenRanges(
+          ranges: const [],
+          textLength: _text.length,
+        );
+
+        final result = nothingHidden.cutHighlighted(highlighted);
+
+        expect(identical(result, highlighted), isTrue);
+        expect(result?.toHtml(), highlighted.toHtml());
+      });
     });
   });
 }

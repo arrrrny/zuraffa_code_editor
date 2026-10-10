@@ -25,9 +25,27 @@
   double tap commits the word) plus the recomputation of the search navigation
   index after a mid-search edit.
 
+- **A committed keystroke-latency benchmark.**
+  `test/src/code_field/edit_latency_test.dart` measures the median keystroke at
+  200, 1000 and 3000 lines, prints the per-line latency, and fails on a
+  super-linear regression, so the next report of "sluggish past a few hundred
+  rows" starts from numbers instead of a sentence.
+
 ### Fixed
 
 - **`dart analyze` warnings in the new tests** — unused imports removed.
+
+- **A keystroke no longer rebuilds the visible highlight or re-indexes the whole
+  document** ([issue #39](https://github.com/arrrrny/zuraffa_code_editor/issues/39),
+  upstream `akvelon/flutter-code-editor#255`). `Code.foldedAs` cut and re-split
+  the entire highlight tree a second time per keystroke even when it folded
+  nothing, `HiddenRanges.cutHighlighted` rebuilt a structurally identical copy
+  of that tree whenever nothing was hidden, and `Autocompleter.setText` re-entered
+  every word of the document into the autotrie. Each now does only the work the
+  edit requires. Median keystroke on a 3000-line document measured 88.7 ms
+  before and 77.9 ms after (−12%; −34% at 200 lines). Growth stays linear in
+  rows — the remaining ceiling is `highlight.parse` of the whole document, which
+  has no incremental API here and is left to issue #22.
 
 ### Changed
 
