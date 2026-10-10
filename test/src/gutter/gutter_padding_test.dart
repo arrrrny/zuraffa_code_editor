@@ -18,6 +18,23 @@ void main() {
       // copyWith without the argument keeps the current value.
       expect(style.copyWith().padding, const EdgeInsets.only(left: 4));
     });
+
+    test('can be overridden through copyWith', () {
+      const style = GutterStyle(padding: EdgeInsets.only(left: 4));
+      expect(style.copyWith(padding: EdgeInsets.zero).padding, EdgeInsets.zero);
+    });
+  });
+
+  group('GutterStyle.copyWith errorPopupTextStyle', () {
+    test('carries the popup style when the argument is omitted', () {
+      const style = GutterStyle(
+        errorPopupTextStyle: TextStyle(fontWeight: FontWeight.w700),
+      );
+      expect(
+        style.copyWith().errorPopupTextStyle?.fontWeight,
+        FontWeight.w700,
+      );
+    });
   });
 
   testWidgets('gutter padding shifts the numbers without moving the grid', (

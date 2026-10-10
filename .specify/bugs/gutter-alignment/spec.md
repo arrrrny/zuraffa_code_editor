@@ -21,5 +21,7 @@ number/error/folding grid.
 
 ## Non-goals
 
-- The `copyWith` dropping `showFoldingHandles` follow-up bug (tracked
-  separately).
+- The `copyWith` follow-up bug was tracked against the wrong field: at
+  this head `copyWith` carries `showFoldingHandles` and actually
+  dropped `errorPopupTextStyle`. Fixed alongside this PR's review
+  fixes, so no separate follow-up is needed.

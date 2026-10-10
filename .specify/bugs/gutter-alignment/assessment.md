@@ -61,10 +61,12 @@ existing vertical padding.
   logical pixels without changing row pitch (grid invariant stays pinned by the
   existing test).
 
-**Follow-up (separate issue, do not fix here)**: `GutterStyle.copyWith`
-(`lib/src/line_numbers/gutter_style.dart:63-77`) silently drops
-`showFoldingHandles`, so `_buildGutter`'s `copyWith(textStyle: ...)` resets a
-user's `showFoldingHandles: false` back to `true`. File as its own bug.
+**Follow-up (correction)**: the tracked claim named the wrong field —
+`GutterStyle.copyWith` carries `showFoldingHandles` (and `_buildGutter`
+only overrides `textStyle`/`errorPopupTextStyle`, so nothing is reset).
+The field it actually dropped was `errorPopupTextStyle`, forwarded bare
+in `copyWith`; fixed in this PR's review-fix pass, so no separate bug is
+needed.
 
 ## Risks & Considerations
 

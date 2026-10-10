@@ -71,14 +71,15 @@ class GutterStyle {
   GutterStyle copyWith({
     TextStyle? errorPopupTextStyle,
     TextStyle? textStyle,
+    EdgeInsets? padding,
   }) => GutterStyle(
     width: width,
     textAlign: textAlign,
     textStyle: textStyle ?? this.textStyle,
-    errorPopupTextStyle: errorPopupTextStyle,
+    errorPopupTextStyle: errorPopupTextStyle ?? this.errorPopupTextStyle,
     background: background,
     margin: margin,
-    padding: padding,
+    padding: padding ?? this.padding,
     showErrors: showErrors,
     showFoldingHandles: showFoldingHandles,
     showLineNumbers: showLineNumbers,
