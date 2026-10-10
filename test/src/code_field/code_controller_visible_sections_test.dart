@@ -63,13 +63,9 @@ void main() {
     test('Separate start no end', () {
       final controller = createTestController({'ss_ne'});
 
-      expect(controller.value.text, '''
-  
-$_method
-  
-}''');
+      // The start tag's line carries only the tag, so it is cut whole.
+      expect(controller.value.text, '$_method\n  \n}');
       expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
-        1,
         2,
         3,
         4,
@@ -80,28 +76,21 @@ $_method
     test('Separate start separate end', () {
       final controller = createTestController({'ss_se'});
 
-      expect(controller.value.text, '''
-  
-$_method
-  
-''');
+      // Both tag lines carry only their tag and are cut whole.
+      expect(controller.value.text, '$_method\n');
       expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
-        1,
         2,
         3,
-        4,
+        5,
       ]);
     });
 
     test('Separate start trailing end', () {
       final controller = createTestController({'ss_te'});
 
-      expect(controller.value.text, '''
-  
-$_method
-''');
+      // The start tag's line is cut; the end tag shares its line with code.
+      expect(controller.value.text, '$_method\n');
       expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
-        1,
         2,
         3,
       ]);
@@ -125,14 +114,12 @@ $_method
     test('Trailing start separate end', () {
       final controller = createTestController({'ts_se'});
 
-      expect(controller.value.text, '''
-$_method
-  
-''');
+      // The start tag shares its line with code; the end tag's line is cut.
+      expect(controller.value.text, '$_method\n');
       expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
         2,
         3,
-        4,
+        5,
       ]);
     });
 
@@ -151,18 +138,14 @@ $_method
     test('No start separate end', () {
       final controller = createTestController({'ns_se'});
 
-      expect(controller.value.text, '''
-class MyClass {
-  
-$_method
-  
-''');
+      // There is no start tag; the end tag's line is cut.
+      expect(controller.value.text, 'class MyClass {\n  \n$_method\n');
       expect(controller.code.hiddenLineRanges.visibleLineNumbers.toList(), [
         0,
         1,
         2,
         3,
-        4,
+        5,
       ]);
     });
 
@@ -262,7 +245,9 @@ void method2() {}''');
         visibleSectionNames: {'show'},
       );
 
-      expect(controller.value.text, '\n\n');
+      // An empty section now presents nothing at all: both of its tag lines
+      // are cut, and there is no trailing newline left to survive them.
+      expect(controller.value.text, '');
     });
   });
 }

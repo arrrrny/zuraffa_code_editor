@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Changed
+
+- **A visible section renders flush with its contents** ([issue #35](https://github.com/arrrrny/zuraffa_code_editor/issues/35),
+  upstream `akvelon/flutter-code-editor#109`). A section whose `[START name]`
+  and `[END name]` tags sit on lines of their own used to present a blank line
+  before and after its contents — the shell of each tag line, the whitespace
+  before the comment and the line break after it — and the gutter carried a
+  number for both. Those two lines are now cut whole, so the presented section
+  starts and ends with its own code. A tag that shares its line with code
+  (`class A {// [START s]`) keeps its line, because the code before the comment
+  belongs to the section; a section with no start tag cuts its end tag alone;
+  and a document with no visible section is byte-for-byte unchanged.
+
 ### Added
 
 - **Tab, Shift+Tab and Enter are dispatched through Flutter's `Shortcuts` /
