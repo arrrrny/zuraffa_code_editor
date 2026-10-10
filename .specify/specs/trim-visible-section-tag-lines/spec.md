@@ -39,7 +39,17 @@ The cut is deliberately narrow. It applies only when **all** of these hold:
 - the section is the visible one (`visibleSection != null`) — a document with
   no visible section is byte-for-byte unchanged;
 - the comment is one of that section's own two tag lines (`[START name]` /
-  `[END name]`), not some other section's tag that happens to fall inside it;
+  `[END name]`), not some other section's tag that happens to fall inside it.
+  The tag is recognized by content — the same `startRe` / `endRe` patterns
+  that define the section, matched against the section's own name — and not
+  by the line it sits on. A first cut of this change gated on line position,
+  and the pool review caught the hole: a section that was never started
+  reports `firstLine == 0` as a document default, so line 0 is not
+  necessarily a tag line, and any service comment that merely sits there
+  (`// readonly`, another section's tag) was cut whole with it. Keeping the
+  patterns on the parser rather than re-deriving them here is what makes the
+  whitespace variants (`[ START s ]`) behave like the tags the parser built
+  the section from;
 - the tag line carries nothing but the comment — a tag sharing its line with
   code (`class A {// [START s]`) keeps its line, because the code before the
   comment belongs to the section and must stay reachable;
