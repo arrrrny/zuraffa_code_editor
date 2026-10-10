@@ -168,6 +168,19 @@ class CodeField extends StatefulWidget {
   /// (for example `SizedBox.shrink()`) to suppress the menu entirely.
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
+  /// The direction the editor's text is laid out and measured in.
+  ///
+  /// Left null the field reads the ambient [Directionality], which is what an
+  /// RTL locale already installs, so Arabic text lays out right to left with no
+  /// configuration at all. Set it to force one direction regardless of locale —
+  /// for example to render a right-to-left snippet inside a left-to-right app.
+  ///
+  /// Everything the editor measures with a [TextPainter] follows the direction
+  /// resolved here, not a hardcoded [TextDirection.ltr]: the caret measurement
+  /// that positions the autocomplete popup would otherwise be taken against the
+  /// wrong layout and place the popup on the far side of the field.
+  final TextDirection? textDirection;
+
   /// {@macro flutter.widgets.textField.enabled}
   final bool? enabled;
 
@@ -222,6 +235,7 @@ class CodeField extends StatefulWidget {
     this.contextMenuBuilder,
     this.focusNode,
     this.onChanged,
+    this.textDirection,
     @Deprecated('Use gutterStyle instead') this.lineNumbers,
     @Deprecated('Use gutterStyle instead')
     this.lineNumberStyle = const GutterStyle(),
@@ -279,6 +293,16 @@ class _CodeFieldState extends State<CodeField> {
   Size? windowSize;
   late TextStyle textStyle;
   Color? _backgroundCol;
+
+  /// The direction the field is laid out in, resolved in `build` from
+  /// [CodeField.textDirection] or, when that is null, the ambient
+  /// [Directionality].
+  ///
+  /// Only the caret measurement needs it: a caret's horizontal offset — and so
+  /// the autocomplete popup that hangs off it — depends on which way the
+  /// paragraph runs, while a line's height does not. That is why the row-height
+  /// painters below keep laying out as [TextDirection.ltr].
+  TextDirection _textDirection = TextDirection.ltr;
 
   /// Resolved background of the suggestion popup, recomputed in `build` from
   /// [CodeField.autocompleteBackground], then `_backgroundCol`, then the
@@ -537,10 +561,13 @@ class _CodeFieldState extends State<CodeField> {
       if (!isComposingText) ..._shortcutsIgnoredWhileComposing,
     };
 
+    _textDirection = widget.textDirection ?? Directionality.of(context);
+
     final codeField = TextField(
       focusNode: _focusNode,
       scrollPadding: widget.padding,
       style: textStyle,
+      textDirection: _textDirection,
       smartDashesType: widget.smartDashesType,
       smartQuotesType: widget.smartQuotesType,
       controller: widget.controller,
@@ -860,9 +887,13 @@ class _CodeFieldState extends State<CodeField> {
   /// caret offsets this painter feeds to the autocomplete popup must come from
   /// a *bounded* layout too: unbounded, a long wrapped line's caret sits
   /// several visual rows away from where the field actually draws it.
+  ///
+  /// The direction is the one the field is rendering in. An RTL caret is a
+  /// horizontal offset from the *right* edge, so measuring it as
+  /// [TextDirection.ltr] would put the popup on the wrong side of the editor.
   TextPainter _getTextPainter(String text) {
     final painter = TextPainter(
-      textDirection: TextDirection.ltr,
+      textDirection: _textDirection,
       text: TextSpan(text: text, style: textStyle),
     );
     final maxWidth = _editorTextWidth;
