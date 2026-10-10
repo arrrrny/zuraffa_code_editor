@@ -3,6 +3,9 @@ import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../common/create_app.dart';
+import '../common/snippets.dart';
+
+const _methodSnippetLength = MethodSnippet.full.length;
 
 void main() {
   group('Tab never survives into the code (#20)', () {
@@ -76,5 +79,26 @@ void main() {
       expect(controller.text, 'ab\t');
       controller.dispose();
     });
+
+    // The review of #64 found this hole: the hidden-ranges early return
+    // passed the raw platform value through before the conversion ran, so a
+    // tab survived into the code whenever a block was folded.
+    testWidgets(
+      'A tab delivered while composing is converted when a block is folded',
+      (WidgetTester wt) async {
+        final controller = await pumpController(wt, MethodSnippet.full);
+        controller.foldAt(1);
+
+        final end = _methodSnippetLength;
+        controller.value = TextEditingValue(
+          text: '${MethodSnippet.full}\t',
+          selection: TextSelection.collapsed(offset: end + 1),
+          composing: TextRange(start: end, end: end + 1),
+        );
+
+        expect(controller.text.contains('\t'), isFalse);
+        expect(controller.value.text.contains('\t'), isFalse);
+      },
+    );
   });
 }
