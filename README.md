@@ -117,9 +117,12 @@ final controller = CodeController(
 );
 ```
 
-Inside `<script>` and `<style>` bodies the text is left as markup rather than
-re-parsed as JavaScript or CSS, because `highlight`'s `xml` mode declares no
-embedded sub-language for them.
+In practice, `<script>` and `<style>` bodies come out as plain markup rather
+than being re-parsed as JavaScript or CSS in `highlight` 0.7.0: the modes do
+declare `subLanguage` entries for both, but their `<script`/`<style` tag modes
+never match, so those entries never engage. (`<?php ?>` bodies *are* parsed —
+as PHP.) If a future `highlight` release fixes the matching, the bodies would
+start being re-parsed.
 
 
 ### Code Blocks Folding 

@@ -14,9 +14,12 @@
   `package:highlight/languages/html.dart` that HTML is unsupported, and the
   demo's language picker gained `html` and `xml` entries so the path is
   demonstrable. Pinned by `test/src/highlight/html_language_test.dart`.
-  Inside `<script>` and `<style>` bodies the text stays markup rather than being
-  re-parsed as JavaScript or CSS, because `highlight`'s `xml` mode declares no
-  embedded sub-language for them.
+  In practice, `<script>` and `<style>` bodies stay markup rather than being
+  re-parsed as JavaScript or CSS in `highlight` 0.7.0: the mode does declare
+  `subLanguage` entries for both, but their `<script`/`<style` tag modes never
+  match, so those entries never engage (`<?php ?>` bodies *are* parsed, as
+  PHP). If a future `highlight` release fixes the matching, the bodies would
+  start being re-parsed.
 
 - **`tool/coverage_gate.py` gained a line-level exemption mechanism.**
   `EXEMPT_LINES` removes individual unreachable lines from both the numerator

@@ -51,8 +51,9 @@ No new highlighter, no forked `highlight`, no new public API on the package.
 - A public language registry or name-based language selection on
   `CodeController`: `setLanguage` takes a `Mode`, and the issue asks for a list
   entry, not for a new selection API.
-- Highlighting `<script>`/`<style>` bodies as JavaScript/CSS: `xml`'s mode has
-  no `subLanguage`, and adding one is a `highlight` change.
+- Highlighting `<script>`/`<style>` bodies as JavaScript/CSS: `xml`'s mode does
+  declare `subLanguage` entries for both, but its `<script`/`<style` tag modes
+  never match them in `highlight` 0.7.0, so the bodies stay markup.
 - Changing the example's language set beyond HTML/`xml`.
 
 ## Acceptance criteria

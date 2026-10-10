@@ -67,7 +67,8 @@ order-dependence is introduced.
 ## Out of scope
 
 Forking `highlight` to add an `html` mode; highlighting `<script>`/`<style>`
-bodies as JS/CSS (that needs a `subLanguage`, a `highlight` change); a public
+bodies as JS/CSS (the mode declares `subLanguage` entries for both, but its
+`<script`/`<style` tag modes never match them in 0.7.0); a public
 language registry or name-based selection on `CodeController`; changing the other
 7 example entries.
 
