@@ -103,6 +103,11 @@ class CodeController extends TextEditingController {
 
   final _styleList = <TextStyle>[];
   final _modifierMap = <String, CodeModifier>{};
+
+  /// Modifiers that react to a character being removed, keyed by that character
+  /// — the deletion counterpart of [_modifierMap]. See
+  /// [CodeModifier.deletesChar].
+  final _deletionModifierMap = <String, CodeModifier>{};
   late PopupController popupController;
   final autocompleter = Autocompleter();
   late final historyController = CodeHistoryController(codeController: this);
@@ -145,6 +150,7 @@ class CodeController extends TextEditingController {
     IndentModifier(),
     CloseBlockModifier(),
     TabModifier(),
+    OutdentModifier(),
     InsertionCodeModifier.backticks,
     InsertionCodeModifier.braces,
     InsertionCodeModifier.brackets,
@@ -183,7 +189,13 @@ class CodeController extends TextEditingController {
 
     // Create modifier map
     for (final el in modifiers) {
-      _modifierMap[el.char] = el;
+      final deletesChar = el.deletesChar;
+
+      if (deletesChar != null) {
+        _deletionModifierMap[deletesChar] = el;
+      } else {
+        _modifierMap[el.char] = el;
+      }
     }
 
     // Build styleRegExp
@@ -540,6 +552,31 @@ class CodeController extends TextEditingController {
     return sel.start;
   }
 
+  /// The offset of the character a single-character deletion removed from [a],
+  /// or null when [b] was not produced by exactly that.
+  ///
+  /// The mirror of [_insertedLoc]: there the text grew by one and the caret sat
+  /// after the inserted character; here it shrank by one and the caret sits
+  /// where the removed character had been. [newSel] is the selection of the
+  /// value being assigned, because the field's own [selection] still reports the
+  /// pre-deletion caret at this point.
+  int? _deletedLoc(String a, String b, TextSelection newSel) {
+    if (a.length != b.length + 1 || !newSel.isCollapsed) {
+      return null;
+    }
+
+    final deleted = newSel.start;
+    if (deleted < 0 || deleted >= a.length) {
+      return null;
+    }
+
+    if (a.substring(0, deleted) + a.substring(deleted + 1) != b) {
+      return null;
+    }
+
+    return deleted;
+  }
+
   @override
   set value(TextEditingValue newValue) {
     final hadActiveCompositionInOldValue = hasActiveComposition;
@@ -612,6 +649,23 @@ class CodeController extends TextEditingController {
             text: val.text,
             selection: val.selection,
           );
+        }
+      } else {
+        // A deletion removes a character instead of inserting one, so there is
+        // no typed character to key the dispatch on. The character that was
+        // removed stands in for it — see CodeModifier.deletesChar.
+        final deletedLoc = _deletedLoc(text, newValue.text, newValue.selection);
+
+        if (deletedLoc != null) {
+          final modifier = _deletionModifierMap[text[deletedLoc]];
+          final val = modifier?.updateString(text, selection, params);
+
+          if (val != null) {
+            newValue = newValue.copyWith(
+              text: val.text,
+              selection: val.selection,
+            );
+          }
         }
       }
 
