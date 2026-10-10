@@ -891,6 +891,16 @@ class _CodeFieldState extends State<CodeField> {
   /// The direction is the one the field is rendering in. An RTL caret is a
   /// horizontal offset from the *right* edge, so measuring it as
   /// [TextDirection.ltr] would put the popup on the wrong side of the editor.
+  ///
+  /// Known limitation, kept from the LTR-only days: [_getPopupLeftOffset]
+  /// converts the caret to a viewport x with
+  /// `caret.dx + padding.left − horizontalScroll`, which assumes the
+  /// paragraph's left edge sits at the viewport's left edge. That holds while
+  /// the line fits — the case the popup targets. Once an RTL line overflows
+  /// and the field scrolls horizontally, the line anchors at its *right* edge
+  /// instead, and the scrolled popup x drifts. Fixing that needs RTL scroll
+  /// semantics in the conversion; until then the unscrolled path above is the
+  /// only one this painter guarantees.
   TextPainter _getTextPainter(String text) {
     final painter = TextPainter(
       textDirection: _textDirection,

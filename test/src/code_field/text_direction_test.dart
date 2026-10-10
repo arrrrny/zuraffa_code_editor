@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zuraffa_code_editor/src/gutter/gutter.dart';
 import 'package:zuraffa_code_editor/src/wip/autocomplete/popup.dart';
 import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -75,6 +76,21 @@ Future<double> popupOffsetDx(
   return wt.widget<Popup>(find.byType(Popup)).normalOffset.dx;
 }
 
+/// The test surface's logical width. Thresholds below are derived from this
+/// and from the rendered editor box's left edge rather than hardcoded px, so
+/// a drift in the harness defaults fails as the pin it moved, not as a
+/// mysterious numeric delta.
+double viewWidth(WidgetTester wt) =>
+    wt.view.physicalSize.width / wt.view.devicePixelRatio;
+
+/// The gutter's line-number [Table], found inside the [GutterWidget] rather
+/// than as "the first Table in the tree" — an overlay or popup above the
+/// field that renders one would silently win that race.
+Finder gutterTable() => find.descendant(
+  of: find.byType(GutterWidget),
+  matching: find.byType(Table),
+);
+
 void main() {
   group('#14 — the field can be told its text direction', () {
     testWidgets('an explicit textDirection reaches the field', (wt) async {
@@ -129,18 +145,24 @@ void main() {
         ambient: TextDirection.rtl,
       );
       final rtlEnd = await popupOffsetDx(wt, rtl, text.length);
+      // Bounds derived from what is on screen, not absolute px: the editor
+      // box's left edge plus a fraction of the logical view width, so the pin
+      // survives harness drift (test-surface or font-metric changes).
+      final rtlEditorLeft = wt.getTopLeft(find.byType(TextField)).dx;
 
       final ltr = await pumpEditorWithDirection(wt, text);
       final ltrEnd = await popupOffsetDx(wt, ltr, text.length);
+      final ltrEditorLeft = wt.getTopLeft(find.byType(TextField)).dx;
+      final width = viewWidth(wt);
 
       expect(
         rtlEnd,
-        lessThan(40),
+        lessThan(rtlEditorLeft + width * 0.1),
         reason: 'the end of the text is the left edge of the editor in RTL',
       );
       expect(
         ltrEnd,
-        greaterThan(250),
+        greaterThan(ltrEditorLeft + width * 0.2),
         reason:
             'and the right edge in LTR — a hardcoded LTR painter puts both '
             'at the right edge',
@@ -213,13 +235,25 @@ void main() {
         'void main() {}',
         ambient: TextDirection.rtl,
       );
-      final rtlGutter = wt.getTopLeft(find.byType(Table).first).dx;
+      final rtlGutter = wt.getTopLeft(gutterTable()).dx;
+      final width = viewWidth(wt);
 
       await pumpEditorWithDirection(wt, 'void main() {}');
-      final ltrGutter = wt.getTopLeft(find.byType(Table).first).dx;
+      final ltrGutter = wt.getTopLeft(gutterTable()).dx;
+      final ltrEditorLeft = wt.getTopLeft(find.byType(TextField)).dx;
 
-      expect(rtlGutter, greaterThan(400));
-      expect(ltrGutter, lessThan(40));
+      expect(
+        rtlGutter,
+        greaterThan(width / 2),
+        reason: 'the gutter flips to the right half of the window',
+      );
+      expect(
+        ltrGutter,
+        lessThan(ltrEditorLeft),
+        reason:
+            'and hugs the window\'s left edge, left of the editor box — '
+            'derived from the rendered box rather than an absolute px bound',
+      );
     });
 
     testWidgets('forcing RTL on the field alone keeps the gutter on the left', (
@@ -234,7 +268,11 @@ void main() {
         textDirection: TextDirection.rtl,
       );
 
-      expect(wt.getTopLeft(find.byType(Table).first).dx, lessThan(40));
+      expect(
+        wt.getTopLeft(gutterTable()).dx,
+        lessThan(wt.getTopLeft(find.byType(TextField)).dx),
+        reason: 'the gutter stays left of the editor box',
+      );
     });
   });
 }
