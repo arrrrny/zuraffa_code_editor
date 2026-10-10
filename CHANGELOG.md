@@ -4,6 +4,23 @@
 
 ### Added
 
+- **HTML is reachable and documented as a first-class language**
+  ([issue #40](https://github.com/arrrrny/zuraffa_code_editor/issues/40)):
+  `highlight` ships no `html` mode — HTML is one of the aliases of its `xml`
+  mode, and that mode already classifies the doctype, element names, attributes,
+  attribute values, comments and entity references of a real document. The
+  README's *Languages › Syntax Highlighting* section now says so instead of
+  leaving the reader to conclude from a missing
+  `package:highlight/languages/html.dart` that HTML is unsupported, and the
+  demo's language picker gained `html` and `xml` entries so the path is
+  demonstrable. Pinned by `test/src/highlight/html_language_test.dart`.
+  In practice, `<script>` and `<style>` bodies stay markup rather than being
+  re-parsed as JavaScript or CSS in `highlight` 0.7.0: the mode does declare
+  `subLanguage` entries for both, but their `<script`/`<style` tag modes never
+  match, so those entries never engage (`<?php ?>` bodies *are* parsed, as
+  PHP). If a future `highlight` release fixes the matching, the bodies would
+  start being re-parsed.
+
 - **`tool/coverage_gate.py` gained a line-level exemption mechanism.**
   `EXEMPT_LINES` removes individual unreachable lines from both the numerator
   and the denominator of the file they sit in — the same contract

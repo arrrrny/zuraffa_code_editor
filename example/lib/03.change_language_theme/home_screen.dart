@@ -140,6 +140,10 @@ class _HomeScreenState extends State<HomeScreen> {
       _language = value;
       _codeController.language = builtinLanguages[value];
       _analyzer = _defaultAnalyzer;
+      // `setLanguage` early-returns when the new mode is identical to the
+      // current one (`html` and `xml` share a single `Mode`), so assign the
+      // analyzer explicitly to keep the controller in step with the dropdown.
+      _codeController.analyzer = _defaultAnalyzer;
 
       _codeFieldFocusNode.requestFocus();
     });
