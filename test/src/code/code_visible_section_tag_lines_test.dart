@@ -118,6 +118,20 @@ void main() {
       expect(code.visibleText, '');
     });
 
+    test('the cut covers a CRLF line break too', () {
+      const text =
+          'before1\r\n\r\n// [START s]\r\n  int x;\r\n// [END s]\r\n\r\nafter1\r\n';
+
+      final code = _code(text, visibleSectionNames: {'s'});
+
+      // A single-line comment's content runs up to the \n, so the \r of a
+      // CRLF break is part of the comment and the \n that follows it is the
+      // line break the cut consumes. Without that, a CRLF document would
+      // keep the \r as a remnant on each tag line.
+      expect(code.visibleText, '  int x;\r\n');
+      expect(code.hiddenLineRanges.visibleLineNumbers.toList(), [3, 7]);
+    });
+
     test('a document without visible sections is untouched', () {
       const text = '// readonly\n  int x;\n';
 
