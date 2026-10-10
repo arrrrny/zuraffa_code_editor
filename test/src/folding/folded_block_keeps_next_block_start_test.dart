@@ -90,11 +90,6 @@ int factorial(int n){
 
       // The following block's first line keeps a row of its own.
       expect(controller.code.hiddenLineRanges.cutLineIndexIfVisible(8), 3);
-      expect(
-        controller.code.hiddenLineRanges.cutLineIndexIfVisible(8),
-        isNotNull,
-        reason: 'the start of the next block must not become hidden',
-      );
     });
 
     test('keeps the gutter and the editor in agreement on the row count', () {
@@ -136,6 +131,53 @@ int factorial(int n){
       controller.unfoldAt(2);
       expect(controller.text, source);
       expect(controller.code.foldedBlocks, isEmpty);
+    });
+  });
+
+  group('A shared closer that does not begin the line.', () {
+    //  0  void f() {
+    //  1    int value = 1;
+    //  2    if (a &&
+    //  3        b &&
+    //  4        c) {   <- closes the parentheses block, opens the braces block
+    //  5      g();
+    //  6    }
+    //  7  }
+    //
+    // `_isClosingLine` accepted only a line that *starts* with the closer, so
+    // the guard missed this shape and folding the condition hid `c) {` whole —
+    // the issue #25 failure mode with a non-leading closer.
+    const source =
+        'void f() {\n'
+        '  int value = 1;\n'
+        '  if (a &&\n'
+        '      b &&\n'
+        '      c) {\n'
+        '    g();\n'
+        '  }\n'
+        '}\n';
+
+    test('is a foldable block of its own', () {
+      final code = CodeController(text: source, language: java).code;
+
+      expect(
+        code.foldableBlocks.map((b) => '${b.firstLine}..${b.lastLine}'),
+        containsAllInOrder(<String>['2..4', '4..6']),
+      );
+    });
+
+    test('keeps the next block start visible when the condition is folded', () {
+      final controller = CodeController(text: source, language: java);
+
+      controller.foldAt(2); // `if (a &&`
+
+      expect(
+        controller.code.hiddenLineRanges.cutLineIndexIfVisible(4),
+        isNotNull,
+        reason:
+            '`c) {` closes the condition and opens the next block, so it must '
+            'keep a row of its own',
+      );
     });
   });
 

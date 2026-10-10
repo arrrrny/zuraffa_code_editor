@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.1.2
+
+### Fixed
+
+- **Foldable blocks that merely touch are no longer merged.** `joinIntersecting`
+  joined two blocks when the second began on the first block's last line, so
+  `}void main(){` — the closer of one block and the opener of the next — became
+  a single block and folding the first folded the second
+  ([issue #25](https://github.com/arrrrny/zuraffa_code_editor/issues/25)).
+  Touching blocks now stay separate (`0..1`, `2..8`, `3..5`, `8..11`).
+
+- **The block below keeps its start on screen.** When a block's closing line
+  also opens the following foldable block, the hidden range ends one character
+  earlier so the closer keeps a row of its own — and with it the line number
+  and the fold toggle the next block hangs there. The guard no longer requires
+  the closer to be the line's first token, so a multi-line condition
+  (`if (a &&` / `b &&` / `c) {`) is covered too. The upstream glue default
+  (`parsers: [  ],`) is unchanged.
+
 ## 0.1.1
 
 ### Fixed

@@ -521,12 +521,25 @@ class Code {
     // Ending the range just before the closing line still leaves the closer's
     // text on screen: the newline that ended the previous content line falls
     // outside the range and becomes the row break the closer needs.
-    if (_isClosingLine(lastLine) && _startsAnotherFoldableBlock(block)) {
+    //
+    // The closer need not be the line's first token: in a multi-line condition
+    // (`if (a &&` / `b &&` / `c) {`) the shared line is `c) {`, which closes
+    // the parentheses block and opens the braces block. The helper below is
+    // already narrow enough on its own, so it is the whole test — gating it on
+    // `_isClosingLine` missed that shape.
+    if (_startsAnotherFoldableBlock(block)) {
       final closerOnItsOwnRow = lastLine.textRange.start - 1;
       if (closerOnItsOwnRow > startOfRange) {
         endOfRange = closerOnItsOwnRow;
       }
     }
+
+    // Known limitation, same family: when the touching blocks are only two
+    // lines (`if (a &&` / `b) {`), `startOfRange == closerOnItsOwnRow`, so the
+    // `>` check above is false and this guard is inert however it is gated —
+    // the shared line has no preceding content row to preserve and stays
+    // hidden. That sub-shape wants its own fix, not a widening of this narrow
+    // guard.
 
     return HiddenRange(
       startOfRange,
