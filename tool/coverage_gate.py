@@ -101,13 +101,13 @@ EXEMPT_LINES: Dict[str, Dict[int, str]] = {
     # the second loop below, which adds a toggle for every folded block — so the
     # lambda built here is discarded before it can ever be tapped.
     "lib/src/gutter/gutter.dart": {
-        221: "the folded-block loop below overwrites this toggle",
+        229: "the folded-block loop below overwrites this toggle",
     },
     # `_getErrorPopup()` is called from the `MouseRegion.onEnter` handler: a
     # widget can only receive an enter event (be hit-tested) after it has been
     # laid out, so `findRenderObject()` cannot be null there.
     "lib/src/gutter/error.dart": {
-        71: "onEnter implies laid out and hit-tested, so RenderBox is non-null",
+        89: "onEnter implies laid out and hit-tested, so RenderBox is non-null",
     },
     # `_getNextOrFirstMatchIndex()` only returns null when the match list is
     # empty, and the guard two lines above has already ruled that out — so this

@@ -17,6 +17,18 @@
 
 ### Added
 
+- **The gutter's error icon is overridable, by issue type**
+  ([issue #81](https://github.com/arrrrny/zuraffa_code_editor/issues/81),
+  upstream `akvelon/flutter-code-editor#216`). The gutter rendered one
+  hardcoded red `Icons.cancel` for every issue and offered no way to change it.
+  `GutterStyle` now carries `errorIcon`, `warningIcon` and `infoIcon` — nullable
+  `IconData`s resolved per issue through `GutterStyle.issueIcon(IssueType)` — and
+  `GutterErrorWidget` takes an optional `icon` widget for a host that mounts it
+  directly. A style that sets none of them renders exactly the icon it always
+  did: every type still falls back to `defaultIssueIcon`, which is the glyph the
+  `errorIcon` constant is now built from so the two cannot drift apart. Only the
+  glyph is overridable — the icon is drawn at the issue column's own width, so
+  its size stays part of the row geometry.
 - **Tab, Shift+Tab and Enter are dispatched through Flutter's `Shortcuts` /
   `Actions` machinery**, and the raw key path is now pinned as owning none of
   them ([issue #29](https://github.com/arrrrny/zuraffa_code_editor/issues/29)):

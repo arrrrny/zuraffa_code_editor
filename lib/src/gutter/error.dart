@@ -4,15 +4,33 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../analyzer/models/issue.dart';
+import '../line_numbers/gutter_style.dart';
 import 'clickable.dart';
 
-const errorIcon = Icon(Icons.cancel, color: Colors.red, size: 16);
+/// The icon the gutter renders for an issue when nothing overrides it.
+///
+/// Built from [defaultIssueIcon] so the two can never disagree: if the default
+/// glyph ever changes, the constant changes with it and a style that sets
+/// nothing still matches.
+const errorIcon = Icon(defaultIssueIcon, color: Colors.red, size: 16);
 
 class GutterErrorWidget extends StatefulWidget {
   final Issue issue;
   final TextStyle popupTextStyle;
 
-  const GutterErrorWidget(this.issue, this.popupTextStyle, {super.key});
+  /// The glyph shown for the issue.
+  ///
+  /// Defaults to [errorIcon] — the icon the gutter has always rendered. The
+  /// gutter passes the glyph [GutterStyle.issueIcon] resolved for the issue's
+  /// own type; a host mounting this widget directly can pass its own.
+  final Widget icon;
+
+  const GutterErrorWidget(
+    this.issue,
+    this.popupTextStyle, {
+    super.key,
+    this.icon = errorIcon,
+  });
 
   @override
   State<GutterErrorWidget> createState() => _GutterErrorWidgetState();
@@ -58,7 +76,7 @@ class _GutterErrorWidgetState extends State<GutterErrorWidget> {
           });
         });
       },
-      child: errorIcon,
+      child: widget.icon,
     );
   }
 
