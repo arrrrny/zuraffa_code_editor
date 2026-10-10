@@ -15,8 +15,8 @@ import '../common/create_app.dart';
 /// parameter, so the default platform toolbar was the only option.
 ///
 /// The gesture this file drives is a long press on the first line of text, which
-/// is the only way a touch selection appears in a widget test; the editor's own
-/// keyboard shortcuts are wired elsewhere and are unaffected.
+/// is the simplest way a touch selection appears in a widget test; the editor's
+/// own keyboard shortcuts are wired elsewhere and are unaffected.
 void main() {
   Widget app({
     required CodeController controller,

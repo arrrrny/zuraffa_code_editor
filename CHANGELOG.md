@@ -31,6 +31,14 @@
   super-linear regression, so the next report of "sluggish past a few hundred
   rows" starts from numbers instead of a sentence.
 
+- **`CodeField` exposes `contextMenuBuilder`**
+  ([issue #12](https://github.com/arrrrny/zuraffa_code_editor/issues/12)):
+  an app can now replace the selection toolbar with its own actions (search,
+  format, go to line) by passing an `EditableTextContextMenuBuilder`. When no
+  builder is given, the field forwards `TextField`'s own default instead of an
+  explicit `null`, so the platform menu — Copy, Select All — survives unchanged
+  for every existing `CodeField`.
+
 ### Fixed
 
 - **`dart analyze` warnings in the new tests** — unused imports removed.

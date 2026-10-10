@@ -158,7 +158,7 @@ class CodeField extends StatefulWidget {
   /// A way to replace specific line numbers by a custom TextSpan
   final TextSpan Function(int, TextStyle?)? lineNumberBuilder;
 
-  /// {@macro flutter.widgets.textField.contextMenuBuilder}
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
   ///
   /// The selection toolbar only: the editor's own actions (search, comment,
   /// indent) stay wired through [FocusableActionDetector] either way, so this
