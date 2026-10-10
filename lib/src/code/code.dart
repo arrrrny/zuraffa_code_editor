@@ -107,13 +107,22 @@ class Code {
       );
     }
 
+    final visibleSection = sectionsMap
+        .getByKeys(visibleSectionNames)
+        .firstOrNull;
+
     final visibleSectionsHiddenRanges = _visibleSectionsToHiddenRanges(
       visibleSectionNames,
       sectionsMap,
       lines,
     );
 
-    final commentsHiddenRanges = _commentsToHiddenRanges(serviceComments);
+    final commentsHiddenRanges = _commentsToHiddenRanges(
+      serviceComments,
+      visibleSection: visibleSection,
+      text: text,
+      lines: lines,
+    );
 
     final hiddenRangesBuilder = HiddenRangesBuilder.fromMaps({
       String: visibleSectionsHiddenRanges,
@@ -256,19 +265,90 @@ class Code {
     return result;
   }
 
+  /// Hidden ranges for the comments, keyed by each comment's offset.
+  ///
+  /// A service comment hides its own text. In visible-section presentation
+  /// mode, the visible section's two tag lines are scaffolding rather than
+  /// content: when a tag line carries nothing but the comment, the whole
+  /// line — the whitespace before the comment and the line break after it —
+  /// is hidden, so the presented section renders flush with its contents.
+  /// A tag that shares its line with code keeps the line: the code before
+  /// the comment belongs to the section.
   static Map<int, HiddenRange> _commentsToHiddenRanges(
-    Iterable<SingleLineComment> comments,
+    Iterable<SingleLineComment> comments, {
+    required NamedSection? visibleSection,
+    required String text,
+    required CodeLines lines,
+  }) {
+    final result = <int, HiddenRange>{};
+
+    for (final comment in comments) {
+      result[comment.characterIndex] = _commentHiddenRange(
+        comment,
+        visibleSection: visibleSection,
+        text: text,
+        lines: lines,
+      );
+    }
+
+    return result;
+  }
+
+  static HiddenRange _commentHiddenRange(
+    SingleLineComment comment, {
+    required NamedSection? visibleSection,
+    required String text,
+    required CodeLines lines,
+  }) {
+    final commentStart = comment.characterIndex;
+    final commentEnd = commentStart + comment.outerContent.length;
+
+    final hidesOnlyItself =
+        visibleSection == null ||
+        !_isVisibleSectionTagLine(comment, visibleSection) ||
+        !_lineCarriesOnlyTheComment(comment, text: text, lines: lines) ||
+        // A last line with no trailing line break has no line break to cut.
+        commentEnd >= text.length ||
+        text[commentEnd] != '\n';
+
+    return HiddenRange(
+      hidesOnlyItself
+          ? commentStart
+          : lines.lines[comment.lineIndex].textRange.start,
+      hidesOnlyItself ? commentEnd : commentEnd + 1,
+      firstLine: comment.lineIndex,
+      lastLine: comment.lineIndex,
+      wholeFirstLine: !hidesOnlyItself,
+    );
+  }
+
+  /// Whether [comment] sits on one of the visible section's own tag lines.
+  ///
+  /// A section with no ending tag only ever has its start tag cut, and a
+  /// start and an end tag on the same line describe an empty section whose
+  /// single line is left alone.
+  static bool _isVisibleSectionTagLine(
+    SingleLineComment comment,
+    NamedSection section,
   ) {
-    return <int, HiddenRange>{
-      for (final comment in comments)
-        comment.characterIndex: HiddenRange(
-          comment.characterIndex,
-          comment.characterIndex + comment.outerContent.length,
-          firstLine: comment.lineIndex,
-          lastLine: comment.lineIndex,
-          wholeFirstLine: false,
-        ),
-    };
+    if (comment.lineIndex == section.firstLine &&
+        section.lastLine != section.firstLine) {
+      return true;
+    }
+
+    return comment.lineIndex == section.lastLine &&
+        section.lastLine != section.firstLine;
+  }
+
+  /// Whether the comment is the only thing on its line.
+  static bool _lineCarriesOnlyTheComment(
+    SingleLineComment comment, {
+    required String text,
+    required CodeLines lines,
+  }) {
+    final lineStart = lines.lines[comment.lineIndex].textRange.start;
+
+    return text.substring(lineStart, comment.characterIndex).trim().isEmpty;
   }
 
   /// Returns whether the current selection has any read-only part.
