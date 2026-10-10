@@ -35,15 +35,21 @@ what hands the character-shaped keys to the shortcut table.
 
 | Test | Pins |
 |------|------|
-| Tab / Shift+Tab / Enter are `ignored` by `onKey` | the negative the issue asks for: the raw path owns no Tab/Enter branch |
+| Tab is `ignored` by `onKey`; Shift+Tab is, with the modifier held | the negative the issue asks for: the raw path owns no Tab/Enter branch and does not inspect modifiers to decide |
+| Enter is `ignored` | the same negative for Enter |
 | the arrows outside the popup are `ignored` | the boundary of what the raw path does own |
-| while composing, every key is `ignored` (Ctrl+F included) | composition is owned by the platform |
+| while composing, every key is `ignored` — Ctrl+F included | the composing guard sits above the Ctrl+F branch; the ctrl is held through the framework, because the `keyF` leg with the modifier up is ignored either way |
 | Ctrl+F opens the search and is `handled` | `onKey` is not empty — it just does not own the character-shaped keys |
-| every declared intent is answered by an action | the intent → action table |
+| every one of the ten declared intents is answered by an action | the intent → action table, copy/undo/redo included |
 | the actions share the controller that dispatches them | no action is wired to a foreign controller |
 | a real Tab inserts the editor indent | the shortcut table delivers the edit |
 | a real Shift+Tab outdents the caret line | `OutdentIntent` is reachable from the keyboard |
 | a real Enter breaks the line | `EnterKeyIntent` is reachable from the keyboard |
+
+Fault-injected twice. Removing the composing early-return reddens only the
+composing-Ctrl+F test — Tab and Enter have no raw branch to fire either way, so
+the modifier is what makes the guard visible. Adding a Tab branch to
+`_onKeyDownRepeat` reddens the first two.
 
 The negative is the point: a regression that moved Tab back into a raw handler
 would leave every behavioural test green, because the observable effect of a

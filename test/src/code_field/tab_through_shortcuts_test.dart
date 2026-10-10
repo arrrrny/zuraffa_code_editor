@@ -71,8 +71,11 @@ void main() {
     testWidgets('Shift+Tab is ignored too, modifiers and all', (wt) async {
       final controller = controllerFor();
 
-      // The raw path does not inspect modifiers at all: Shift+Tab reaches it as
-      // the same logical Tab key, and it still declines to own it.
+      // The raw path does not inspect modifiers at all: the framework reports
+      // Shift+Tab as the same logical Tab key, and the raw path still declines
+      // to own it. The shift has to actually be held — a regression that claimed
+      // Shift+Tab by reading `isShiftPressed` would sail through this with the
+      // modifier up.
       await wt.sendKeyDownEvent(LogicalKeyboardKey.shift);
       final result = controller.onKey(_key(LogicalKeyboardKey.tab));
       await wt.sendKeyUpEvent(LogicalKeyboardKey.shift);
@@ -104,8 +107,10 @@ void main() {
       wt,
     ) async {
       // Composition is owned by the platform; while it is in progress the raw
-      // path declines every key, including Ctrl+F, so it cannot corrupt the
-      // composing text.
+      // path declines every key, Ctrl+F included, so it cannot corrupt the
+      // composing text. The ctrl is held through the framework because that is
+      // what makes the guard load-bearing: the `keyF` leg with the modifier up
+      // is ignored whether the guard is there or not.
       final controller = await pumpController(wt, 'void main()');
 
       controller.value = const TextEditingValue(
@@ -128,7 +133,13 @@ void main() {
       await wt.sendKeyUpEvent(LogicalKeyboardKey.control);
 
       expect(result, KeyEventResult.ignored);
-      expect(controller.searchController.shouldShow, isFalse);
+      expect(
+        controller.searchController.shouldShow,
+        isFalse,
+        reason:
+            'a shortcut that opens a panel must not fire on top of an '
+            'in-progress composition',
+      );
     });
   });
 
