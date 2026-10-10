@@ -5,6 +5,19 @@ on:
     branches: [ '**' ]
   pull_request:
     branches: [ '**' ]
+  workflow_dispatch:
+
+# A new push to a branch makes the runs already in flight for it pointless, and
+# the pipeline is a hard gate on every PR — a stale run only burns CI minutes
+# and makes the checks list lie about what the branch tip would do.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# The pipeline only ever reads the checkout and writes a status back. Nothing
+# here needs to push, comment, or touch packages.
+permissions:
+  contents: read
 
 env:
   flutter_version: 3.47.5
@@ -12,6 +25,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v3
@@ -61,15 +75,16 @@ jobs:
 
       # Ratchet: the number only ever rises, and only in the PR that adds the
       # tests behind it — the step below refuses a PR that lowers it.
-      # Measured on this branch with a fresh coverage run and the CI helper:
-      # 100.00% (3089/3089 lines). Unreachable files are exempted (see
-      # EXEMPT_FILES in tool/coverage_gate.py): the CI helper imports every
-      # file under lib/, so dead/wip modules the package never references
-      # would otherwise drag the number down. 13 individual lines are exempted
-      # the same way (see EXEMPT_LINES): each is a provably unreachable guard
-      # or dead branch, and every entry carries its proof in the comment above
-      # it. The gate is pinned to the measured value: a new uncovered line must
-      # be covered, or proved dead via EXEMPT_LINES/EXEMPT_FILES.
+      # Measured on master with a fresh coverage run and the CI helper:
+      # 100.00% (3309/3309 lines, CI run 38081200818). Unreachable files are
+      # exempted (see EXEMPT_FILES in tool/coverage_gate.py): the CI helper
+      # imports every file under lib/, so dead/wip modules the package never
+      # references would otherwise drag the number down. 13 individual lines
+      # are exempted the same way (see EXEMPT_LINES): each is a provably
+      # unreachable guard or dead branch, and every entry carries its proof in
+      # the comment above it. The gate is pinned to the measured value: a new
+      # uncovered line must be covered, or proved dead via
+      # EXEMPT_LINES/EXEMPT_FILES.
       - name: Coverage gate
         run: |
           python3 tool/coverage_gate.py --min 100
@@ -99,6 +114,16 @@ jobs:
       #     'lib/*/*.part.dart' \
       #     'lib/generated/*.dart' \
       #     'lib/generated/*/*.dart' -o coverage/lcov.info
+
+      # The gate reports a number; this keeps the data behind it, so a
+      # failing run can be read for which lines, not just how many.
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov-${{ github.run_id }}
+          path: coverage/lcov.info
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Codecov
         uses: codecov/codecov-action@v3
