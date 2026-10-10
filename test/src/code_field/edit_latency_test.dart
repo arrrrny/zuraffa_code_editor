@@ -39,7 +39,7 @@ int _median(List<int> values) {
 /// and everything after it shifts. The controller is measured on its own
 /// because that is where the work that grows with the document lives — parsing
 /// the changed text, rebuilding the lines, folds and hidden ranges.
-Future<int> _medianKeystrokeMicros(WidgetTester wt, int lines, int reps) async {
+Future<int> _medianKeystrokeMicros(int lines, int reps) async {
   final controller = createController(_document(lines), language: java);
   final samples = <int>[];
   final stopwatch = Stopwatch();
@@ -78,15 +78,15 @@ void main() {
   const reps = 5;
 
   testWidgets('A keystroke gets no more expensive per line as the document '
-      'grows', (wt) async {
+      'grows', (_) async {
     // Without this the first measured size pays for JIT compilation and reads
     // several times slower than the rest, which would make the comparison below
     // depend on the order of `sizes` rather than on the editor.
-    await _medianKeystrokeMicros(wt, 1000, reps);
+    await _medianKeystrokeMicros(1000, reps);
 
     final micros = <int, int>{};
     for (final lines in sizes) {
-      micros[lines] = await _medianKeystrokeMicros(wt, lines, reps);
+      micros[lines] = await _medianKeystrokeMicros(lines, reps);
     }
 
     for (final lines in sizes) {
