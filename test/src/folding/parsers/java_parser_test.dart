@@ -50,7 +50,8 @@ class MyClass{                                      // 10
           _FB(firstLine: 4, lastLine: 8, type: _T.imports),
           _FB(firstLine: 10, lastLine: 23, type: _T.braces),
           _FB(firstLine: 11, lastLine: 14, type: _T.brackets),
-          _FB(firstLine: 16, lastLine: 22, type: _T.union),
+          _FB(firstLine: 16, lastLine: 19, type: _T.parentheses),
+          _FB(firstLine: 19, lastLine: 22, type: _T.braces),
           _FB(firstLine: 20, lastLine: 21, type: _T.singleLineComment),
         ],
       ),
@@ -223,7 +224,10 @@ class MyClass{            // 0
 * some weird comment         3
 */                        // 4
 ''',
-        expected: [_FB(firstLine: 0, lastLine: 4, type: _T.union)],
+        expected: [
+          _FB(firstLine: 0, lastLine: 2, type: _T.braces),
+          _FB(firstLine: 2, lastLine: 4, type: _T.multilineComment),
+        ],
       ),
 
       _Example(
@@ -282,7 +286,10 @@ class MyClass{
 }
 */
 ''',
-        expected: [_FB(firstLine: 0, lastLine: 6, type: _T.union)],
+        expected: [
+          _FB(firstLine: 0, lastLine: 2, type: _T.braces),
+          _FB(firstLine: 2, lastLine: 6, type: _T.multilineComment),
+        ],
       ),
 
       _Example(
@@ -339,7 +346,8 @@ import java.lang.Exception;   // 9
         expected: [
           _FB(firstLine: 0, lastLine: 9, type: _T.imports),
           _FB(firstLine: 2, lastLine: 4, type: _T.singleLineComment),
-          _FB(firstLine: 5, lastLine: 7, type: _T.union),
+          _FB(firstLine: 5, lastLine: 6, type: _T.multilineComment),
+          _FB(firstLine: 6, lastLine: 7, type: _T.singleLineComment),
         ],
       ),
     ];

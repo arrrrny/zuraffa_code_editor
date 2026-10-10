@@ -30,9 +30,9 @@ block destroys code the user asked to keep visible.
 
 ## Acceptance criteria
 
-- [ ] Root cause identified in the folding logic (`foldable_block.dart` / hidden ranges) when two blocks are adjacent
-- [ ] Folding block A hides only A's lines, including A's trailing block-start line
-- [ ] A regression test pins the hidden-range set for adjacent blocks
+- [x] Root cause identified in the folding logic (`foldable_block.dart` / hidden ranges) when two blocks are adjacent
+- [x] Folding block A hides only A's lines, including A's trailing block-start line
+- [x] A regression test pins the hidden-range set for adjacent blocks
 
 ## Comments
 
