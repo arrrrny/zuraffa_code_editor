@@ -13,6 +13,7 @@ import '../autocomplete/autocompleter.dart';
 import '../code/code_edit_result.dart';
 import '../code/key_event.dart';
 import '../code_modifiers/insertion.dart';
+import '../highlight/sub_languages.dart';
 import '../history/code_history_controller.dart';
 import '../history/code_history_record.dart';
 import '../search/controller.dart';
@@ -252,6 +253,7 @@ class CodeController extends TextEditingController {
     if (language != null) {
       _languageId = language.hashCode.toString();
       highlight.registerLanguage(_languageId, language);
+      _registerSubLanguages(language);
     }
 
     _language = language;
@@ -259,6 +261,70 @@ class CodeController extends TextEditingController {
     _updateCode(_code.text);
     this.analyzer = analyzer;
     notifyListeners();
+  }
+
+  /// Registers every language [language] can embed under the name it names it.
+  ///
+  /// `highlight` looks an embedded sub-language up **by name** in the language
+  /// registry, so a mode that embeds one cannot find it unless that name is
+  /// registered. Without this, `_processSubLanguage` gives up and hands the
+  /// embedded fragment back as one plain node — markdown's `<b>html</b>`, dart's
+  /// doc comments, erb's Ruby, and every other embedding silently lose their
+  /// highlighting.
+  ///
+  /// The references live on child modes, not on the top one (markdown's
+  /// `Mode(begin: "<", end: ">", subLanguage: ["xml"])` is one of its
+  /// `contains`), so the tree is walked. Only the names this mode actually
+  /// references are registered, so setting a language cannot make another
+  /// language's embeddings worse, and a reference outside [subLanguages] stays
+  /// exactly as unhighlighted as it was before.
+  void _registerSubLanguages(Mode language) {
+    final references = <String>{};
+    _collectSubLanguageReferences(language, references, {});
+    if (references.isEmpty) {
+      return;
+    }
+
+    for (final name in references) {
+      final subLanguage = subLanguages[name];
+      if (subLanguage != null) {
+        highlight.registerLanguage(name, subLanguage);
+      }
+    }
+  }
+
+  /// Gathers every sub-language name reachable from [mode], following
+  /// `contains`, `variants`, `starts` and `refs` the way the highlighter's
+  /// own compiler does, and skipping modes already [seen] so a self- or
+  /// cross-referencing mode cannot loop.
+  void _collectSubLanguageReferences(
+    Mode mode,
+    Set<String> into,
+    Set<Mode> seen,
+  ) {
+    if (!seen.add(mode)) {
+      return;
+    }
+
+    into.addAll(mode.subLanguage ?? const []);
+
+    for (final child in mode.contains ?? const <Mode?>[]) {
+      if (child != null) {
+        _collectSubLanguageReferences(child, into, seen);
+      }
+    }
+    for (final variant in mode.variants ?? const <Mode?>[]) {
+      if (variant != null) {
+        _collectSubLanguageReferences(variant, into, seen);
+      }
+    }
+    final starts = mode.starts;
+    if (starts != null) {
+      _collectSubLanguageReferences(starts, into, seen);
+    }
+    for (final ref in mode.refs?.values ?? const <Mode>[]) {
+      _collectSubLanguageReferences(ref, into, seen);
+    }
   }
 
   /// Sets a specific cursor position in the text
