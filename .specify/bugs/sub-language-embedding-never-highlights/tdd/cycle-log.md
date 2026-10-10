@@ -65,3 +65,28 @@ Four detect the defect; three are guards.
 `test/src/code_field/zz_probe2_test.dart`,
 `test/src/code_field/zz_probe_docker_test.dart`. `test/coverage_helper_test.dart`
 and `coverage/` were never committed.
+
+## Cycle 4 — review findings (PR #67 review, folded in)
+
+Two findings, both now in the code:
+
+- The registry test asserted on `package:highlight/highlight.dart`'s
+  pre-seeded global — a different instance from the `highlight_core` one the
+  controller registers into — so it passed before the fix and could not catch
+  a regression. It now parses through the `highlight_core` instance and fails
+  when the registration call is removed.
+- The walk was one level deep: it registered `markdown` for dart but never
+  followed `markdown → xml`, so with a cold registry the HTML inside a doc
+  comment stayed plain. `_registerSubLanguages` now follows the referenced
+  languages' own references through the same map, each name handled once —
+  bounded by the 28-entry map even with the cycles (xml and xquery
+  self-reference; perl ↔ mojolicious). A `<?php` fragment inside markdown's
+  embedded XML (`markdown → xml → php`) is the new test 4; with the walk
+  reduced to one level it is the only failure.
+
+The review's informational note is resolved in the docs, not the code:
+registration is unconditional, so a consumer's own mode under one of the 28
+names is replaced — `Highlight` exposes no read of the registry, so a
+skip-if-present guard is not possible — and `sub_languages.dart`'s header now
+says so.
+

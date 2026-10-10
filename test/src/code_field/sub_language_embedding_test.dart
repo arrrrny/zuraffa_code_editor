@@ -1,6 +1,6 @@
 // ignore_for_file: discarded_futures
 
-import 'package:highlight/highlight.dart';
+import 'package:highlight/highlight_core.dart';
 import 'package:highlight/languages/dart.dart';
 import 'package:highlight/languages/dockerfile.dart';
 import 'package:highlight/languages/markdown.dart';
@@ -78,6 +78,30 @@ void main() {
       expect(html, contains('hljs-string'));
     });
 
+    test(
+      'a second-level embed highlights (php inside xml inside markdown)',
+      () {
+        // The top language's graph names only `xml`; `php` is named by xml
+        // itself (`<?php`), so a walk that stops after the top language leaves
+        // the PHP fragment plain.
+        final controller = CodeController(
+          text: 'Some <?php echo "hi"; ?> here.',
+          language: markdown,
+        );
+        addTearDown(controller.dispose);
+
+        final html = htmlOf(controller);
+
+        expect(
+          html,
+          contains('<span class="php">'),
+          reason: 'the PHP fragment must be tokenised, was: $html',
+        );
+        expect(html, contains('hljs-keyword'));
+        expect(html, contains('hljs-string'));
+      },
+    );
+
     test('an embedded language outside the bundled set stays plain', () {
       // A mode that embeds a name this package does not bundle still falls
       // back to plaintext exactly as before, so the boundary is honest.
@@ -128,9 +152,15 @@ void main() {
       );
       addTearDown(markdownController.dispose);
 
-      // Reached through the public API, so the assertion does not depend on
-      // how the controller stores what it registered.
-      final html = highlight.parse('a <b>x</b> b', language: 'md').toHtml();
+      // This `highlight` is `highlight_core.dart`'s instance — the registry
+      // the controller registers into and parses through. (`highlight.dart`
+      // exports a different instance pre-seeded with every mode, where these
+      // names resolve with or without the controller.) The dart controller
+      // registers `markdown`, whose mode embeds `xml`, so parsing a markdown
+      // source resolves both names the way the field's own parse does.
+      final html = highlight
+          .parse('a <b>x</b> b', language: 'markdown')
+          .toHtml();
       expect(html, contains('hljs-tag'));
     });
   });

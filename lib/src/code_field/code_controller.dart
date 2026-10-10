@@ -274,10 +274,14 @@ class CodeController extends TextEditingController {
   ///
   /// The references live on child modes, not on the top one (markdown's
   /// `Mode(begin: "<", end: ">", subLanguage: ["xml"])` is one of its
-  /// `contains`), so the tree is walked. Only the names this mode actually
-  /// references are registered, so setting a language cannot make another
-  /// language's embeddings worse, and a reference outside [subLanguages] stays
-  /// exactly as unhighlighted as it was before.
+  /// `contains`), so the tree is walked. The walk then follows the referenced
+  /// languages' own references — dart embeds markdown, whose mode embeds xml —
+  /// so a second-level embed is registered too; each name is handled once,
+  /// which bounds the walk over [subLanguages] even though some modes
+  /// reference each other in a cycle (xml and xquery include themselves).
+  /// Only the names this mode's graph reaches are registered, so setting a
+  /// language cannot make another language's embeddings worse, and a reference
+  /// outside [subLanguages] stays exactly as unhighlighted as it was before.
   void _registerSubLanguages(Mode language) {
     final references = <String>{};
     _collectSubLanguageReferences(language, references, {});
@@ -285,11 +289,23 @@ class CodeController extends TextEditingController {
       return;
     }
 
-    for (final name in references) {
-      final subLanguage = subLanguages[name];
-      if (subLanguage != null) {
-        highlight.registerLanguage(name, subLanguage);
+    final pending = references.toList();
+    final handled = <String>{};
+    while (pending.isNotEmpty) {
+      final name = pending.removeLast();
+      if (!handled.add(name)) {
+        continue;
       }
+
+      final subLanguage = subLanguages[name];
+      if (subLanguage == null) {
+        continue;
+      }
+
+      highlight.registerLanguage(name, subLanguage);
+      final nested = <String>{};
+      _collectSubLanguageReferences(subLanguage, nested, {});
+      pending.addAll(nested);
     }
   }
 

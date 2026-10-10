@@ -20,6 +20,10 @@
 /// plaintext exactly as before; register it with `highlight.registerLanguage`
 /// to light it up.
 ///
+/// Registering is unconditional — `Highlight` exposes no way to read the
+/// registry back — so a mode a consumer registered under one of these names is
+/// replaced the next time a language embedding that name is set.
+///
 /// Rebuild after a `highlight` upgrade:
 ///
 /// ```sh
