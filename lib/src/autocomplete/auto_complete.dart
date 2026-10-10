@@ -53,7 +53,7 @@ class AutoComplete {
 
   /// Clear all the entries. The engine is now blank.
   void clearEntries() {
-    _tree.root = TrieNode('', false);
+    _tree.root = TrieNode('');
   }
 
   /// Get all the entries in a list.
@@ -105,7 +105,7 @@ class _TrieSearchTree {
   TrieNode root;
   double Function(SortValue e) sort;
 
-  _TrieSearchTree(this.sort) : root = TrieNode('', false) {
+  _TrieSearchTree(this.sort) : root = TrieNode('') {
     root.children = <TrieNode>[];
   }
 
@@ -114,7 +114,7 @@ class _TrieSearchTree {
 
     //Iterate through string and add/progress through nodes.
     for (var i = 0; i < word.length; i++) {
-      var x = TrieNode(word[i], false);
+      var x = TrieNode(word[i]);
       final existing = base.children.indexOf(x);
       if (existing < 0) {
         // x is added to base.children
@@ -141,7 +141,7 @@ class _TrieSearchTree {
   List<String> suggestions(String prefix) {
     var base = root;
     for (var i = 0; i < prefix.length; i++) {
-      var x = TrieNode(prefix[i], false);
+      var x = TrieNode(prefix[i]);
       final existing = base.children.indexOf(x);
       if (existing < 0) {
         return [];
@@ -157,8 +157,9 @@ class _TrieSearchTree {
       for (var i = 0; i < returner.length; i++) returner[i]: i,
     };
     returner.sort((TrieString a, TrieString b) {
-      final byScore = sort(SortValue(b.lastInsert, b.hits))
-          .compareTo(sort(SortValue(a.lastInsert, a.hits)));
+      final byScore = sort(
+        SortValue(b.lastInsert, b.hits),
+      ).compareTo(sort(SortValue(a.lastInsert, a.hits)));
       if (byScore != 0) return byScore;
       return dfsIndex[a]!.compareTo(dfsIndex[b]!);
     });
@@ -177,7 +178,7 @@ class _TrieSearchTree {
   bool search(String word) {
     var base = root;
     for (var i = 0; i < word.length; i++) {
-      var x = TrieNode(word[i], false);
+      var x = TrieNode(word[i]);
       final existing = base.children.indexOf(x);
       if (existing < 0) return false;
       base = base.children[existing];
@@ -203,8 +204,7 @@ class _TrieSearchTree {
       return cur.children.isEmpty;
     }
     var ch = word[index];
-    var next = cur
-        .children[cur.children.indexOf(TrieNode(ch, index == word.length - 1))];
+    var next = cur.children[cur.children.indexOf(TrieNode(ch))];
     var shouldDeleteNode = _delete(next, word, index + 1) && next.hits == 0;
 
     if (shouldDeleteNode) {
@@ -229,12 +229,15 @@ class TrieString {
 }
 
 class TrieNode {
+  /// A node of the trie. Word-end state lives in [hits], not here: the value
+  /// alone identifies the node among its siblings, because a parent's children
+  /// hold at most one node per character.
   String value;
   List<TrieNode> children;
   late int lastInsert;
   int hits = 0;
 
-  TrieNode(this.value, bool isEnd) : children = <TrieNode>[];
+  TrieNode(this.value) : children = <TrieNode>[];
 
   @override
   bool operator ==(covariant TrieNode other) {

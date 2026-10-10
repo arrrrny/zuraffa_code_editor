@@ -29,7 +29,7 @@ dart pub global run pana --source path . --json | grep -o 'platform:[a-z]*' | so
 | `lib/src/autocomplete/auto_complete.dart` | **new** | the port — `AutoComplete`, `SortEngine`, `SortValue`, `_TrieSearchTree`, `TrieString`, `TrieNode` |
 | `lib/src/autocomplete/autocompleter.dart` | modified | import rewired from `package:autotrie/autotrie.dart` to `auto_complete.dart` |
 | `pubspec.yaml` | modified | `autotrie: ^2.0.0` removed, `platforms:` declaring all six added |
-| `test/src/autocomplete/auto_complete_test.dart` | **new** | 29 tests over the ported surface |
+| `test/src/autocomplete/auto_complete_test.dart` | **new** | 36 tests over the ported surface |
 | `CHANGELOG.md` | modified | `Unreleased › Added` entry |
 
 ## The port
@@ -107,3 +107,18 @@ replaces the recency tie-break, the shared-prefix delete that used to fail, and
 the full surface of the port — construction from a bank, `enter`, `enterList`,
 `suggest`, `allEntries`, `isEmpty`, `contains`, `delete`, `clearEntries`,
 `SortEngine`, `SortValue`, `TrieNode`, `TrieString`.
+
+Three nitpicks the pool's fix round left open, applied on top of it:
+
+**`TrieNode`'s `isEnd` constructor parameter was dead.** It was never stored and
+the equality deliberately ignored it, while word-end state lives in `hits`.
+Dropped, and the `TrieNode` test group rewritten around what actually identifies
+a node among its siblings — a single `indexOf` finding the node a character
+already owns, which is the one lookup `addWord`, `suggestions` and `search` all
+rely on.
+
+**A test name asserted the opposite of its body.** "an empty string bank entry
+is kept" → "an empty string bank entry is a no-op".
+
+**The records said 29 tests; the file has 36.** Counts corrected in the
+CHANGELOG, this file and `pr-body.md`.

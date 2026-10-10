@@ -23,7 +23,7 @@ void main() {
       expect(engine().isEmpty, isTrue);
     });
 
-    test('an empty string bank entry is kept', () {
+    test('an empty string bank entry is a no-op', () {
       final ac = engine(['']);
 
       // The root carries no hit, so '' is not its own suggestion.
@@ -256,21 +256,36 @@ void main() {
   });
 
   group('TrieNode', () {
-    test('compares by value only', () {
-      expect(TrieNode('a', false), TrieNode('a', true));
-      expect(TrieNode('a', false), isNot(TrieNode('b', false)));
+    test('identifies by its value, so a sibling list dedupes', () {
+      // The equality is what makes a single `indexOf` find the node a character
+      // already owns — the one lookup `addWord`, `suggestions` and `search` all
+      // rely on. Two nodes for the same character would duplicate a branch.
+      final children = <TrieNode>[TrieNode('a')];
+      children.add(TrieNode('a'));
+
+      expect(children.indexOf(TrieNode('a')), 0);
+      expect(children.where((e) => e == TrieNode('a')), hasLength(2));
+    });
+
+    test('a different value is a different node', () {
+      expect(TrieNode('a'), isNot(TrieNode('b')));
     });
 
     test('hashCode agrees with the equality it overrides', () {
-      expect(TrieNode('a', false).hashCode, TrieNode('a', true).hashCode);
-      expect(
-        TrieNode('a', false).hashCode,
-        isNot(TrieNode('b', false).hashCode),
-      );
+      expect(TrieNode('a').hashCode, TrieNode('a').hashCode);
 
       // The pairing is what makes a node usable as a key.
-      final set = <TrieNode>{TrieNode('a', false), TrieNode('a', true)};
-      expect(set.length, 1);
+      final set = <TrieNode>{TrieNode('a'), TrieNode('a'), TrieNode('b')};
+      expect(set, hasLength(2));
+    });
+
+    test('a node carries no word-end state of its own', () {
+      // End-of-word lives in `hits`. The constructor used to take an `isEnd`
+      // flag that was never stored and never read; it is gone.
+      final node = TrieNode('a');
+
+      expect(node.hits, 0);
+      expect(node.children, isEmpty);
     });
   });
 

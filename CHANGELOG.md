@@ -17,7 +17,7 @@
   are file-persistence helpers with no caller in this package, so the port
   carries the in-memory surface only and `hive` leaves the graph with
   `autotrie`. Pinned by `test/src/autocomplete/auto_complete_test.dart`
-  (29 tests); the port corrects two `autotrie` defects that cannot be fixed
+  (36 tests); the port corrects two `autotrie` defects that cannot be fixed
   upstream, both unreachable from `Autocompleter`: `contains` now reports
   entered words rather than surviving prefix paths, and `delete` now clears the
   hit of the word it removes instead of leaving it suggested when a longer word

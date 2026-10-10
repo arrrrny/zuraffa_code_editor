@@ -33,7 +33,7 @@ so no version bump closes the gap.
 | `lib/src/autocomplete/auto_complete.dart` | **new** — the in-house engine (`AutoComplete`, `SortEngine`, `SortValue`, `_TrieSearchTree`, `TrieString`, `TrieNode`) |
 | `lib/src/autocomplete/autocompleter.dart` | import rewired to `auto_complete.dart` |
 | `pubspec.yaml` | `autotrie: ^2.0.0` removed; `platforms:` declaring all six added |
-| `test/src/autocomplete/auto_complete_test.dart` | **new** — 29 tests over the ported surface |
+| `test/src/autocomplete/auto_complete_test.dart` | **new** — 36 tests over the ported surface |
 | `README.md` | multi-platform sentence states the six platforms and why web is real |
 | `CHANGELOG.md` | `Unreleased › Added` entry |
 | `.specify/chores/list-web-as-supported-platform/` | `implement.md`, `test-list.md` |
@@ -98,9 +98,8 @@ under the old `_delete`.
 ## Verification
 
 - `pana --source path .` → `android ios linux macos web windows`
-- `flutter test` → **All 643 tests pass** (609 before; +29 engine tests, +5
-  net elsewhere on master)
-- `python3 tool/coverage_gate.py --min 100` → **100.00% (3268/3268 lines over
+- `flutter test` → **All 646 tests pass** (610 on master; +36 engine tests)
+- `python3 tool/coverage_gate.py --min 100` → **100.00% (3273/3273 lines over
   104 files)**, `lib/src/autocomplete/auto_complete.dart` at 100.00%)
 - `dart analyze --fatal-infos` → No issues found
 - `dart format --output=none --set-exit-if-changed .` → no changes
