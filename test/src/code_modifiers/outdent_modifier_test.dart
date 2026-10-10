@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:highlight/languages/java.dart';
 
 import '../common/create_app.dart';
 
@@ -246,6 +247,54 @@ void main() {
           selection: TextSelection.collapsed(offset: 4),
         ),
         reason: 'read-only means no edit at all',
+      );
+    });
+
+    testWidgets('a real Backspace outdents below a folded block', (wt) async {
+      const text = 'void main() {\n    first();\n}\n    return;\n';
+      final controller = CodeController(
+        text: text,
+        language: java,
+        params: const EditorParams(tabSpaces: 4),
+      );
+      final focusNode = FocusNode();
+
+      await wt.pumpWidget(createApp(controller, focusNode));
+      focusNode.requestFocus();
+
+      // `void main() {` swallows `    first();`, so the caret's line sits
+      // behind a hidden range.
+      controller.foldAt(0);
+      await wt.pumpAndSettle();
+      expect(controller.code.hiddenRanges.ranges, isNotEmpty);
+
+      // While a block is folded the field edits the visible text, so the
+      // caret goes into the indent of `    return;` in visible coordinates:
+      // `void main() {}\n` is 15 characters.
+      controller.selection = const TextSelection.collapsed(offset: 19);
+      await wt.pumpAndSettle();
+
+      await wt.sendKeyEvent(LogicalKeyboardKey.backspace);
+      await wt.pumpAndSettle();
+
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: 'void main() {}\nreturn;\n',
+          //                \ cursor
+          selection: TextSelection.collapsed(offset: 15),
+        ),
+        reason: 'the whole indent level goes, not one space',
+      );
+      expect(
+        controller.fullText,
+        'void main() {\n    first();\n}\nreturn;\n',
+        reason: 'the outdent maps back into the full text, folded lines intact',
+      );
+      expect(
+        controller.code.hiddenRanges.ranges,
+        isNotEmpty,
+        reason: 'the fold survives the edit',
       );
     });
 

@@ -96,4 +96,4 @@ about to perform — the reason the reporter found the key path dead.
    unchanged.
 7. `OutdentModifier`'s effect survives the read-only and folded-range paths: a
    read-only line and a caret inside a folded block still refuse the edit.
-8. The 643 existing tests keep passing; no insertion modifier changes behaviour.
+8. The 610 existing tests keep passing; no insertion modifier changes behaviour.

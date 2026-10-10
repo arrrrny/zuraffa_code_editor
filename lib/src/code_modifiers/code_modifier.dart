@@ -15,6 +15,10 @@ abstract class CodeModifier {
   /// This is what makes "outdent on Backspace" implementable from outside the
   /// package; without it no modifier can ever fire on a backspace, which is the
   /// gap issue #21 reports.
+  ///
+  /// The two registrations are exclusive: setting this field keeps [char] out
+  /// of the insertion map, so a modifier that must react to both a typed
+  /// character and a deleted one needs two instances, one for each.
   final String? deletesChar;
 
   const CodeModifier(this.char, {this.deletesChar});

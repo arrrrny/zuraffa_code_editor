@@ -15,6 +15,13 @@ import 'code_modifier.dart';
 /// Outside the leading whitespace it returns null and the ordinary
 /// one-character delete stands, because a backspace that removes real code
 /// should remove one character rather than reindent the line.
+///
+/// Its semantics are deliberately narrower than
+/// [CodeController.outdentSelection]'s, the Shift+Tab command: that command
+/// also strips tabs and trims whatever indent is left when it is not a
+/// multiple of `tabSpaces` (`trimLeft`), while this modifier declines over a
+/// tab and empties a partial indent exactly (`clamp`) — the Backspace gesture
+/// stays conservative where the command is free to reindent.
 class OutdentModifier extends CodeModifier {
   const OutdentModifier() : super(' ', deletesChar: ' ');
 

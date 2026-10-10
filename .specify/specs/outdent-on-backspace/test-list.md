@@ -24,9 +24,11 @@ Two surfaces to pin: the deletion dispatch itself, which did not exist, and the
 | 13 | a read-only controller refuses the outdent (real key) | pass (was RED) |
 | 14 | a real Backspace key outdents the editor (real key) | pass (was RED) |
 | 15 | a real Backspace outside the indent deletes one char (real key) | pass (was RED) |
+| 16 | a real Backspace outdents below a folded block (real key) | pass (added after review) |
 
 Tests 1–5 are red before `CodeModifier.deletesChar`, `_deletionModifierMap` and
 `_deletedLoc` exist: the test file does not compile against the old base class.
-Tests 6–12 are red because `OutdentModifier` does not exist. Tests 13–15 drive a
+Tests 6–12 are red because `OutdentModifier` does not exist. Tests 13–16 drive a
 real `LogicalKeyboardKey.backspace` through `createApp`, so they would also fail
-on `lib/` alone.
+on `lib/` alone. Test 16 pins the folded-block half of acceptance criterion 7,
+which the review found asserted in the docs but never pinned.

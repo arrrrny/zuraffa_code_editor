@@ -654,11 +654,17 @@ class CodeController extends TextEditingController {
         // A deletion removes a character instead of inserting one, so there is
         // no typed character to key the dispatch on. The character that was
         // removed stands in for it — see CodeModifier.deletesChar.
-        final deletedLoc = _deletedLoc(text, newValue.text, newValue.selection);
+        final newSel = newValue.selection;
+        final candidate = newSel.isCollapsed ? newSel.start : -1;
+        final modifier = candidate >= 0 && candidate < text.length
+            ? _deletionModifierMap[text[candidate]]
+            : null;
 
-        if (deletedLoc != null) {
-          final modifier = _deletionModifierMap[text[deletedLoc]];
-          final val = modifier?.updateString(text, selection, params);
+        // The probe above uses the unverified index; _deletedLoc still
+        // confirms the deletion before updateString runs.
+        if (modifier != null &&
+            _deletedLoc(text, newValue.text, newSel) != null) {
+          final val = modifier.updateString(text, selection, params);
 
           if (val != null) {
             newValue = newValue.copyWith(
