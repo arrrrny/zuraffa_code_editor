@@ -28,11 +28,17 @@ class GutterWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
-      child: SingleChildScrollView(
-        controller: scrollController,
-        child: AnimatedBuilder(
-          animation: codeController,
-          builder: _buildOnChange,
+      child: Padding(
+        // User escape hatch for fine gutter alignment: applied outside the
+        // columns so the whole number/error/folding grid shifts by exactly
+        // these insets. Zero by default — renders like no padding at all.
+        padding: style.padding,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: AnimatedBuilder(
+            animation: codeController,
+            builder: _buildOnChange,
+          ),
         ),
       ),
     );

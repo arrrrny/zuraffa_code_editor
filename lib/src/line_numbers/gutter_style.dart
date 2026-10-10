@@ -26,6 +26,13 @@ class GutterStyle {
   /// Central horizontal margin between the numbers and the code.
   final double margin;
 
+  /// Extra padding around the whole gutter column, applied outside the
+  /// number/error/folding columns.
+  ///
+  /// Defaults to [EdgeInsets.zero], which renders exactly like no
+  /// padding at all.
+  final EdgeInsets padding;
+
   /// Whether to show line numbers column.
   final bool showLineNumbers;
 
@@ -40,6 +47,7 @@ class GutterStyle {
 
   const GutterStyle({
     this.margin = 10.0,
+    this.padding = EdgeInsets.zero,
     this.textAlign = TextAlign.right,
     this.showErrors = true,
     this.showFoldingHandles = true,
@@ -70,6 +78,7 @@ class GutterStyle {
     errorPopupTextStyle: errorPopupTextStyle,
     background: background,
     margin: margin,
+    padding: padding,
     showErrors: showErrors,
     showFoldingHandles: showFoldingHandles,
     showLineNumbers: showLineNumbers,
