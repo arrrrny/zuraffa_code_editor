@@ -373,6 +373,7 @@ class _CodeFieldState extends State<CodeField> {
     Widget codeField,
     TextStyle textStyle,
     double minWidth,
+    double maxHeight,
   ) {
     final intrinsic = IntrinsicWidth(
       child: Column(
@@ -386,7 +387,18 @@ class _CodeFieldState extends State<CodeField> {
               child: Text(longestLine, style: textStyle),
             ), // Add extra padding
           ),
-          widget.expands ? Expanded(child: codeField) : codeField,
+          // The field must know how tall the viewport is: a TextField with
+          // maxLines: null grows to its content height, so left unbounded the
+          // column overflows instead of scrolling and the caret scrolls out
+          // of view. Bounding it by the editor box height keeps the field's
+          // own vertical scrollable (and the linked gutter) in charge, which
+          // also restores Flutter's auto-reveal-the-caret-while-typing.
+          widget.expands
+              ? Expanded(child: codeField)
+              : ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: maxHeight),
+                  child: codeField,
+                ),
         ],
       ),
     );
@@ -463,7 +475,12 @@ class _CodeFieldState extends State<CodeField> {
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           // Control horizontal scrolling
-          return _wrapInScrollView(codeField, textStyle, constraints.maxWidth);
+          return _wrapInScrollView(
+            codeField,
+            textStyle,
+            constraints.maxWidth,
+            constraints.maxHeight,
+          );
         },
       ),
     );
