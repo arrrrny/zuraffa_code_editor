@@ -6,7 +6,8 @@ import '../common/create_app.dart';
 
 /// What one keystroke costs in a 3000-line (110 KB) document, measured on the
 /// `value` setter below — the whole synchronous path a keystroke drives.
-/// `flutter test` (unoptimized JIT), median of 9 reps, after a warm-up rep:
+/// `flutter test` (unoptimized JIT), median of 9 reps in a one-off profiling
+/// run (this file's harness takes a median of 5), after a warm-up rep:
 ///
 /// | Component | µs | Share |
 /// |---|---|---|
@@ -129,10 +130,14 @@ void main() {
     // document shows up as a ratio above it, while nothing the editor does
     // today comes close. Fault-injected with an O(rows^2) pass in
     // `CodeLinesBuilder.textToCodeLines` (one full walk of the lines per
-    // line), which added 29us per line at 3000 lines and reddened this at
-    // 2.1x. `flutter test` runs on the unoptimized JIT and CI machines are
-    // shared, so this is a tripwire against super-linear growth, not a
-    // millisecond budget.
+    // line), which added 29 µs per line at 3000 lines and reddened this at
+    // 2.13×. The ratio has been observed on CI hardware too: the printed
+    // pairs in the two green ubuntu-latest runs of c28bbdd read
+    // 17.4 vs 12.1 µs per line (ratio 1.43) and 26.3 vs 29.1 µs per line
+    // (ratio 0.90), so the bound holds off the author's machine and the
+    // median of 5 stays. `flutter test` runs on the unoptimized JIT and CI
+    // machines are shared, so this is a tripwire against super-linear growth,
+    // not a millisecond budget.
     expect(perLineLarge, lessThan(perLineSmall * 2));
   });
 }
