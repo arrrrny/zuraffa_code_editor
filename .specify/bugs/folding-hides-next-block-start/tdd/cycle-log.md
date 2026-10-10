@@ -92,3 +92,20 @@ closer of `main` is not the opener of another block, so it still glues.
 - The new test file uses named constants (`foldedFactorialText`,
   `foldedMainText`) rather than inline multi-line literals so both the
   folded-`factorial` and the folded-`main` expectations read the same way.
+
+## Follow-up: review findings (PR #56)
+
+`zuraffa-review[bot]` reviewed `b166e20` and raised three findings (0 blockers):
+the guard asked whether the last line *starts* with a closing character, so a
+multi-line condition (`if (a &&` / `b &&` / `c) {`) closed mid-line and stayed
+hidden; the CHANGELOG had no entry; and one assertion duplicated the row check.
+
+Resolved in `5baa4d1`: the `_isClosingLine` conjunct is dropped (the
+`_startsAnotherFoldableBlock` helper is narrow enough on its own), a
+regression group pins the non-leading-closer shape, a CHANGELOG entry covers
+both halves, and the redundant assertion is gone. The two-line sub-shape
+(`if (a &&` / `b) {`) is documented at the guard as a known limitation rather
+than silently widened around: there `startOfRange == closerOnItsOwnRow`, so no
+narrow guard can give the shared line its own row.
+
+Green: `flutter test` — 508 tests, `dart analyze` clean, `dart format` clean.
