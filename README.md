@@ -30,6 +30,12 @@ Zuraffa Code Editor is a multi-platform code editor supporting:
 - Themes,
 - And many other features.
 
+Android, iOS, Linux, macOS, Windows and the web are all supported. The web
+target is real rather than declared: nothing in the dependency graph reaches
+`dart:io` since the autocompletion engine became in-house, which is what
+`pana` derives the platform tags from. `pubspec.yaml` lists the six platforms
+explicitly so the claim cannot silently regress.
+
 ![Basic example](https://raw.githubusercontent.com/arrrrny/zuraffa_code_editor/master/example/images/main.gif)
 
 

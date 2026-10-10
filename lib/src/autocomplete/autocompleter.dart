@@ -1,4 +1,4 @@
-import 'package:autotrie/autotrie.dart';
+import 'auto_complete.dart';
 import 'package:highlight/highlight_core.dart';
 
 import '../code/reg_exp.dart';
