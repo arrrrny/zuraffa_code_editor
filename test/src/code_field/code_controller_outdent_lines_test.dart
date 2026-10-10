@@ -16,6 +16,7 @@ void main() {
       // "aaaa\n", "\n", "aaaa\n"; the middle one is the blank line the
       // `line == '\n'` guard short-circuits on.
       final controller = CodeController(text: 'aaaa\n\naaaa\n');
+      addTearDown(controller.dispose);
 
       controller.selection = const TextSelection(
         baseOffset: 0,
@@ -24,7 +25,6 @@ void main() {
       controller.outdentSelection();
 
       expect(controller.text, 'aaaa\n\naaaa\n');
-      controller.dispose();
     });
 
     test('a line shorter than the tab width loses its indentation', () {
@@ -33,6 +33,7 @@ void main() {
             'a\n'
             '  b\n',
       );
+      addTearDown(controller.dispose);
 
       controller.selection = const TextSelection(
         baseOffset: 0,
@@ -42,7 +43,6 @@ void main() {
       controller.outdentSelection();
 
       expect(controller.text, 'a\nb\n');
-      controller.dispose();
     });
   });
 }

@@ -55,6 +55,17 @@ void main() {
       expect(comment.isReadonly, true);
     });
 
+    test('is true when the token appears later in the comment', () {
+      final comment = SingleLineComment.cut(
+        '// flutter: readonly',
+        characterIndex: 0,
+        lineIndex: 0,
+        sequences: const ['//'],
+      );
+
+      expect(comment.isReadonly, true);
+    });
+
     test('is false without the token', () {
       final comment = SingleLineComment.cut(
         '// editable',

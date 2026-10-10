@@ -17,12 +17,15 @@ void main() {
   group('SearchSettingsWidget', () {
     testWidgets('pressing a toggle flips the settings controller', (wt) async {
       final settings = SearchSettingsController();
+      addTearDown(settings.dispose);
+      final patternFocusNode = FocusNode();
+      addTearDown(patternFocusNode.dispose);
 
       await wt.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: SearchSettingsWidget(
-              patternFocusNode: FocusNode(),
+              patternFocusNode: patternFocusNode,
               settingsController: settings,
             ),
           ),
@@ -47,18 +50,19 @@ void main() {
       await wt.pumpAndSettle();
       expect(settings.value.isCaseSensitive, false);
       expect(settings.value.isRegExp, true);
-
-      settings.dispose();
     });
 
     testWidgets('rebuilds when the settings change', (wt) async {
       final settings = SearchSettingsController();
+      addTearDown(settings.dispose);
+      final patternFocusNode = FocusNode();
+      addTearDown(patternFocusNode.dispose);
 
       await wt.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: SearchSettingsWidget(
-              patternFocusNode: FocusNode(),
+              patternFocusNode: patternFocusNode,
               settingsController: settings,
             ),
           ),
@@ -81,8 +85,6 @@ void main() {
         ),
         findsOneWidget,
       );
-
-      settings.dispose();
     });
   });
 }

@@ -29,6 +29,7 @@ Future<CodeController> _pumpField(
   ThemeData? theme,
 }) async {
   final controller = createController('int a;');
+  addTearDown(controller.dispose);
   final focusNode = FocusNode();
   addTearDown(focusNode.dispose);
 
@@ -145,7 +146,6 @@ void main() {
 
       controller.dismiss();
       await tester.pumpAndSettle();
-      controller.dispose();
 
       expect(overlayBorder.border?.top.color, const Color(0xff112233));
     });
@@ -179,7 +179,6 @@ void main() {
 
       controller.dismiss();
       await tester.pumpAndSettle();
-      controller.dispose();
 
       expect(overlayBorder.border?.top.color, Colors.purple);
     });

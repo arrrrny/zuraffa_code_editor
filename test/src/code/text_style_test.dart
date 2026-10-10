@@ -17,7 +17,7 @@ void main() {
     });
 
     test('a transparent colour fades away entirely', () {
-      // `Color.fromARGB` clamps at 0, so the alpha rounds down.
+      // `~/ 2` truncates, so an alpha of 1/255 rounds down to zero.
       expect(
         const TextStyle(color: Color(0x01ff0000)).paled().color,
         const Color(0x00ff0000),

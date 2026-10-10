@@ -69,6 +69,8 @@ void main() {
 
     // No error widget is created for a line the gutter has no row for.
     expect(find.byType(GutterWidget), findsOneWidget);
+    // The hidden line's issue must not surface an error widget.
+    expect(find.byType(GutterErrorWidget), findsNothing);
     expect(
       controller.code.hiddenLineRanges.visibleLineNumbers.length,
       lessThan(controller.code.lines.length),
@@ -173,7 +175,7 @@ void main() {
     controller.foldAt(1);
     await wt.pumpAndSettle();
 
-    // Still two toggles, now pointing at unfold.
+    // Still at least one toggle, now pointing at unfold.
     expect(find.byType(FoldToggle), findsAtLeastNWidgets(1));
 
     controller.unfoldAt(1);
