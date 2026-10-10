@@ -82,5 +82,23 @@ void main() {
         ),
       );
     });
+
+    test('foldedAs an unfolded code keeps the visible text and highlight', () {
+      final outsideOfSetup = Code(
+        text: _text,
+        highlighted: highlight.parse(_text, language: 'java'),
+        namedSectionParser: const BracketsStartEndNamedSectionParser(),
+        language: _language,
+      );
+
+      final result = outsideOfSetup.foldedAs(code);
+
+      expect(code.foldedBlocks, isEmpty);
+      expect(identical(result.visibleText, outsideOfSetup.visibleText), isTrue);
+      expect(
+        identical(result.visibleHighlighted, outsideOfSetup.visibleHighlighted),
+        isTrue,
+      );
+    });
   });
 }

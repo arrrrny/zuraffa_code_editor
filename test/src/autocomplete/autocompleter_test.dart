@@ -89,6 +89,33 @@ void main() {
       expect(bothResults2, bothResults);
     });
 
+    test('Words added by typing match a fresh index', () async {
+      final typed = Autocompleter();
+      typed.setText('key', 'alpha beta');
+      typed.setText('key', 'alpha beta gamma');
+
+      final fresh = Autocompleter()..setText('key', 'alpha beta gamma');
+
+      expect(await typed.getSuggestions(''), await fresh.getSuggestions(''));
+    });
+
+    test(
+      'Drops a word that disappears, and one that prefixes another',
+      () async {
+        final wholeWordGone = Autocompleter();
+        wholeWordGone.setText('key', 'foo foobar');
+        wholeWordGone.setText('key', 'foo');
+
+        expect(await wholeWordGone.getSuggestions('foobar'), const []);
+
+        final prefixGone = Autocompleter();
+        prefixGone.setText('key', 'foo foobar');
+        prefixGone.setText('key', 'foobar');
+
+        expect(await prefixGone.getSuggestions('foo'), const ['foobar']);
+      },
+    );
+
     test('Shows custom words', () async {
       final ac = Autocompleter();
       ac.setCustomWords(['Lorem', 'ipsum', 'word3', 'word4']);
