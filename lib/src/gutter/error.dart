@@ -25,11 +25,20 @@ class GutterErrorWidget extends StatefulWidget {
   /// own type; a host mounting this widget directly can pass its own.
   final Widget icon;
 
+  /// Decoration of the popup's container.
+  ///
+  /// Null derives it from [popupTextStyle]'s `backgroundColor` and `color`,
+  /// which is what the popup has always used. The gutter passes
+  /// [GutterStyle.errorPopupDecoration]; a host mounting this widget directly
+  /// can pass its own.
+  final BoxDecoration? popupDecoration;
+
   const GutterErrorWidget(
     this.issue,
     this.popupTextStyle, {
     super.key,
     this.icon = errorIcon,
+    this.popupDecoration,
   });
 
   @override
@@ -116,12 +125,14 @@ class _GutterErrorWidgetState extends State<GutterErrorWidget> {
                       minWidth: 100,
                       maxWidth: 500,
                     ),
-                    decoration: BoxDecoration(
-                      color: style.backgroundColor,
-                      border: style.color != null
-                          ? Border.all(color: style.color!)
-                          : null,
-                    ),
+                    decoration:
+                        widget.popupDecoration ??
+                        BoxDecoration(
+                          color: style.backgroundColor,
+                          border: style.color != null
+                              ? Border.all(color: style.color!)
+                              : null,
+                        ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,

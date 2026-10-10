@@ -204,6 +204,7 @@ class GutterWidget extends StatelessWidget {
             color: Colors.red,
             size: _issueColumnWidth,
           ),
+          popupDecoration: style.errorPopupDecoration,
         ),
         lineIndex,
       );
