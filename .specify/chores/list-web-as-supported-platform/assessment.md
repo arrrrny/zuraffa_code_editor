@@ -1,4 +1,10 @@
-# Assessment — "List web as a supported platform" (#23)
+# Chore Assessment: List web as a supported platform
+
+- **Slug**: list-web-as-supported-platform
+- **Created**: 2026-10-10
+- **Source**: https://github.com/arrrrny/zuraffa_code_editor/issues/23
+- **Verdict**: in scope
+- **Size**: medium
 
 **Issue:** [arrrrny/zuraffa_code_editor#23](https://github.com/arrrrny/zuraffa_code_editor/issues/23) — synced from upstream `akvelon/flutter-code-editor#208`.
 **Label:** `chore`

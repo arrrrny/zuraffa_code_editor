@@ -1,4 +1,10 @@
-# Assessment — "Switch to the Akvelon highlighting package" (#37)
+# Chore Assessment: Switch to the Akvelon highlighting package
+
+- **Slug**: switch-to-akvelon-highlighting
+- **Created**: 2026-10-10
+- **Source**: https://github.com/arrrrny/zuraffa_code_editor/issues/37
+- **Verdict**: needs scoping
+- **Size**: small
 
 **Issue:** [arrrrny/zuraffa_code_editor#37](https://github.com/arrrrny/zuraffa_code_editor/issues/37) — synced from upstream `akvelon/flutter-code-editor#230`.
 **Label:** `chore`
@@ -25,8 +31,8 @@ The two candidates compared:
 | latest | 0.7.0 | 0.9.0+11.8.0 |
 | published | 2021-03-07 | 2023-05-05 |
 | repo | `git-touch/highlight.dart` | `akvelon/dart-highlighting` |
-| open issues | ~30 | 26 |
-| last push | dormant since 2021 | 2023-11-16 |
+| open issues | 49 | 26 |
+| last push | 2026-03-30 (workspace refactor + release tooling); last pub release 0.7.0 (2021) | 2023-11-16 |
 
 ## Why the migration is not implementable as asked
 
@@ -52,16 +58,16 @@ Setting `equatable: ^2.1.0` here does resolve, and the package's 11 `Equatable` 
 This is the decisive point. The issue's premise is "the highlighting package is almost unusable from the bugs", and `highlighting` answers it only partially:
 
 - last push 2023-11-16, 26 open issues, no releases since 2023;
-- a `dart:js_interop`-era Dart 3 SDK constraint of `>=2.17.0 <3.0.0` in its pubspec, which only resolves here because pub.dev's Dart-3-compatibility tag relaxes it.
+- a pre-Dart-3 SDK constraint (`>=2.17.0 <3.0.0`) that still resolves here because pub rewrites a null-safe `<3.0.0` bound to `<4.0.0` on Dart 3+, client-side, in `SdkConstraint.interpretDartSdkConstraint`.
 
-Switching would move the dependency from one dormant package to another, so the bug-exposure the reporter complained about would carry over.
+The current `highlight` is the less dormant of the two: its repo was revived in 2026-03 (workspace-monorepo refactor plus release tooling) even though it still ships no pub release since 0.7.0 (2021), whereas `highlighting` has been dormant since 2023-11-16. So switching would not reduce bug or maintenance exposure — it would trade a package whose upstream is being revived for one that is still dormant.
 
 ## The bugs named in the issue, pinned
 
 Two concrete `highlight` 0.7.0 defects were found while assessing, both reproduced:
 
 1. **Embedded sub-languages declared on `starts` sub-modes never resolve.** `xml`'s mode declares `subLanguage` for `<script>`/`<style>` (and `php` on a plain `contains`), but the `<script`/`<style` tag modes never match them, so script and style bodies stay markup even after registering `javascript` and `css` by name. `<?php ?>` bodies *are* re-parsed. Pinned by `test/src/highlight/html_language_test.dart` (PR #71) and documented in the README.
-2. **A language's aliases are not registrations.** `html` is an alias of `xml` and therefore unreachable by name — issue #40, closed by PR #70.
+2. **A language's aliases are not registrations.** `html` is an alias of `xml` and therefore unreachable by name — issue #40, fixed by PR #70 (the issue was closed manually 23 minutes before that PR merged).
 
 Neither is fixable from this package: both live inside `highlight`'s mode definitions and its registry.
 
