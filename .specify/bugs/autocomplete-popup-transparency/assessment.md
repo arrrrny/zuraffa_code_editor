@@ -6,6 +6,7 @@
   (upstream akvelon/flutter-code-editor#273, labeled `[question]`)
 - **Verdict**: valid — no user-facing control over the popup background
 - **Severity**: low (cosmetic), but a recurring upstream ask
+- **Status**: **resolved by PR #54** (merged 2026-10-10) — `_popupBackground = autocompleteBackground ?? _backgroundCol ?? themeData.cardColor`; kept as the source assessment for `fix.md`.
 
 ## Symptom
 
@@ -17,13 +18,14 @@ list with the editor's text visible behind it.
 
 The popup's background is not its own concern in the current design:
 
-- `lib/src/code_field/code_field.dart:718` — `_buildSuggestionOverlay`
-  passes `backgroundColor: _backgroundCol` to `Popup`.
+- `CodeField._buildSuggestionOverlay` passes `backgroundColor:
+  _backgroundCol` to `Popup` (at the fix's base `0d57280`: `:698`; line
+  numbers rot, so the symbol is the stable citation).
 - `_backgroundCol` is the **editor's** background:
   `widget.background ?? CodeTheme root style background ??
   DefaultStyles.backgroundColor` (grey.shade900).
-- `lib/src/code_field/code_field.dart:434` — `if (widget.decoration !=
-  null) { _backgroundCol = null; }`, deliberately so the decoration
+- The `if (widget.decoration != null)` branch in `CodeField.build` nulls
+  `_backgroundCol` (base `0d57280`: `:426`), deliberately so the decoration
   paints the field background. The popup inherits that null, and
   `Popup.build` puts `widget.backgroundColor` straight into the
   `BoxDecoration` (`lib/src/wip/autocomplete/popup.dart:99`), so a null
