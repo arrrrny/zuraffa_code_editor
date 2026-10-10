@@ -25,8 +25,12 @@ import 'abstract.dart';
 class BracketsStartEndNamedSectionParser extends AbstractNamedSectionParser {
   const BracketsStartEndNamedSectionParser();
 
-  static final _startRe = RegExp(r'\[(\s*)START(\s+)([_0-9a-zA-Z]+)(\s*)\]');
-  static final _endRe = RegExp(r'\[(\s*)END(\s+)([_0-9a-zA-Z]+)(\s*)\]');
+  /// The patterns a comment's content must match to carry this parser's
+  /// start or end tag. Group 3 is the section name. Public so the tag
+  /// recognition stays in one place — consumers that need to tell a
+  /// section's own tag from an unrelated comment match with these, too.
+  static final startRe = RegExp(r'\[(\s*)START(\s+)([_0-9a-zA-Z]+)(\s*)\]');
+  static final endRe = RegExp(r'\[(\s*)END(\s+)([_0-9a-zA-Z]+)(\s*)\]');
 
   @override
   List<NamedSection> parseUnsorted({
@@ -36,7 +40,7 @@ class BracketsStartEndNamedSectionParser extends AbstractNamedSectionParser {
     final lasts = <String, int>{};
 
     for (final comment in singleLineComments) {
-      for (final match in _startRe.allMatches(comment.innerContent)) {
+      for (final match in startRe.allMatches(comment.innerContent)) {
         final name = match.group(3) ?? '';
         final oldFirst = firsts[name];
         firsts[name] = oldFirst == null
@@ -44,7 +48,7 @@ class BracketsStartEndNamedSectionParser extends AbstractNamedSectionParser {
             : min(comment.lineIndex, oldFirst);
       }
 
-      for (final match in _endRe.allMatches(comment.innerContent)) {
+      for (final match in endRe.allMatches(comment.innerContent)) {
         final name = match.group(3) ?? '';
         lasts[name] = max(comment.lineIndex, lasts[name] ?? 0);
       }

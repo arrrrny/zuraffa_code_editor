@@ -17,6 +17,7 @@ import '../hidden_ranges/hidden_ranges.dart';
 import '../hidden_ranges/hidden_ranges_builder.dart';
 import '../named_sections/named_section.dart';
 import '../named_sections/parsers/abstract.dart';
+import '../named_sections/parsers/brackets_start_end.dart';
 import '../service_comment_filter/service_comment_filter.dart';
 import '../single_line_comments/parser/single_line_comment_parser.dart';
 import '../single_line_comments/parser/single_line_comments.dart';
@@ -322,22 +323,38 @@ class Code {
     );
   }
 
-  /// Whether [comment] sits on one of the visible section's own tag lines.
+  /// Whether [comment] is one of the visible [section]'s own tag comments.
   ///
   /// A section with no ending tag only ever has its start tag cut, and a
   /// start and an end tag on the same line describe an empty section whose
   /// single line is left alone.
+  ///
+  /// The tag is recognized by the same patterns that define the section, not
+  /// by the line it sits on: a service comment that is not this section's tag
+  /// — `// readonly`, another section's tag, prose containing the tag's words
+  /// — keeps its remnants even when it sits alone on the section's first
+  /// line, which a section with no start tag has at line 0.
   static bool _isVisibleSectionTagLine(
     SingleLineComment comment,
     NamedSection section,
   ) {
-    if (comment.lineIndex == section.firstLine &&
-        section.lastLine != section.firstLine) {
-      return true;
+    if (section.lastLine == section.firstLine) {
+      return false;
     }
 
-    return comment.lineIndex == section.lastLine &&
-        section.lastLine != section.firstLine;
+    final isStartLine =
+        comment.lineIndex == section.firstLine &&
+        BracketsStartEndNamedSectionParser.startRe
+            .allMatches(comment.innerContent)
+            .any((match) => match.group(3) == section.name);
+
+    final isEndLine =
+        comment.lineIndex == section.lastLine &&
+        BracketsStartEndNamedSectionParser.endRe
+            .allMatches(comment.innerContent)
+            .any((match) => match.group(3) == section.name);
+
+    return isStartLine || isEndLine;
   }
 
   /// Whether the comment is the only thing on its line.

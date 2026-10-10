@@ -101,13 +101,13 @@ void main() {
     });
 
     test('an end tag with no line break after it keeps its line', () {
-      const text = 'before\n// [START s]\n  int x;\n// [END s]';
+      const text = 'before\n// [START s]\n  int x;\n  // [END s]';
 
       final code = _code(text, visibleSectionNames: {'s'});
 
-      // There is no trailing newline to cut, so the last line keeps the
-      // remnant the comment range always left.
-      expect(code.visibleText, '  int x;\n');
+      // There is no trailing newline to cut, so the whitespace before the
+      // comment is the remnant that survives on the last line.
+      expect(code.visibleText, '  int x;\n  ');
     });
 
     test('an empty section presents nothing', () {
@@ -130,6 +130,43 @@ void main() {
       // keep the \r as a remnant on each tag line.
       expect(code.visibleText, '  int x;\r\n');
       expect(code.hiddenLineRanges.visibleLineNumbers.toList(), [3, 7]);
+    });
+
+    test('the cut covers trailing whitespace on a tag line too', () {
+      const text =
+          'before1\n\n// [START s]  \n  int x;\n// [END s]  \n\nafter1\n';
+
+      final code = _code(text, visibleSectionNames: {'s'});
+
+      // A single-line comment's content runs up to the \n, so whitespace
+      // after the tag is part of the comment and the \n that follows it is
+      // the line break the cut consumes — the tag line has no remnant left.
+      expect(code.visibleText, '  int x;\n');
+    });
+
+    test(
+      "a non-tag comment on the never-started first line keeps its line",
+      () {
+        const text = '// readonly\nint x;\n// [END s]\n';
+
+        final code = _code(text, visibleSectionNames: {'s'});
+
+        // A section with no start tag is pinned to line 0, but line 0 carries
+        // `// readonly`, not the section's own tag: only the comment's own
+        // text hides, and the line and its number stay.
+        expect(code.visibleText, '\nint x;\n');
+        expect(code.hiddenLineRanges.visibleLineNumbers.toList(), [0, 1, 3]);
+      },
+    );
+
+    test("a whitespace-variant tag is still the section's own tag", () {
+      const text = '// [ START s ]\n  int x;\n// [ END s ]\n';
+
+      final code = _code(text, visibleSectionNames: {'s'});
+
+      // The tag is recognized by the same patterns that define the section,
+      // so the whitespace variants it accepts are cut like any other tag.
+      expect(code.visibleText, '  int x;\n');
     });
 
     test('a document without visible sections is untouched', () {
