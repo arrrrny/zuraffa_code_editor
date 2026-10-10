@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../code_field/code_controller.dart';
@@ -58,15 +60,22 @@ class GutterWidget extends StatelessWidget {
   Widget _buildOnChange(BuildContext context, Widget? child) {
     final code = codeController.code;
 
-    final gutterWidth =
-        style.width -
-        (style.showErrors ? 0 : _issueColumnWidth) -
-        (style.showFoldingHandles ? 0 : _foldingColumnWidth);
-
     final issueColumnWidth = style.showErrors ? _issueColumnWidth : 0.0;
     final foldingColumnWidth = style.showFoldingHandles
         ? _foldingColumnWidth
         : 0.0;
+
+    // The numbers are a flex column, so they take whatever the requested width
+    // leaves after the fixed columns and the margin to the code — and never
+    // less than the widest visible number needs to render on one line. A
+    // number that does not fit wraps, and a wrapped number is twice as tall as
+    // the line it labels: every row past it doubles in pitch, the gutter's
+    // scroll extent stops matching the code's, and the rows on screen end up
+    // with no number over them (#18).
+    final numberColumnWidth = math.max(
+      style.width - issueColumnWidth - foldingColumnWidth - style.margin,
+      _widestNumberWidth(),
+    );
 
     final tableRows = List.generate(
       code.hiddenLineRanges.visibleLineNumbers.length,
@@ -91,10 +100,15 @@ class GutterWidget extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.only(right: style.margin),
-      width: style.showLineNumbers ? gutterWidth : null,
+      width: style.showLineNumbers
+          ? issueColumnWidth +
+                foldingColumnWidth +
+                style.margin +
+                numberColumnWidth
+          : null,
       child: Table(
         columnWidths: {
-          _lineNumberColumn: const FlexColumnWidth(),
+          _lineNumberColumn: FlexColumnWidth(),
           _issueColumn: FixedColumnWidth(issueColumnWidth),
           _foldingColumn: FixedColumnWidth(foldingColumnWidth),
         },
@@ -102,6 +116,34 @@ class GutterWidget extends StatelessWidget {
         children: tableRows,
       ),
     );
+  }
+
+  /// Width the widest visible line number needs to render on a single line.
+  ///
+  /// Zero when the numbers are hidden, or when there is nothing to number, so
+  /// the requested width is left untouched in both cases.
+  double _widestNumberWidth() {
+    if (!style.showLineNumbers) {
+      return 0.0;
+    }
+
+    var widest = -1;
+    for (final number
+        in codeController.code.hiddenLineRanges.visibleLineNumbers) {
+      if (number > widest) {
+        widest = number;
+      }
+    }
+    if (widest < 0) {
+      return 0.0;
+    }
+
+    final painter = TextPainter(
+      text: TextSpan(text: '${widest + 1}', style: style.textStyle),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    return painter.width;
   }
 
   void _fillLineNumbers(List<TableRow> tableRows) {
@@ -119,6 +161,11 @@ class GutterWidget extends StatelessWidget {
           style.showLineNumbers ? '${i + 1}' : ' ',
           style: style.textStyle,
           textAlign: style.textAlign,
+          // A single line, always: a wrapped number is twice as tall as the
+          // line it labels, which is the #18 desync. The column is sized to
+          // fit the widest number, so this never clips in practice.
+          softWrap: false,
+          maxLines: 1,
         ),
         lineIndex,
       );
