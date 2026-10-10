@@ -4,6 +4,18 @@
 
 ### Added
 
+- **Tab, Shift+Tab and Enter are dispatched through Flutter's `Shortcuts` /
+  `Actions` machinery**, and the raw key path is now pinned as owning none of
+  them ([issue #29](https://github.com/arrrrny/zuraffa_code_editor/issues/29)):
+  `CodeField`'s `FocusableActionDetector` sends Tab to `TabKeyIntent`, Shift+Tab
+  to `OutdentIntent`, Enter to `EnterKeyIntent`, Ctrl+/ to
+  `CommentUncommentIntent` and Ctrl+F to `SearchIntent`, and
+  `CodeController.actions` answers each with its action;
+  `CodeController.onKey` handles only Ctrl+F and the autocomplete popup's arrows
+  and returns `ignored` for everything else. The negative is what
+  `test/src/code_field/tab_through_shortcuts_test.dart` pins — a regression that
+  moved Tab back into a raw handler would leave every behavioural test green,
+  because the observable effect of a Tab is identical either way.
 - **Outdent on Backspace, and a modifier hook that can carry it**
   ([issue #21](https://github.com/arrrrny/zuraffa_code_editor/issues/21)):
   pressing Backspace inside a line's leading whitespace now removes one indent
