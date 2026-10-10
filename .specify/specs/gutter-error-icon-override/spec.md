@@ -62,11 +62,11 @@ Two escape hatches at two levels of granularity, because the ask names both:
 
 `tool/coverage_gate.py` pins `EXEMPT_LINES` by **line number**. Inserting lines
 above an exempted line shifts it and the gate goes red with a "matches nothing"
-or a bare miss. This spec adds ~18 lines above `error.dart`'s null-`RenderBox`
-guard and ~4 above `gutter.dart`'s discarded fold-toggle lambda, so both entries
-are renumbered (71→89 and 221→229). Any further insertion in either file needs
-the same treatment; the "stale line exemption" line the tool prints is the
-signal.
+or a bare miss. This spec adds 18 lines above `error.dart`'s null-`RenderBox`
+guard and 8 above `gutter.dart`'s discarded fold-toggle lambda (3 comment + 5
+code), so both entries are renumbered (71→89 and 221→229). Any further
+insertion in either file needs the same treatment; the "stale line exemption"
+line the tool prints is the signal.
 
 ## Acceptance criteria
 

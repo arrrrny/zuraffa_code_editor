@@ -77,9 +77,11 @@ void main() {
         infoIcon: null,
       );
 
-      for (final type in IssueType.values) {
-        expect(style.issueIcon(type), isA<IconData>());
-      }
+      // Pin the concrete glyph per type: the non-nullable return type alone is
+      // a compile-time property, so only an exact expectation can fail.
+      expect(style.issueIcon(IssueType.error), Icons.bug_report);
+      expect(style.issueIcon(IssueType.warning), defaultIssueIcon);
+      expect(style.issueIcon(IssueType.info), defaultIssueIcon);
     });
   });
 
@@ -199,6 +201,14 @@ void main() {
 
       expect(find.byIcon(Icons.bug_report), findsOneWidget);
       expect(find.byIcon(Icons.cancel), findsOneWidget);
+      // Colour and size stay the gutter's own, whichever glyph resolves —
+      // the same literals the errorIcon constant is built from.
+      final overridden = wt.widget<Icon>(find.byIcon(Icons.bug_report));
+      expect(overridden.color, _iconColor);
+      expect(overridden.size, _iconSize);
+      final fallback = wt.widget<Icon>(find.byIcon(Icons.cancel));
+      expect(fallback.color, _iconColor);
+      expect(fallback.size, _iconSize);
     });
 
     testWidgets('the icon is resolved per issue, not once per gutter', (
@@ -215,6 +225,14 @@ void main() {
 
       expect(find.byIcon(Icons.info_outline), findsOneWidget);
       expect(find.byIcon(Icons.cancel), findsOneWidget);
+      // Pin the gutter's own colour and size on the overridden path too, so
+      // they cannot drift from the errorIcon constant in error.dart.
+      final infoIcon = wt.widget<Icon>(find.byIcon(Icons.info_outline));
+      expect(infoIcon.color, _iconColor);
+      expect(infoIcon.size, _iconSize);
+      final errorIcon = wt.widget<Icon>(find.byIcon(Icons.cancel));
+      expect(errorIcon.color, _iconColor);
+      expect(errorIcon.size, _iconSize);
     });
   });
 }
