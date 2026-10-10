@@ -108,6 +108,16 @@ final _shortcutsIgnoredWhileComposing = <ShortcutActivator, Intent>{
 /// `_CodeFieldState._gutterRowExcess` unable to ever match.
 const _contentInsets = 2 * codeFieldVerticalPadding;
 
+/// What the toolbar looks like when the app set no `contextMenuBuilder`.
+///
+/// `TextField` declares the parameter nullable but defaults it to a private
+/// `_defaultContextMenuBuilder`, and that default is reachable only by leaving
+/// the argument out: an explicit null disables the selection toolbar outright,
+/// so Copy / Select All would vanish from every `CodeField`. Reading the
+/// default off a bare `TextField` gets the real one — including its
+/// `SystemContextMenu` branch on iOS — without forking Flutter's logic.
+final _defaultContextMenuBuilder = const TextField().contextMenuBuilder;
+
 class CodeField extends StatefulWidget {
   /// {@macro flutter.widgets.textField.minLines}
   final int? minLines;
@@ -147,6 +157,16 @@ class CodeField extends StatefulWidget {
 
   /// A way to replace specific line numbers by a custom TextSpan
   final TextSpan Function(int, TextStyle?)? lineNumberBuilder;
+
+  /// {@macro flutter.widgets.textField.contextMenuBuilder}
+  ///
+  /// The selection toolbar only: the editor's own actions (search, comment,
+  /// indent) stay wired through [FocusableActionDetector] either way, so this
+  /// changes what the menu looks like, not what the keyboard does.
+  ///
+  /// Leave it null to keep the platform default menu, or return an empty widget
+  /// (for example `SizedBox.shrink()`) to suppress the menu entirely.
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
 
   /// {@macro flutter.widgets.textField.enabled}
   final bool? enabled;
@@ -199,6 +219,7 @@ class CodeField extends StatefulWidget {
     this.cursorColor,
     this.textSelectionTheme,
     this.lineNumberBuilder,
+    this.contextMenuBuilder,
     this.focusNode,
     this.onChanged,
     @Deprecated('Use gutterStyle instead') this.lineNumbers,
@@ -543,6 +564,14 @@ class _CodeFieldState extends State<CodeField> {
       enabled: widget.enabled,
       onChanged: widget.onChanged,
       readOnly: widget.readOnly,
+      // Never forward a *null* builder here. `TextField` gives
+      // `contextMenuBuilder` the private `_defaultContextMenuBuilder`, and
+      // that default is only reachable by leaving the argument out: an
+      // explicit null disables the selection toolbar outright, so Copy /
+      // Select All silently disappear from every `CodeField`. Falling back to
+      // the same widget `TextField` would have built keeps the platform menu.
+      contextMenuBuilder:
+          widget.contextMenuBuilder ?? _defaultContextMenuBuilder,
     );
 
     final editingField = Theme(
