@@ -106,9 +106,26 @@ extension TextEditingValueExtension on TextEditingValue {
   }
 
   TextEditingValue tabsToSpaces(int spaceCount) {
-    final replacedBefore = beforeSelection.tabsToSpaces(spaceCount);
-    final replacedSelected = selected.tabsToSpaces(spaceCount);
-    final replacedAfter = afterSelection.tabsToSpaces(spaceCount);
+    // A platform update can carry a selection past the end of its own text
+    // while a composition shrinks; splitting on it would throw, so the
+    // selection is clamped to the text it points into. A selection that
+    // carries no offset at all is left to the getters, which read it as
+    // "no selection".
+    var value = this;
+    if (selection.baseOffset >= 0 &&
+        selection.extentOffset >= 0 &&
+        selection.end > text.length) {
+      value = copyWith(
+        selection: TextSelection(
+          baseOffset: selection.baseOffset.clamp(0, text.length),
+          extentOffset: selection.extentOffset.clamp(0, text.length),
+        ),
+      );
+    }
+
+    final replacedBefore = value.beforeSelection.tabsToSpaces(spaceCount);
+    final replacedSelected = value.selected.tabsToSpaces(spaceCount);
+    final replacedAfter = value.afterSelection.tabsToSpaces(spaceCount);
 
     final finalText = replacedBefore + replacedSelected + replacedAfter;
 
@@ -119,7 +136,31 @@ extension TextEditingValueExtension on TextEditingValue {
         replacedSelected,
         replacedAfter,
       ),
-      composing: composing,
+      composing: _shiftedForTabs(value.composing, spaceCount),
+    );
+  }
+
+  /// Moves [range] past the tabs that precede it, each of which grew by
+  /// [spaceCount] - 1 characters. An empty or out-of-bounds range is not a
+  /// region of this text and is returned as is.
+  TextRange _shiftedForTabs(TextRange range, int spaceCount) {
+    if (range.start < 0 || range.end < 0 || range.end > text.length) {
+      return range;
+    }
+
+    int shiftBefore(int offset) {
+      var shift = 0;
+      for (var i = 0; i < offset; i++) {
+        if (text[i] == '\t') {
+          shift += spaceCount - 1;
+        }
+      }
+      return shift;
+    }
+
+    return TextRange(
+      start: range.start + shiftBefore(range.start),
+      end: range.end + shiftBefore(range.end),
     );
   }
 

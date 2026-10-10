@@ -166,6 +166,19 @@ void main() {
         expect(value, expected);
       });
 
+      test('with a selection past the end of the text', () {
+        // A platform update can carry a selection past the end of its own text
+        // while an IME composition shrinks; converting must not throw on it.
+        TextEditingValue value = TextEditingValue(
+          text: _codeWithTabs,
+          selection: TextSelection.collapsed(offset: _codeWithTabs.length + 5),
+        );
+
+        value = value.tabsToSpaces(_spaceCount);
+
+        expect(value.text, _codeWithDoubleSpaces);
+      });
+
       test('with non-empty normalized selection', () {
         TextEditingValue value = const TextEditingValue(
           text: _codeWithTabs,
@@ -183,6 +196,44 @@ void main() {
         value = value.tabsToSpaces(_spaceCount);
 
         expect(value, expected);
+      });
+
+      test('with a composing range past the end of the text', () {
+        // Not a region of this text, so it is left exactly as it came.
+        const outOfBounds = TextRange(start: 0, end: 1000);
+        TextEditingValue value = TextEditingValue(
+          text: _codeWithTabs,
+          selection: const TextSelection.collapsed(offset: 0),
+          composing: outOfBounds,
+        );
+
+        value = value.tabsToSpaces(_spaceCount);
+
+        expect(value.composing, outOfBounds);
+      });
+
+      test('with a composing range that spans tabs', () {
+        const composingStart = 14;
+        const composingEnd = 40;
+        TextEditingValue value = TextEditingValue(
+          text: _codeWithTabs,
+          selection: const TextSelection.collapsed(offset: 0),
+          composing: const TextRange(start: composingStart, end: composingEnd),
+        );
+
+        value = value.tabsToSpaces(_spaceCount);
+
+        int tabsBefore(int offset) => RegExp(
+          '\t',
+        ).allMatches(_codeWithTabs).where((m) => m.start < offset).length;
+
+        expect(
+          value.composing,
+          TextRange(
+            start: composingStart + tabsBefore(composingStart) * 1,
+            end: composingEnd + tabsBefore(composingEnd) * 1,
+          ),
+        );
       });
 
       test('with non-empty reversed selection', () {

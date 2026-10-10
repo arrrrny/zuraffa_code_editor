@@ -79,7 +79,7 @@ EXEMPT_LINES: Dict[str, Dict[int, str]] = {
     # `select()` has already found `pattern` at `position` via `indexOf`, so
     # `matchAsPrefix` cannot return null there.
     "lib/src/code_field/text_editing_value.dart": {
-        188: "matchAsPrefix cannot fail after indexOf matched",
+        229: "matchAsPrefix cannot fail after indexOf matched",
     },
     # The only `ScrollablePositionedList` that can attach this controller is the
     # one built by `Popup` itself, and that list only receives the controller

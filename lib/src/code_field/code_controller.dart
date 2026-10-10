@@ -492,6 +492,13 @@ class CodeController extends TextEditingController {
       // During IME composition, preserve platform-provided editing state
       // and avoid applying editor transforms that may break composition commit.
       // Keep internal code state in sync so highlighted rendering doesn't drift.
+      // A tab is not an editor transform: it is a character no font the editor
+      // can rely on draws (flutter/flutter#79153), so it is converted here too,
+      // where the rest of the value setter converts it.
+      if (_isTabReplacementEnabled && hasTextChanged) {
+        newValue = newValue.tabsToSpaces(params.tabSpaces);
+      }
+
       if (hasTextChanged) {
         _updateCodeIfChanged(newValue.text);
       }
