@@ -7,6 +7,7 @@ import 'package:zuraffa_code_editor/src/code_field/actions/search.dart';
 import 'package:zuraffa_code_editor/src/code_field/actions/tab.dart';
 import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:highlight/languages/dart.dart';
 
 void main() {
   // The six `Action` subclasses the editor installs for its shortcuts. Each
@@ -15,7 +16,7 @@ void main() {
   const snippet = 'void main() {}';
 
   CodeController pumpController() {
-    final controller = CodeController(text: snippet);
+    final controller = CodeController(text: snippet, language: dart);
     // A fresh controller's selection sits at offset -1, which the editing
     // helpers reject; every action below edits through them.
     controller.value = const TextEditingValue(
@@ -57,16 +58,21 @@ void main() {
 
       IndentIntentAction(controller: controller).invoke(const IndentIntent());
 
-      // Nothing is selected, so nothing moves.
+      // A collapsed caret indents to the next tab stop (`tabSpaces` defaults
+      // to 2, so one space lands between `{` and `}`).
       expect(controller.text, 'void main() { }');
     });
 
     test('OutdentIntentAction outdents the selection', () {
       final controller = pumpController();
+      controller.value = const TextEditingValue(
+        text: '  x;',
+        selection: TextSelection(baseOffset: 0, extentOffset: 4),
+      );
 
       OutdentIntentAction(controller: controller).invoke(const OutdentIntent());
 
-      expect(controller.text, snippet);
+      expect(controller.text, 'x;');
     });
 
     test('CommentUncommentAction comments the selection out', () {
@@ -76,7 +82,7 @@ void main() {
         controller: controller,
       ).invoke(const CommentUncommentIntent());
 
-      expect(controller.text, snippet);
+      expect(controller.text, '// void main() {}');
     });
   });
 }

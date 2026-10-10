@@ -103,10 +103,11 @@ EXEMPT_LINES: Dict[str, Dict[int, str]] = {
     "lib/src/gutter/gutter.dart": {
         165: "the folded-block loop below overwrites this toggle",
     },
-    # The popup is created from a post-frame callback, so `findRenderObject()`
-    # has a laid out `RenderBox` ancestor by construction.
+    # `_getErrorPopup()` is called from the `MouseRegion.onEnter` handler: a
+    # widget can only receive an enter event (be hit-tested) after it has been
+    # laid out, so `findRenderObject()` cannot be null there.
     "lib/src/gutter/error.dart": {
-        71: "findRenderObject is non-null after the post-frame callback",
+        71: "onEnter implies laid out and hit-tested, so RenderBox is non-null",
     },
     # `_getNextOrFirstMatchIndex()` only returns null when the match list is
     # empty, and the guard two lines above has already ruled that out — so this
@@ -210,8 +211,16 @@ def main() -> int:
         )
         return 2
 
-    stats = parse_lcov(args.lcov)
-    line_stats = parse_lcov_lines(args.lcov)
+    # Key both maps through `relative()`, the way EXEMPT_FILES entries have
+    # always been matched: an lcov written with absolute `SF:` paths then hits
+    # the exempted files and lines exactly like a package-relative one.
+    stats = {
+        relative(path): stat for path, stat in parse_lcov(args.lcov).items()
+    }
+    line_stats = {
+        relative(path): lines
+        for path, lines in parse_lcov_lines(args.lcov).items()
+    }
     if not stats:
         sys.stderr.write("No instrumented lines found in %s.\n" % args.lcov)
         return 2
@@ -222,7 +231,7 @@ def main() -> int:
     for path, lines in EXEMPT_LINES.items():
         for line in lines:
             entry = line_stats.get(path, {}).get(line)
-            if entry is None or entry[0] == -1:
+            if entry is None:
                 sys.stderr.write(
                     "stale line exemption: %s:%d matches nothing in %s\n"
                     % (path, line, os.path.basename(args.lcov))

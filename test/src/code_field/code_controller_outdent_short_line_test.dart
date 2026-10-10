@@ -5,10 +5,14 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('CodeController.outdentSelection', () {
     test('a line shorter than one tab loses its indent entirely', () {
-      // `tabSpaces` is 4, so `  x;` (3 characters) has no full tab to remove.
-      // It falls back to trimming whatever indentation it does have.
+      // `tabSpaces` is pinned to 4, so `  x;` (4 characters, 2 of them
+      // indentation) has no full tab to remove — it falls back to trimming
+      // whatever indentation it does have.
       const snippet = 'void main() {\n  x;\n}';
-      final controller = CodeController(text: snippet);
+      final controller = CodeController(
+        text: snippet,
+        params: const EditorParams(tabSpaces: 4),
+      );
       controller.value = const TextEditingValue(
         text: snippet,
         selection: TextSelection(baseOffset: 0, extentOffset: snippet.length),

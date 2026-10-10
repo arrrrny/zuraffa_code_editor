@@ -68,8 +68,8 @@ jobs:
       # would otherwise drag the number down. 13 individual lines are exempted
       # the same way (see EXEMPT_LINES): each is a provably unreachable guard
       # or dead branch, and every entry carries its proof in the comment above
-      # it. The gate sits just under the measured value so master is green and
-      # every coverage PR raises it.
+      # it. The gate is pinned to the measured value: a new uncovered line must
+      # be covered, or proved dead via EXEMPT_LINES/EXEMPT_FILES.
       - name: Coverage gate
         run: |
           python3 tool/coverage_gate.py --min 100

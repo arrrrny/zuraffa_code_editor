@@ -13,7 +13,7 @@
   short: if an exempted line becomes reachable, the test that reaches it is
   added and the entry dropped.
 
-- **20 new test files** closing the reachable coverage gaps left over from the
+- **22 new test files** closing the reachable coverage gaps left over from the
   previous rounds: the autocompleter's blacklist and unknown-keyword paths, all
   six `Action` delegates of the code field, the tab modifier, `TextSelection`
   extension, named sections, `AbstractAnalyzer.dispose`, the single-line
