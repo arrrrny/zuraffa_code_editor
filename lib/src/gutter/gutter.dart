@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../code_field/code_controller.dart';
 import '../line_numbers/gutter_style.dart';
+import '../sizes.dart';
 import 'error.dart';
 import 'fold_toggle.dart';
 
@@ -37,7 +38,7 @@ class GutterWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: codeFieldVerticalPadding),
       child: Padding(
         // User escape hatch for fine gutter alignment: applied outside the
         // columns so the whole number/error/folding grid shifts by exactly
@@ -156,12 +157,15 @@ class GutterWidget extends StatelessWidget {
 
       final isFolded = code.foldedBlocks.contains(block);
 
-      tableRows[lineIndex].children[_foldingColumn] = FoldToggle(
-        color: style.textStyle?.color,
-        isFolded: isFolded,
-        onTap: isFolded
-            ? () => codeController.unfoldAt(block.firstLine)
-            : () => codeController.foldAt(block.firstLine),
+      tableRows[lineIndex].children[_foldingColumn] = _sized(
+        FoldToggle(
+          color: style.textStyle?.color,
+          isFolded: isFolded,
+          onTap: isFolded
+              ? () => codeController.unfoldAt(block.firstLine)
+              : () => codeController.foldAt(block.firstLine),
+        ),
+        lineIndex,
       );
     }
 

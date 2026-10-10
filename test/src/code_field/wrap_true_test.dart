@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zuraffa_code_editor/src/gutter/gutter.dart';
 import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
@@ -37,12 +38,17 @@ Future<void> _pumpLongLine(WidgetTester tester, {required bool wrap}) async {
   await tester.pumpAndSettle();
 }
 
-/// Pumps a `CodeField` holding long lines in a deliberately narrow editor,
-/// where a couple of lines land exactly on a wrap boundary.
+/// Long lines in a deliberately narrow editor, where a couple of them land
+/// exactly on a wrap boundary — the case a sum-only row match can still get
+/// wrong per line. Shared so the alignment test measures the same document.
+final List<String> _narrowWrappedLines = List.generate(
+  40,
+  (i) => 'line $i ${'y' * 100}',
+);
+
+/// Pumps a `CodeField` holding [_narrowWrappedLines] in a narrow editor.
 Future<void> _pumpNarrowWrappedText(WidgetTester tester) async {
-  final controller = CodeController(
-    text: List.generate(40, (i) => 'line $i ${'y' * 100}').join('\n'),
-  );
+  final controller = CodeController(text: _narrowWrappedLines.join('\n'));
   addTearDown(controller.dispose);
 
   await tester.pumpWidget(
@@ -63,7 +69,7 @@ Future<void> _pumpNarrowWrappedText(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-/// The content height behind the gutte's own scroll view: how many pixels of
+/// The content height behind the gutter's own scroll view: how many pixels of
 /// rows it has, so it can be compared with the editor's.
 double _contentHeight(ScrollableState scrollable) =>
     scrollable.position.maxScrollExtent + scrollable.position.viewportDimension;
@@ -138,17 +144,64 @@ void main() {
       // numbers pointing at the wrong lines as soon as the user scrolls.
       expect(
         _contentHeight(gutter),
-        _contentHeight(editor),
+        closeTo(_contentHeight(editor), 0.5),
         reason: 'the gutter and the code must scroll over the same content',
       );
 
       editor.position.jumpTo(2000);
       await tester.pumpAndSettle();
-      expect(gutter.position.pixels, editor.position.pixels);
+      expect(gutter.position.pixels, closeTo(editor.position.pixels, 0.5));
 
       gutter.position.jumpTo(60);
       await tester.pumpAndSettle();
-      expect(editor.position.pixels, gutter.position.pixels);
+      expect(editor.position.pixels, closeTo(gutter.position.pixels, 0.5));
+    });
+
+    testWidgets('every gutter number sits on the wrapped line it labels', (
+      tester,
+    ) async {
+      await _pumpNarrowWrappedText(tester);
+
+      final editable = tester.allRenderObjects
+          .whereType<RenderEditable>()
+          .single;
+
+      var lineStart = 0;
+
+      for (var i = 0; i < _narrowWrappedLines.length; i++) {
+        // Top of the code line, in the same global space as the gutter row.
+        final codeTop = editable
+            .localToGlobal(
+              editable
+                  .getLocalRectForCaret(TextPosition(offset: lineStart))
+                  .topLeft,
+            )
+            .dy;
+
+        // The row cell `_sized` pinned the number into: its top is the row's.
+        final numberRow = tester.getRect(
+          find
+              .ancestor(
+                of: find.descendant(
+                  of: find.byType(GutterWidget),
+                  matching: find.text('${i + 1}'),
+                ),
+                matching: find.byType(SizedBox),
+              )
+              .first,
+        );
+
+        expect(
+          numberRow.top,
+          closeTo(codeTop, 1.0),
+          reason:
+              'the number for line ${i + 1} must sit on the code line it '
+              'labels — a matching total height alone can hide a line that '
+              'wrapped one visual row off',
+        );
+
+        lineStart += _narrowWrappedLines[i].length + 1;
+      }
     });
 
     testWidgets('without wrapping the gutter keeps one row per line', (
@@ -180,7 +233,7 @@ void main() {
       // the wrapped-row measurement must not disturb this layout.
       expect(
         _contentHeight(_gutterScrollable(tester)),
-        _contentHeight(_editorScrollable(tester)),
+        closeTo(_contentHeight(_editorScrollable(tester)), 0.5),
       );
     });
   });

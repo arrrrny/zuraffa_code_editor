@@ -54,3 +54,34 @@ exactly.
   the fast path (heights already agreeing) reads in three lines and the
   calibration is confined to one block.
 - The gutter's three fill methods each route their cell through `_sized`.
+
+## Follow-up: review findings (PR #55)
+
+`zuraffa-review[bot]` reviewed the branch at `259f795` and raised seven
+findings (0 blockers). Resolved here:
+
+- **The wrapped-row measurement is memoised** on (controller text, width). It
+  ran from `build()` and re-measured every line of the file — up to nine times
+  with the calibration — on every rebuild. A result is cached only once the
+  editor's extent is known, so the first frame still calibrates instead of
+  freezing an uncalibrated list.
+- **The calibration's objective is the summed extents, not per-line starts.**
+  That limitation is now documented at the search, and test 5 pins the
+  per-line property the gutter actually needs: with the calibration disabled
+  it fails (line 2's number at 310 against the code's 352), so it is
+  load-bearing rather than a restatement of the totals.
+- **The autocomplete popup's `TextPainter` is bounded** to the editor's text
+  width under `wrap`, so caret offsets for a wrapped line are no longer read
+  from an unbounded layout.
+- **`codeFieldVerticalPadding`** is the single source for the editor's
+  `contentPadding` and the gutter's outer `Padding`, with `_contentInsets`
+  derived from it, so the two cannot drift apart unnoticed.
+- **The extent and scroll-offset assertions use `closeTo(…, 0.5)`** instead of
+  bit-exact double equality on independently computed layout metrics.
+- **The fold-toggle loop routes its cell through `_sized`**, like the other
+  three cell writers.
+- **Drive-bys:** the test's `gutte's` typo, and `longestLine` is no longer
+  scanned when wrapping (only the unwrapped path reads it).
+
+Green: `flutter test test/src/code_field/wrap_true_test.dart` — 5/5;
+`dart analyze --fatal-infos` and `dart format` clean.
