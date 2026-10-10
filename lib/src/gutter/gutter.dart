@@ -196,6 +196,14 @@ class GutterWidget extends StatelessWidget {
           issue,
           style.errorPopupTextStyle ??
               (throw Exception('Error popup style should never be null')),
+          // Resolved per issue from the style, not once for the gutter: two
+          // issues of different types on different lines can carry different
+          // glyphs.
+          icon: Icon(
+            style.issueIcon(issue.type),
+            color: Colors.red,
+            size: _issueColumnWidth,
+          ),
         ),
         lineIndex,
       );

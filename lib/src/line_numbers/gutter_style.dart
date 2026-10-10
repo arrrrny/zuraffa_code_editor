@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../analyzer/models/issue_type.dart';
+
+/// The glyph the gutter shows for an issue when the style overrides nothing.
+///
+/// Every [IssueType] falls back to it — the one icon the gutter has always
+/// rendered — so a style that sets none of the icon fields looks exactly as it
+/// did before they existed.
+const IconData defaultIssueIcon = Icons.cancel;
+
 class GutterStyle {
   /// Width of the line number column.
   final double width;
@@ -19,6 +28,26 @@ class GutterStyle {
 
   /// Style of the error popup.
   final TextStyle? errorPopupTextStyle;
+
+  /// Glyph the gutter shows for an [IssueType.error] issue.
+  ///
+  /// Null renders [defaultIssueIcon], which is what every issue type has
+  /// always shown. Only the glyph is overridable: the icon is rendered 16px in
+  /// the 16-wide issue column, so its size is part of the row geometry and
+  /// comes from the gutter, not from the style.
+  final IconData? errorIcon;
+
+  /// Glyph the gutter shows for an [IssueType.warning] issue.
+  ///
+  /// Null renders [defaultIssueIcon], so setting nothing here leaves warnings
+  /// looking exactly as they did.
+  final IconData? warningIcon;
+
+  /// Glyph the gutter shows for an [IssueType.info] issue.
+  ///
+  /// Null renders [defaultIssueIcon], so setting nothing here leaves info
+  /// looking exactly as it did.
+  final IconData? infoIcon;
 
   /// Background of the line number column.
   final Color? background;
@@ -45,6 +74,16 @@ class GutterStyle {
   /// Whether there is any column to show in gutter.
   bool get showGutter => showLineNumbers || showErrors || showFoldingHandles;
 
+  /// The glyph to render for an issue of [type].
+  ///
+  /// The matching field when the style supplies one, [defaultIssueIcon]
+  /// otherwise. Never null, so a caller never has to re-apply the fallback.
+  IconData issueIcon(IssueType type) => switch (type) {
+    IssueType.error => errorIcon ?? defaultIssueIcon,
+    IssueType.warning => warningIcon ?? defaultIssueIcon,
+    IssueType.info => infoIcon ?? defaultIssueIcon,
+  };
+
   const GutterStyle({
     this.margin = 10.0,
     this.padding = EdgeInsets.zero,
@@ -55,6 +94,9 @@ class GutterStyle {
     this.width = 80.0,
     this.background,
     this.errorPopupTextStyle,
+    this.errorIcon,
+    this.warningIcon,
+    this.infoIcon,
     this.textStyle,
   });
 
@@ -72,11 +114,17 @@ class GutterStyle {
     TextStyle? errorPopupTextStyle,
     TextStyle? textStyle,
     EdgeInsets? padding,
+    IconData? errorIcon,
+    IconData? warningIcon,
+    IconData? infoIcon,
   }) => GutterStyle(
     width: width,
     textAlign: textAlign,
     textStyle: textStyle ?? this.textStyle,
     errorPopupTextStyle: errorPopupTextStyle ?? this.errorPopupTextStyle,
+    errorIcon: errorIcon ?? this.errorIcon,
+    warningIcon: warningIcon ?? this.warningIcon,
+    infoIcon: infoIcon ?? this.infoIcon,
     background: background,
     margin: margin,
     padding: padding ?? this.padding,
