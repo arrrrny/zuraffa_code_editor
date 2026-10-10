@@ -121,11 +121,28 @@ extension FoldableBlockList on List<FoldableBlock> {
 
         final isDuplicate = bubble.isSameLines(ancestor);
 
-        final areIntersecting =
-            ancestor.lastLine >= bubble.firstLine &&
+        // Two blocks *cross* when one ends strictly inside the other. Such
+        // blocks cannot both stay on screen — the gutter would show a fold
+        // toggle whose range swallows the other block's lines — so they are
+        // joined.
+        //
+        // Blocks that merely touch (`}void main(){` closes one block and
+        // opens the next on the same line) are NOT crossing: each keeps its
+        // own first line, so each keeps its own fold toggle row. Joining them
+        // here would fold the following block into the one above it, and
+        // folding the upper block then hid the following block's start
+        // together with its body.
+        //
+        // Blocks that share a first line always join: the gutter renders one
+        // fold toggle per row, so two blocks opening on the same line would
+        // fight over it.
+        final shareFirstLine = ancestor.firstLine == bubble.firstLine;
+
+        final areCrossing =
+            ancestor.lastLine > bubble.firstLine &&
             ancestor.lastLine < bubble.lastLine;
 
-        if (isDuplicate || areIntersecting) {
+        if (isDuplicate || shareFirstLine || areCrossing) {
           final joined = ancestor.join(bubble);
 
           this[ancestorIndexToOverallIndex[ancestorIndex]] = joined;
@@ -136,7 +153,7 @@ extension FoldableBlockList on List<FoldableBlock> {
           ancestorIndexToOverallIndex.removeAt(bubbleIndexInAncestors);
           overallIndex--;
 
-          if (!areIntersecting) {
+          if (isDuplicate) {
             // `bubble` was a duplicate lines-wise.
             // Do not go up the hierarchy because it is laid down alright there.
             break; // to the top level, try the next block.

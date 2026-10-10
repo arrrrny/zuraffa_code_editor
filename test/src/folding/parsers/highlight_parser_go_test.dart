@@ -22,7 +22,11 @@ func (
 	y int) bool {
 
 }''';
-      const expectedBlocks = [FB(firstLine: 0, lastLine: 5, type: FBT.union)];
+      const expectedBlocks = [
+        FB(firstLine: 0, lastLine: 1, type: FBT.parentheses),
+        FB(firstLine: 1, lastLine: 3, type: FBT.parentheses),
+        FB(firstLine: 3, lastLine: 5, type: FBT.braces),
+      ];
       _Tester.parseAndCheck(mode: go, code: code, expected: expectedBlocks);
     });
 
@@ -139,7 +143,10 @@ import (
 )
 
 func main() {}''';
-      const expectedBlocks = [FB(firstLine: 0, lastLine: 6, type: FBT.imports)];
+      const expectedBlocks = [
+        FB(firstLine: 0, lastLine: 2, type: FBT.imports),
+        FB(firstLine: 2, lastLine: 6, type: FBT.parentheses),
+      ];
       _Tester.parseAndCheck(mode: go, code: code, expected: expectedBlocks);
     });
 
@@ -153,8 +160,9 @@ import (
 	"strings"
 )''';
       const expectedBlocks = [
-        FB(firstLine: 0, lastLine: 6, type: FBT.imports),
+        FB(firstLine: 0, lastLine: 3, type: FBT.imports),
         FB(firstLine: 1, lastLine: 2, type: FBT.singleLineComment),
+        FB(firstLine: 3, lastLine: 6, type: FBT.parentheses),
       ];
       _Tester.parseAndCheck(mode: go, code: code, expected: expectedBlocks);
     });

@@ -506,6 +506,28 @@ class Code {
       endOfRange = _upstreamEndOfRange(lastLine);
     }
 
+    // Normally the closer shares a row with the opener, exactly as upstream
+    // does: `parsers: [` folds to `parsers: [  ],`. That is fine while the
+    // closing line only closes this block.
+    //
+    // But when the closing line also opens the following foldable block —
+    // `}void main(){` closes `factorial` and opens `main` on the same line —
+    // the closer needs a row of its own. That row is where the following
+    // block hangs its fold toggle, and it is the only row that can carry the
+    // line number of the block's own start. Gluing the two rows together
+    // loses both, so folding the block above hides the start of the one below
+    // it (akvelon/flutter-code-editor#213).
+    //
+    // Ending the range just before the closing line still leaves the closer's
+    // text on screen: the newline that ended the previous content line falls
+    // outside the range and becomes the row break the closer needs.
+    if (_isClosingLine(lastLine) && _startsAnotherFoldableBlock(block)) {
+      final closerOnItsOwnRow = lastLine.textRange.start - 1;
+      if (closerOnItsOwnRow > startOfRange) {
+        endOfRange = closerOnItsOwnRow;
+      }
+    }
+
     return HiddenRange(
       startOfRange,
       endOfRange,
@@ -514,6 +536,15 @@ class Code {
       wholeFirstLine: false, // Some characters of the first line are visible.
     );
   }
+
+  /// Whether a foldable block other than [block] starts on the very line
+  /// [block] ends on.
+  ///
+  /// This is the "another block at the end of the first" case: the last line
+  /// closes this block and opens the next one at the same time.
+  bool _startsAnotherFoldableBlock(FoldableBlock block) => foldableBlocks.any(
+    (other) => !other.isSameLines(block) && other.firstLine == block.lastLine,
+  );
 
   /// The hidden range end upstream uses: the end of [line] excluding its
   /// trailing newline.

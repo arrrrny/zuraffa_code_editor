@@ -123,16 +123,30 @@ void main() {
         FB(firstLine: 20, lastLine: 21, type: FBT.brackets),
         FB(firstLine: 23, lastLine: 23, type: FBT.braces),
       ];
+      // Blocks that merely touch (`) {` or `} void`) each keep their own
+      // first line, so each keeps its own fold toggle row. Joining them would
+      // fold the following block into the one above it, and folding the upper
+      // block would then hide the following block's start together with its
+      // body (akvelon/flutter-code-editor#213).
+      //
+      // Blocks that share a first line always join: the gutter renders one
+      // fold toggle per row, so two blocks opening on the same line would
+      // fight over it.
       const expected = [
         FB(firstLine: 0, lastLine: 1, type: FBT.brackets),
         FB(firstLine: 2, lastLine: 17, type: FBT.braces),
-        FB(firstLine: 3, lastLine: 8, type: FBT.union),
-        FB(firstLine: 4, lastLine: 6, type: FBT.union),
-        FB(firstLine: 10, lastLine: 17, type: FBT.union),
+        FB(firstLine: 3, lastLine: 7, type: FBT.parentheses),
+        FB(firstLine: 4, lastLine: 5, type: FBT.brackets),
+        FB(firstLine: 5, lastLine: 6, type: FBT.braces),
+        FB(firstLine: 7, lastLine: 8, type: FBT.parentheses),
+        FB(firstLine: 10, lastLine: 13, type: FBT.brackets),
         FB(firstLine: 11, lastLine: 12, type: FBT.union),
+        FB(firstLine: 13, lastLine: 16, type: FBT.brackets),
         FB(firstLine: 14, lastLine: 15, type: FBT.braces),
+        FB(firstLine: 16, lastLine: 17, type: FBT.parentheses),
         FB(firstLine: 18, lastLine: 22, type: FBT.brackets),
         FB(firstLine: 19, lastLine: 21, type: FBT.union),
+        FB(firstLine: 20, lastLine: 21, type: FBT.brackets),
         FB(firstLine: 23, lastLine: 23, type: FBT.braces),
       ];
 

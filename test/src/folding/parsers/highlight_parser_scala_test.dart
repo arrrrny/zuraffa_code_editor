@@ -26,8 +26,10 @@ class MyClass(var myVar1: Int,
   }
 }''';
       const expected = [
-        FB(firstLine: 0, lastLine: 8, type: FBT.union),
-        FB(firstLine: 3, lastLine: 7, type: FBT.union),
+        FB(firstLine: 0, lastLine: 2, type: FBT.parentheses),
+        FB(firstLine: 2, lastLine: 8, type: FBT.braces),
+        FB(firstLine: 3, lastLine: 5, type: FBT.parentheses),
+        FB(firstLine: 5, lastLine: 7, type: FBT.braces),
       ];
       _Tester.parseAndCheck(mode: scala, code: code, expected: expected);
     });
@@ -149,7 +151,10 @@ import users.User // Without this, it is 'braces' block.
 import users.{ 
   User
 }''';
-      const expected = [FB(firstLine: 0, lastLine: 3, type: FBT.imports)];
+      const expected = [
+        FB(firstLine: 0, lastLine: 1, type: FBT.imports),
+        FB(firstLine: 1, lastLine: 3, type: FBT.braces),
+      ];
       _Tester.parseAndCheck(mode: scala, code: code, expected: expected);
     });
 
