@@ -4,6 +4,27 @@ import 'package:highlight/languages/java.dart';
 
 import '../common/create_app.dart';
 
+/// What one keystroke costs in a 3000-line (110 KB) document, measured on the
+/// `value` setter below — the whole synchronous path a keystroke drives.
+/// `flutter test` (unoptimized JIT), median of 9 reps, after a warm-up rep:
+///
+/// | Component | µs | Share |
+/// |---|---|---|
+/// | `highlight.parse(text)` | 52,000–59,000 | ~62% |
+/// | `Code(...)` construction | 15,000–17,600 | ~18% |
+/// | `Autocompleter.setText` | 5,600–6,700 | ~7% |
+/// | remainder (edit diff, tab replacement, selection mapping, history) | ~11,000 | ~13% |
+/// | **total** | **~84,400** | |
+///
+/// Every one of the three big terms is whole-document work, and none of them
+/// can be trimmed without an architectural change: the `highlight` package
+/// lexes from offset 0 on every call and exposes no incremental API, `Code` is
+/// immutable and rebuilt wholesale, and the autocompleter's remaining
+/// `_splitWords` scans the full text. Issue
+/// [#22](https://github.com/arrrrny/zuraffa_code_editor/issues/22) asks for
+/// lazy loading; the measurement is why that is not the fix, and this test is
+/// the guard that keeps the cost linear while the model is what it is.
+
 /// A Java-like document of [lines] lines, shaped like the file the issue
 /// reports typing into: short lines, comments, and one block every five lines.
 String _document(int lines) {
@@ -101,14 +122,17 @@ void main() {
     final perLineSmall = micros[sizes.last]! / sizes.last;
     final perLineLarge = micros[sizes.first]! / sizes.first;
 
-    // Deliberately loose. `flutter test` runs on the unoptimized JIT, so these
-    // numbers are about an order of magnitude above a release build and carry
-    // the noise of a shared CI machine; the point of the bound is to fail on a
-    // *super-linear* regression rather than to pin milliseconds. Fifteen times
-    // the lines costing more than three times as much per line means a term
-    // growing faster than the document — with this spread that is what a
-    // quadratic step looks like (15x), while the linear behaviour this measures
-    // sits near 1x.
-    expect(perLineLarge, lessThan(perLineSmall * 3));
+    // Deliberately tight but not absolute. Unmodified, the ratio sits between
+    // 1.0 and 1.3 here (five consecutive runs: 1.08, 1.01, 1.09, 1.25, 1.11),
+    // because a keystroke's work is linear in rows and both sizes pay for JIT
+    // noise alike. The bound is 2x: a term growing with the square of the
+    // document shows up as a ratio above it, while nothing the editor does
+    // today comes close. Fault-injected with an O(rows^2) pass in
+    // `CodeLinesBuilder.textToCodeLines` (one full walk of the lines per
+    // line), which added 29us per line at 3000 lines and reddened this at
+    // 2.1x. `flutter test` runs on the unoptimized JIT and CI machines are
+    // shared, so this is a tripwire against super-linear growth, not a
+    // millisecond budget.
+    expect(perLineLarge, lessThan(perLineSmall * 2));
   });
 }

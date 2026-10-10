@@ -141,6 +141,28 @@
 
 ### Changed
 
+- **The keystroke cost is measured, decomposed and pinned against super-linear
+  growth** ([issue #22](https://github.com/arrrrny/zuraffa_code_editor/issues/22),
+  upstream `akvelon/flutter-code-editor#264`). One single-character keystroke in
+  a 3000-line document costs ~84 ms under `flutter test`, and it is
+  `highlight.parse` of the whole document (~62%, 52–59 ms), the `Code(...)`
+  construction (~18%, 15–18 ms), `Autocompleter.setText` (~7%, 5.6–6.7 ms) and
+  the edit diff, tab replacement and selection mapping (~13%). Each of the
+  three big terms is whole-document work, and none can be trimmed without an
+  architectural change: the `highlight` package lexes from offset 0 on every
+  call with no incremental API, `Code` is immutable and rebuilt wholesale, and
+  the autocompleter's remaining `_splitWords` scans the full text. The issue
+  asks for lazy loading; upstream declined it for the same reason ("you would
+  have to mostly rewrite the entire text editor"), and the measurement here
+  confirms it, so the deliverable is the number and a guard, not a rewrite. The
+  guard is `test/src/code_field/edit_latency_test.dart`: the per-line keystroke
+  cost at 3000 lines within 2× the per-line cost at 200 lines, tightened from
+  3× after measuring the unmodified ratio at 1.01–1.25 over five runs. An
+  injected O(rows²) pass in `CodeLinesBuilder.textToCodeLines` (+29 µs/line at
+  3000 lines) reddens it at 2.13×; reverting either of #39's O(n) trims does
+  not, which is the honest limit of a linearity bound and is recorded in the
+  spec.
+
 - **The coverage gate ratchets to 100%.** The measured value is
   `100.00% (3089/3089 lines over 102 files)`; 13 lines are exempted
   individually as provably unreachable (dead branches, defensive guards, the
