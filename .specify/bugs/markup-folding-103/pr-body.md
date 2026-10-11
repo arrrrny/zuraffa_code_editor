@@ -109,7 +109,7 @@ feature: `Error when reading 'lib/src/folding/parsers/markup.dart'`,
 
 ## Verification
 
-- `flutter test` — **765/765 passing** (754 on master + 11 new tests)
+- `flutter test` — **769/769 passing** (758 on master + 11 new tests)
 - `dart analyze` — clean; `dart format` — clean
 - Coverage gate — **100.00%**, no new exemption added: every line of
   `markup.dart` is reachable and covered

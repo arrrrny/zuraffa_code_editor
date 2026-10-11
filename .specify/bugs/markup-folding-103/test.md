@@ -2,16 +2,16 @@
 
 ## Full suite
 
-`flutter test` on `bug/markup-folding-103` @ `d12d537`:
+`flutter test` on `bug/markup-folding-103` rebased onto `0efb5fc` (#128 merged):
 
 ```
-02:30 +764: .../horizontal_scroll_behaviour_test.dart: the code area leaves it
+03:30 +769: .../horizontal_scroll_behaviour_test.dart: the code area leaves it
              alone when there is nothing to scroll wrap: true reflows instead of
              scrolling
-02:31 +765: All tests passed!
+03:37 +769: All tests passed!
 ```
 
-**765 tests, 0 failures** (754 on master + 11 new).
+**769 tests, 0 failures** (758 on master + 11 new).
 
 ## New tests
 
@@ -90,7 +90,7 @@ excluded individual lines (see EXEMPT_LINES): 13
 Coverage gate: 100.00% >= 100.00% — OK
 ```
 
-On master the same gate reports 100.00% (3369/3369 over 105 files): the parser
+On master the same gate reports 100.00% (3371/3371 over 105 files): the parser
 adds one file and three covered lines, and no new exemption was needed. Every
 line of `markup.dart` is reachable and covered — the guards on
 `node.className`, `children`, `opener` and `closer` are all single-line
