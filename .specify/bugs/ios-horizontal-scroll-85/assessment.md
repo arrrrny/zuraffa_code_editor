@@ -86,7 +86,7 @@ keyboard/IME behaviour.
 The code area's horizontal scroll view is an *ancestor* of the `TextField`, so the
 drag that would scroll it lands on the `TextField`'s own recognizers first.
 `TextField` → `EditableText` → `TextFieldSelectionGestureDetectorBuilder.buildGestureDetector`
-(`packages/flutter/lib/src/widgets/text_selection.dart:3684`) registers a
+(`packages/flutter/lib/src/widgets/text_selection.dart:3400`) registers a
 **platform-specific** drag recognizer for text selection
 (`text_selection.dart:3712-3748`):
 

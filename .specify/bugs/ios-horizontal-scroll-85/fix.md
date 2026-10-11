@@ -1,7 +1,7 @@
 # Fix record: ios-horizontal-scroll-85
 
 - **Slug**: ios-horizontal-scroll-85
-- **Branch**: `bug/ios-horizontal-scroll-85` (from master `89ff2c6`)
+- **Branch**: `bug/ios-horizontal-scroll-85` (from master `a02539a`)
 - **Date**: 2026-10-11
 - **Issue**: https://github.com/arrrrny/zuraffa_code_editor/issues/85
   (upstream akvelon/flutter-code-editor#280)
@@ -50,7 +50,7 @@ Nothing in `lib/`, `example/`, `tool/` or `pubspec.yaml`.
 
 ## Verification
 
-- Full suite: **747 passed** on the unfixed baseline (the six new pins green on an
+- Full suite: **737 passed** on the unfixed baseline (the six new pins green on an
   unmodified `lib/`).
 - `dart analyze` on the changed files: no issues.
 - `dart format`: clean.

@@ -57,7 +57,7 @@ after tap      px=285.33   caret placed by a tap -> revealed
 
 | Gate | Command | Result |
 |------|---------|--------|
-| Full suite | `flutter test` | 747 passed (the 6 new pins on an unmodified `lib/`) |
+| Full suite | `flutter test` | 737 passed (the 6 new pins on an unmodified `lib/`) |
 | Analyze | `dart analyze lib/src/code_field/code_field.dart test/src/code_field/horizontal_scroll_behaviour_test.dart` | No issues found |
 | Format | `dart format` | Formatted 2 files, 0 changed after the run |
 | Coverage | `tool/coverage_gate.py --min 100` | 100.00% (3360/3360 lines over 105 files) — test-only change, no new production lines |

@@ -78,41 +78,50 @@ void main() {
   group('the code area scrolls horizontally on drag', () {
     testWidgets('under an iOS platform override', (tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-      // No focus: an unfocused field does not reveal its caret, so the code area
-      // starts at its left edge and the drag has somewhere to go.
-      await _pumpField(tester, text: _longLine);
-      expect(_horizontalPosition(tester).pixels, 0);
+      // Reset in a finally, not an addTearDown: flutter_test's invariant check
+      // runs before tear-down callbacks, so a leaked platform override is caught
+      // here rather than cascading into the tests below.
+      try {
+        // No focus: an unfocused field does not reveal its caret, so the code
+        // area starts at its left edge and the drag has somewhere to go.
+        await _pumpField(tester, text: _longLine);
+        expect(_horizontalPosition(tester).pixels, 0);
 
-      await _dragCodeLeft(tester);
+        await _dragCodeLeft(tester);
 
-      expect(
-        _horizontalPosition(tester).pixels,
-        greaterThan(0),
-        reason:
-            'the drag must scroll the code area past the left edge of the text',
-      );
-      debugDefaultTargetPlatformOverride = null;
+        expect(
+          _horizontalPosition(tester).pixels,
+          greaterThan(0),
+          reason:
+              'the drag must scroll the code area past the left edge of the text',
+        );
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
     });
 
     testWidgets('an android platform override leaves the drag to text selection', (
       tester,
     ) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.android;
-      await _pumpField(tester, text: _longLine);
-      expect(_horizontalPosition(tester).pixels, 0);
+      try {
+        await _pumpField(tester, text: _longLine);
+        expect(_horizontalPosition(tester).pixels, 0);
 
-      await _dragCodeLeft(tester);
+        await _dragCodeLeft(tester);
 
-      // Flutter's own behaviour, not a defect this package can fix:
-      // `TextField` claims the horizontal drag for text selection on android, so
-      // the ancestor scroll view never sees it.
-      expect(
-        _horizontalPosition(tester).pixels,
-        0,
-        reason:
-            'TextField claims the drag for text selection on non-Apple platforms',
-      );
-      debugDefaultTargetPlatformOverride = null;
+        // Flutter's own behaviour, not a defect this package can fix:
+        // `TextField` claims the horizontal drag for text selection on android,
+        // so the ancestor scroll view never sees it.
+        expect(
+          _horizontalPosition(tester).pixels,
+          0,
+          reason:
+              'TextField claims the drag for text selection on non-Apple platforms',
+        );
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
     });
   });
 
