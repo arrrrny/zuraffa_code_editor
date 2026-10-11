@@ -2,12 +2,14 @@ import 'package:zuraffa_code_editor/src/folding/parsers/fallback.dart';
 import 'package:zuraffa_code_editor/src/folding/parsers/highlight.dart';
 import 'package:zuraffa_code_editor/src/folding/parsers/indent.dart';
 import 'package:zuraffa_code_editor/src/folding/parsers/java.dart';
+import 'package:zuraffa_code_editor/src/folding/parsers/markup.dart';
 import 'package:zuraffa_code_editor/src/folding/parsers/parser_factory.dart';
 import 'package:zuraffa_code_editor/src/folding/parsers/python.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:highlight/highlight_core.dart';
 import 'package:highlight/languages/java.dart';
 import 'package:highlight/languages/python.dart';
+import 'package:highlight/languages/xml.dart';
 import 'package:highlight/languages/yaml.dart';
 
 void main() {
@@ -32,6 +34,15 @@ void main() {
       expect(
         FoldableBlockParserFactory.provideParser(yaml),
         isA<IndentFoldableBlockParser>(),
+      );
+    });
+
+    test('xml gets the markup parser', () {
+      // Markup nests on <tag>/</tag>, not on brackets, so the generic
+      // bracket-driven parser finds nothing in it.
+      expect(
+        FoldableBlockParserFactory.provideParser(xml),
+        isA<MarkupFoldableBlockParser>(),
       );
     });
 
