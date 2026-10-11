@@ -29,6 +29,18 @@
   `errorIcon` constant is now built from so the two cannot drift apart. Only the
   glyph is overridable — the icon is drawn at the issue column's own width, so
   its size stays part of the row geometry.
+- **The gutter error popup's decoration is overridable**
+  ([issue #82](https://github.com/arrrrny/zuraffa_code_editor/issues/82),
+  upstream `akvelon/flutter-code-editor#217`). The popup's container chrome was
+  derived inline from the popup text style's `backgroundColor` and `color`, which
+  meant those two `TextStyle` fields were load-bearing for something that is not
+  text styling and there was no way to set a shape or a border.
+  `GutterStyle.errorPopupDecoration` now supplies the `BoxDecoration` outright,
+  and `GutterErrorWidget.popupDecoration` does the same for a host that mounts
+  the widget directly. Leaving it null keeps the existing derivation exactly,
+  and the popup's content — message, url, suggestion and divider — is untouched
+  either way. A `popupBuilder` that would replace the whole overlay is
+  deliberately not in this change.
 - **Tab, Shift+Tab and Enter are dispatched through Flutter's `Shortcuts` /
   `Actions` machinery**, and the raw key path is now pinned as owning none of
   them ([issue #29](https://github.com/arrrrny/zuraffa_code_editor/issues/29)):

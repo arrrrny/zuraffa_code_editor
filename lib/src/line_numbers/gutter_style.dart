@@ -49,6 +49,12 @@ class GutterStyle {
   /// looking exactly as it did.
   final IconData? infoIcon;
 
+  /// Decoration of the error popup's container.
+  ///
+  /// Null derives it from [errorPopupTextStyle]'s `backgroundColor` and
+  /// `color`, which is what the popup has always done.
+  final BoxDecoration? errorPopupDecoration;
+
   /// Background of the line number column.
   final Color? background;
 
@@ -97,6 +103,7 @@ class GutterStyle {
     this.errorIcon,
     this.warningIcon,
     this.infoIcon,
+    this.errorPopupDecoration,
     this.textStyle,
   });
 
@@ -117,6 +124,7 @@ class GutterStyle {
     IconData? errorIcon,
     IconData? warningIcon,
     IconData? infoIcon,
+    BoxDecoration? errorPopupDecoration,
   }) => GutterStyle(
     width: width,
     textAlign: textAlign,
@@ -125,6 +133,7 @@ class GutterStyle {
     errorIcon: errorIcon ?? this.errorIcon,
     warningIcon: warningIcon ?? this.warningIcon,
     infoIcon: infoIcon ?? this.infoIcon,
+    errorPopupDecoration: errorPopupDecoration ?? this.errorPopupDecoration,
     background: background,
     margin: margin,
     padding: padding ?? this.padding,
