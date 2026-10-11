@@ -88,7 +88,7 @@ EXEMPT_LINES: Dict[str, Dict[int, str]] = {
     # `ItemScrollController._attach`'s "already attached" assertion, so the
     # branch is dead both in production and in tests.
     "lib/src/wip/autocomplete/popup.dart": {
-        76: "ItemScrollController can never be attached before it is assigned",
+        80: "ItemScrollController can never be attached before it is assigned",
     },
     # `_visibleLineIndex` counts the newlines of the highlighted nodes, which
     # concatenate to the *visible* text; that text can never carry more newlines
