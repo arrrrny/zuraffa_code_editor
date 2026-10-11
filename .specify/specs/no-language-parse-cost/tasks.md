@@ -94,7 +94,7 @@ either story — no `lib/` change ships (T018).
 
 ### Implementation for User Story 3
 
-- [ ] T013 [US3] Post a comment on `arrrrny/zuraffa_code_editor#111` (and cross-link #93) carrying
+- [x] T013 [US3] Post a comment on `arrrrny/zuraffa_code_editor#111` (and cross-link #93) carrying
       the measured numbers,
       the mechanism (`highlight` 0.7.0's `plaintext` fallback), and the conclusion that no code change
       is warranted (FR-006).

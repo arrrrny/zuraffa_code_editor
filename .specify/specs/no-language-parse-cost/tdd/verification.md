@@ -26,7 +26,7 @@ rather than papered over.
 The usual red-first step could not be performed: the feature's finding is that
 the reported behaviour does not exist. A red would have required demonstrating
 that the editor is slow with no language selected, which measurement contradicts
-(13–23 ms against 127–168 ms with a language).
+(13–23 ms against 119.9–129.5 ms with a language).
 
 What replaces it is **mutation evidence** — the property a red is used to
 establish. Four mutants were injected on scratch copies
@@ -43,7 +43,7 @@ committed:
 M3 exposed a genuine weakness that the audit then closed: the paste test's
 original two assertions (`< 1 s` absolute, `<= javaPaste`) both survive a mutant
 that makes the no-language paste pay for lexing. A ratio bound
-(`noLanguagePaste / javaPaste < 0.5`, measured 0.098–0.166) was added, after
+(`noLanguagePaste / javaPaste < 0.5`, measured 0.125–0.136) was added, after
 which M3 dies. The audit's remediation loop is therefore: 1 finding, 1 fix,
 verified by re-injection.
 
@@ -65,8 +65,8 @@ verified by re-injection.
 |---|---|---|
 | SC-001 — no-language parse < 5% of with-language | test 1, `expect(noLanguageParse, lessThan(javaParse * 0.05))`; test 2 for the unresolvable name | 10–18 µs vs 78.9–96.5 ms |
 | SC-002 — no-language keystroke < 100 ms | test 1, `expect(noLanguageKeystroke, lessThan(100 * 1000))` | 13.1–23.2 ms |
-| SC-003 — no-language keystroke ≤ with-language | test 1, `expect(noLanguageKeystroke, lessThanOrEqualTo(javaKeystroke))`; test 3 for the paste | 0.094–0.166 ratio |
-| SC-004 — a change making the no-language parse comparable fails the suite | test 1 ratio bound (0.105–0.166 vs 0.6 bound) + test 2's 5% bound + test 3's paste ratio bound (0.098–0.166 vs 0.5) | M1/M2/M3 killed |
+| SC-003 — no-language keystroke ≤ with-language | test 1, `expect(noLanguageKeystroke, lessThanOrEqualTo(javaKeystroke))`; test 3 for the paste | 0.125–0.136 ratio |
+| SC-004 — a change making the no-language parse comparable fails the suite | test 1 ratio bound (0.105–0.166 vs 0.6 bound) + test 2's 5% bound + test 3's paste ratio bound (0.125–0.136 vs 0.5) | M1/M2/M3 killed |
 | FR-003 — unresolvable name == no language | test 2 | both < 5% of with-language |
 | #93's "a test pins the cost ... rather than wall clock" | test 3 | paste medians pinned |
 

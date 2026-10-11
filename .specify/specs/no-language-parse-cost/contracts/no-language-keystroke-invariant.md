@@ -28,7 +28,7 @@ Code _createCode(String text) {
 ```
 
 Guarantees relied upon:
-- `_languageId` is `''` until `setLanguage` is called (line 97, assigned at 274).
+- `_languageId` stays `''` until a non-null language is set (line 97, assigned at 274).
 - The call is unconditional — the controller never branches on the language.
 - `language` is `null` in the same state, so `autocompleter.mode` is `null`
   (line 280) and the autocompleter contributes nothing to the keystroke.

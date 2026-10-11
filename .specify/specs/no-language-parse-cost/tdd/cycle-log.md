@@ -71,7 +71,7 @@ the previous form.
 original two assertions (`< 1 s` absolute and `<= javaPaste`) both survive a
 mutant that makes the no-language paste pay for lexing, so the paste pin had no
 tripwire. Fixed by adding `noLanguagePaste / javaPaste < 0.5` (measured
-0.098–0.166), and the fix was verified by re-injecting the mutant: the no-language
+0.125–0.136), and the fix was verified by re-injecting the mutant: the no-language
 paste then reads 136 100 µs against the `java` paste's 138 306 µs — ratio 0.984,
 reddened. 1 finding, 1 fix, verified; no further passes needed.
 

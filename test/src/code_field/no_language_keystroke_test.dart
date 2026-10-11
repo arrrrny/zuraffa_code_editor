@@ -17,8 +17,8 @@ import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 /// **The premise does not hold on this fork**, and the numbers say so:
 /// `CodeController._createCode`
 /// (`lib/src/code_field/code_controller.dart:1013`) does call
-/// `highlight.parse` unconditionally, but `_languageId` is `''` until
-/// `setLanguage` runs, and `highlight` 0.7.0 resolves an unknown name to
+/// `highlight.parse` unconditionally, but `_languageId` stays `''` until a
+/// non-null language is set, and `highlight` 0.7.0 resolves an unknown name to
 /// `plaintext` — `_getLanguage(language) ?? plaintext`
 /// (`highlight-0.7.0/lib/src/highlight.dart:271`), where `plaintext = Mode(
 /// refs: {}, disableAutodetect: true)`
@@ -284,7 +284,7 @@ void main() {
     //
     // The bound is the 5% share of the with-language parse from SC-001 rather
     // than a window around the empty id's own median. Both are the same empty
-    // mode, so their medials differ only by machine noise — and at ~10 µs each
+    // mode, so their medians differ only by machine noise — and at ~10 µs each
     // that noise is large enough relative to the signal that a ratio between
     // the two is flaky under the concurrent load of a full `flutter test` run
     // (this file measures it and it fails that way). Anchoring both against the

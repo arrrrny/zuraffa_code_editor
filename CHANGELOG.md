@@ -14,8 +14,8 @@
   empty or unrecognised language name to `plaintext` — an empty mode with no
   keywords, no sub-modes and no auto-detection — so the highlight step costs
   10–18 µs against 78.9–96.5 ms with `java`, one keystroke medians 13–23 ms
-  against 127–168 ms, and a paste of the whole document 16–23 ms against
-  125–168 ms. Neither path approaches the reported stall, and skipping the parse
+  against 119.9–129.5 ms, and a paste of the whole document 16–23 ms against
+  124.8–129.2 ms. Neither path approaches the reported stall, and skipping the parse
   would remove at most ~18 µs from a ~14 ms keystroke, so no code changed.
   `test/src/code_field/no_language_keystroke_test.dart` pins the conclusion as
   ratios between the two paths plus absolute bounds of 100 ms per keystroke and
