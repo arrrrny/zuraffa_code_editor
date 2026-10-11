@@ -162,6 +162,22 @@
 
 ### Fixed
 
+- **Deleting a folded block's closer no longer destroys the block's content**
+  ([issue #98](https://github.com/arrrrny/zuraffa_code_editor/issues/98),
+  upstream `akvelon/flutter-code-editor#176`). Backspacing the `}` of a folded
+  block — the first visible character after the block's hidden range —
+  recovered the replaced range with downstream affinity, which expanded the
+  range into the hidden content and spliced it out of the document along with
+  the brace. An edit that begins where a folded block's hidden range collapses
+  now recovers its start after the content, so only the removed characters are
+  deleted: the brace goes, the body survives, and the block releases because
+  there is no closer left to fold. The guard is keyed on what the edit removes,
+  not on the direction the visible text's length moved, so replacing the
+  closer with longer text (typing `} else {` over it) is protected too — a
+  pure insertion at that point keeps the documented downstream recovery.
+  Edits at any other hidden range — a named section's marker comment — are
+  unchanged.
+
 - **`dart analyze` warnings in the new tests** — unused imports removed.
 
 - **A keystroke no longer rebuilds the visible highlight or re-indexes the whole
