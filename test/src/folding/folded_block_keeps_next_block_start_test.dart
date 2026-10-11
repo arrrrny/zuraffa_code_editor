@@ -294,6 +294,41 @@ void f() {
       expect(controller.code.foldedBlocks, isEmpty);
     });
 
+    // Folding both foldable blocks at once — the condition (2..3) and the
+    // braces block (3..5) it shares its closer with. Their hidden ranges are
+    // disjoint, so the pin exists to catch any future change that makes the
+    // two folds disturb one another.
+    test('pins the two folds combined, not just one at a time', () {
+      final controller = CodeController(text: source, language: java);
+
+      controller.foldAt(2); // `if (a &&` folds 2..3
+      controller.foldAt(3); // `    b) {` folds 3..5
+
+      expect(
+        controller.text,
+        '''
+void f() {
+  int value = 1;
+  if (a &&      b) {  }
+}
+''',
+        reason:
+            'each shared line keeps its text on screen; the braces closer '
+            'glues onto the shared line\'s row, as any folded closer does',
+      );
+      expect(
+        controller.code.hiddenLineRanges.visibleLineNumbers.toList(),
+        <int>[0, 1, 2, 6, 7],
+        reason: 'the shared line 3 serves line 5\'s glued `}` on the same row',
+      );
+      expect(controller.code.text, source, reason: 'the full text survives');
+
+      controller.unfoldAt(3);
+      controller.unfoldAt(2);
+      expect(controller.text, source);
+      expect(controller.code.foldedBlocks, isEmpty);
+    });
+
     test('glues the leading-closer two-line shape as before', () {
       // 0  int factorial(int n){
       // 1  }void main(){
