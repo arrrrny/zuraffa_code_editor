@@ -130,6 +130,23 @@ never match, so those entries never engage. (`<?php ?>` bodies *are* parsed —
 as PHP.) If a future `highlight` release fixes the matching, the bodies would
 start being re-parsed.
 
+#### Java: `#` and triple-quoted strings
+
+`highlight` 0.7.0's `java` mode stops the parse on an *illegal* lexeme, and
+`_parse` turns that into the whole document being handed back as one plain
+node — so a single `#` outside a comment or a string literal, or a stray `</`,
+loses the highlighting for the entire file. A triple-quoted string literal
+reaches the same end the other way: with no triple-quote mode, the third `"`
+opens an ordinary string whose content crosses a newline, and an ordinary
+`java` string declares a newline illegal.
+
+The controller registers a repaired copy of the `java` mode — the `illegal`
+regex dropped and a `"""`…`"""` string mode added — so neither costs the
+document anything. Only the highlight parse sees the copy: `controller.language`
+is still the mode you supplied, the autocompleter and the single-line-comment
+sequences still key on it, and every other language is registered exactly as
+you gave it.
+
 
 ### Code Blocks Folding 
 
