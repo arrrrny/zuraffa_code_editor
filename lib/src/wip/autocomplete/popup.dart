@@ -153,10 +153,16 @@ class PopupState extends State<Popup> {
     );
   }
 
-  /// Height of one suggestion row. The rows render a `Text` that inherits the
-  /// ambient default style, so the same merged style is measured here.
+  /// Height of one suggestion row. Every row's `Text` renders one level below
+  /// a `Material`, which installs `Theme.of(context).textTheme.bodyMedium` as
+  /// the ambient default style — so the height is measured with that very
+  /// style merged with the popup's own, exactly the way the row renders it.
+  /// Measuring the popup's own `DefaultTextStyle` instead misses whenever the
+  /// two differ (a bare tree resolves the fallback `TextStyle()`, 14 px, while
+  /// the rows render at bodyMedium's 20 px), and that row-height error moves
+  /// both the flip decision and the unflipped clamp.
   double _rowHeight(BuildContext context) {
-    final style = DefaultTextStyle.of(context).style.merge(widget.style);
+    final style = Theme.of(context).textTheme.bodyMedium?.merge(widget.style);
     final painter = TextPainter(
       text: TextSpan(text: widget.controller.suggestions.first, style: style),
       textDirection: Directionality.of(context),

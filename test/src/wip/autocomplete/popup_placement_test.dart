@@ -139,6 +139,29 @@ void main() {
     expectRowsInsideWindow(wt, window);
   });
 
+  testWidgets('a single suggestion just above the window bottom flips '
+      '(SC-004)', (wt) async {
+    // One row renders at bodyMedium's height (20 px) — the ambient style the
+    // row's `Material` installs. Measuring a shorter row (the bare tree's
+    // fallback `TextStyle()`, 14 px) calls 582 + 14 <= 600 room enough, leaves
+    // the popup unflipped at 582, and the rendered row runs 582..602 — past
+    // the bottom edge this clamp exists to keep inside.
+    final positioned = await pumpPopup(
+      wt,
+      popupWindow: window,
+      caretOffset: const Offset(70, 582),
+      flippedCaretOffset: const Offset(70, 460),
+      items: const ['alpha'],
+    );
+
+    expect(
+      positioned.top,
+      460,
+      reason: 'flipped: 582 + one 20 px row does not fit under the bottom',
+    );
+    expectRowsInsideWindow(wt, window);
+  });
+
   testWidgets('many suggestions are measured at the capped height (SC-004)', (
     wt,
   ) async {
