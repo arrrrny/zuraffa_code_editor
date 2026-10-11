@@ -60,6 +60,8 @@ class GutterWidget extends StatelessWidget {
   Widget _buildOnChange(BuildContext context, Widget? child) {
     final code = codeController.code;
 
+    final iconSize = _iconSize;
+
     final issueColumnWidth = style.showErrors ? _issueColumnWidth : 0.0;
     final foldingColumnWidth = style.showFoldingHandles
         ? _foldingColumnWidth
@@ -95,10 +97,10 @@ class GutterWidget extends StatelessWidget {
     _fillLineNumbers(tableRows);
 
     if (style.showErrors) {
-      _fillIssues(tableRows);
+      _fillIssues(tableRows, iconSize);
     }
     if (style.showFoldingHandles) {
-      _fillFoldToggles(tableRows);
+      _fillFoldToggles(tableRows, iconSize);
     }
 
     return Container(
@@ -155,6 +157,36 @@ class GutterWidget extends StatelessWidget {
     return width;
   }
 
+  /// Glyph size for the fixed icon columns.
+  ///
+  /// The columns themselves stay [_issueColumnWidth] /
+  /// [_foldingColumnWidth] wide — narrowing one would change the gutter's
+  /// geometry and the code's start offset. But a glyph taller than the code
+  /// line box sets the [Table] row's height to its own, and the row pitch then
+  /// exceeds the code's line height by the overshoot: every row below it drifts
+  /// off its line by that much again (#107).
+  ///
+  /// So the glyph is clamped to the line. Above a 16px line box that clamp is
+  /// a no-op and the icons render exactly at their column width as before;
+  /// below it the icons shrink with the font instead of dragging the whole
+  /// gutter off grid.
+  double get _iconSize =>
+      math.min(math.max(_issueColumnWidth, _foldingColumnWidth), _rowHeight());
+
+  double _rowHeight() {
+    final style = this.style.textStyle;
+    if (style == null) {
+      return _issueColumnWidth;
+    }
+    final measured = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: TextSpan(text: '', style: style),
+    )..layout();
+    final height = measured.height;
+    measured.dispose();
+    return height > 0 ? height : _issueColumnWidth;
+  }
+
   void _fillLineNumbers(List<TableRow> tableRows) {
     final code = codeController.code;
 
@@ -181,7 +213,7 @@ class GutterWidget extends StatelessWidget {
     }
   }
 
-  void _fillIssues(List<TableRow> tableRows) {
+  void _fillIssues(List<TableRow> tableRows, double iconSize) {
     for (final issue in codeController.analysisResult.issues) {
       if (issue.line >= codeController.code.lines.length) {
         continue;
@@ -202,7 +234,7 @@ class GutterWidget extends StatelessWidget {
           icon: Icon(
             style.issueIcon(issue.type),
             color: Colors.red,
-            size: _issueColumnWidth,
+            size: iconSize,
           ),
           popupDecoration: style.errorPopupDecoration,
         ),
@@ -211,7 +243,7 @@ class GutterWidget extends StatelessWidget {
     }
   }
 
-  void _fillFoldToggles(List<TableRow> tableRows) {
+  void _fillFoldToggles(List<TableRow> tableRows, double iconSize) {
     final code = codeController.code;
 
     for (final block in code.foldableBlocks) {
@@ -229,6 +261,7 @@ class GutterWidget extends StatelessWidget {
           onTap: isFolded
               ? () => codeController.unfoldAt(block.firstLine)
               : () => codeController.foldAt(block.firstLine),
+          iconSize: iconSize,
         ),
         lineIndex,
       );
@@ -247,6 +280,7 @@ class GutterWidget extends StatelessWidget {
           color: style.textStyle?.color,
           isFolded: true,
           onTap: () => codeController.unfoldAt(block.firstLine),
+          iconSize: iconSize,
         ),
         lineIndex,
       );
