@@ -1,20 +1,17 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zuraffa_code_editor/src/wip/autocomplete/popup.dart';
 import 'package:zuraffa_code_editor/src/wip/autocomplete/popup_controller.dart';
 
 /// The completion popup is a wip module, but it is wired into the field, so its
-/// item gestures are part of the editing surface: a tap moves the selection
-/// and hands focus back to the editor, a double tap also commits the word.
+/// item gestures are part of the editing surface: a single tap commits the word
+/// it sits on and hands focus back to the editor, exactly like the Enter path.
 ///
-/// Both handlers sit on the same InkWell, so the gesture arena holds a single
-/// tap back until the double tap timeout has passed. Every tap below is
-/// therefore followed by a `kDoubleTapTimeout`-sized pump, and every double tap
-/// pumps a short gap between its two taps so they carry distinct timestamps.
+/// Upstream `akvelon/flutter-code-editor#205` (our #84) reported the mobile
+/// symptom: the commit used to hang off `onDoubleTap`, so the first tap only
+/// moved the highlight and the word was never inserted.
 void main() {
   const suggestions = ['alpha', 'beta', 'gamma'];
-  final settleDoubleTap = kDoubleTapTimeout + const Duration(milliseconds: 100);
 
   Future<(PopupController, FocusNode, List<int>)> pumpPopup(
     WidgetTester wt,
@@ -37,7 +34,6 @@ void main() {
                 Popup(
                   controller: controller,
                   editingWindowSize: const Size(400, 600),
-                  editorOffset: Offset.zero,
                   flippedOffset: Offset.zero,
                   normalOffset: Offset.zero,
                   parentFocusNode: focusNode,
@@ -65,7 +61,7 @@ void main() {
     expect(controller.selectedIndex, 0);
   });
 
-  testWidgets('a tap on an item selects it and returns focus to the editor', (
+  testWidgets('a tap on an item commits it and returns focus to the editor', (
     wt,
   ) async {
     final (controller, focusNode, completions) = await pumpPopup(wt);
@@ -73,29 +69,24 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
 
     await wt.tap(find.text('beta'));
-    await wt.pump(settleDoubleTap);
+    // Far under kDoubleTapTimeout: the commit may not wait for the
+    // double tap timeout to expire.
+    await wt.pump(const Duration(milliseconds: 100));
     await wt.pumpAndSettle();
 
     expect(controller.selectedIndex, 1);
     expect(focusNode.hasFocus, isTrue);
-    expect(
-      completions,
-      isEmpty,
-      reason: 'a single tap only moves the selection, it does not commit',
-    );
+    expect(completions.length, 1);
   });
 
-  testWidgets('a double tap commits the selected item', (wt) async {
-    final (controller, focusNode, completions) = await pumpPopup(wt);
+  testWidgets('the tapped row is the one committed', (wt) async {
+    final (controller, _, completions) = await pumpPopup(wt);
 
     await wt.tap(find.text('gamma'));
-    await wt.pump(const Duration(milliseconds: 50));
-    await wt.tap(find.text('gamma'));
-    await wt.pump(settleDoubleTap);
+    await wt.pump(const Duration(milliseconds: 100));
     await wt.pumpAndSettle();
 
     expect(controller.selectedIndex, 2);
-    expect(focusNode.hasFocus, isTrue);
     expect(completions.length, 1);
   });
 }

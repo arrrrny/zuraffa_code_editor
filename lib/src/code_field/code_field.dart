@@ -290,6 +290,13 @@ class _CodeFieldState extends State<CodeField> {
   FocusNode? _focusNode;
   String? lines;
   String longestLine = '';
+
+  /// The window size the suggestion popup is bounded by.
+  ///
+  /// The popup is inserted into the root overlay, so it is placed at window
+  /// coordinates and has to stay inside the window — not inside this field's
+  /// render box, which is the smaller rectangle whenever the editor is
+  /// narrower than the window.
   Size? windowSize;
   late TextStyle textStyle;
   Color? _backgroundCol;
@@ -354,13 +361,11 @@ class _CodeFieldState extends State<CodeField> {
       if (!mounted) {
         return;
       }
-      // Same guard as rebuild(): currentContext was seen null in tests.
-      final context = _codeFieldKey.currentContext;
-      if (context != null) {
-        final double width = context.size!.width;
-        final double height = context.size!.height;
-        windowSize = Size(width, height);
-      }
+      // The popup is inserted into the root overlay, so its bounds are the
+      // window's — not this field's render box, which is often the smaller
+      // rectangle (a narrow editor, a gutter, an inset pane) and would push
+      // the popup off the edge.
+      windowSize = MediaQuery.maybeOf(context)?.size;
     });
     _onTextChanged();
   }
@@ -420,14 +425,9 @@ class _CodeFieldState extends State<CodeField> {
         if (!mounted) {
           return;
         }
-        // For some reason _codeFieldKey.currentContext is null in tests
-        // so check first.
-        final context = _codeFieldKey.currentContext;
-        if (context != null) {
-          final double width = context.size!.width;
-          final double height = context.size!.height;
-          windowSize = Size(width, height);
-        }
+        // Same reason as the initState callback: the popup lives in the root
+        // overlay and is bounded by the window.
+        windowSize = MediaQuery.maybeOf(context)?.size;
       });
     });
   }
@@ -1040,7 +1040,6 @@ class _CodeFieldState extends State<CodeField> {
           style: textStyle,
           backgroundColor: _popupBackground,
           parentFocusNode: _focusNode!,
-          editorOffset: _editorOffset,
         );
       },
     );
