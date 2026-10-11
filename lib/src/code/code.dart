@@ -460,24 +460,26 @@ class Code {
         placeHiddenRanges: TextAffinity.downstream,
       ),
 
-      // If we are inserting (and the old changed part is empty),
+      // If the edit is a pure insertion (the old changed part is empty),
       // then using the same `placeHiddenRanges` is straightforward.
       //
-      // A deletion whose first removed character is the first visible
+      // An edit whose first removed character is the first visible
       // character after a hidden range recovers its start to that range's
       // start, which puts the whole range inside the replacement and
       // silently deletes it. For the range a folded block owns that content
       // is the block's body and the first visible character is the block's
-      // closer, so the body must survive the edit: such deletions recover
-      // with upstream affinity and start after the content. Ranges no
-      // folded block owns — a named section's marker comment — keep
-      // downstream: deleting the marker instead of the adjacent character
-      // is the documented behaviour for those.
+      // closer, so the body must survive the edit: such an edit — a
+      // deletion or a replacement that grows the text, e.g. typing
+      // `} else {` over the closer — recovers with upstream affinity and
+      // starts after the content. A pure insertion at that point and edits
+      // at a hidden range no folded block owns — a named section's marker
+      // comment, where deleting the marker instead of the adjacent
+      // character is the documented behaviour — keep downstream.
       start: hiddenRanges.recoverPosition(
         visibleRangeAfter.start,
-        placeHiddenRanges: _deletionStartAffinity(
+        placeHiddenRanges: _editStartAffinity(
           clampedVisibleAfter,
-          visibleRangeAfter.start,
+          visibleRangeAfter,
         ),
       ),
     );
@@ -529,29 +531,39 @@ class Code {
     );
   }
 
-  /// Affinity with which the start of the replaced range is recovered for a
-  /// deletion beginning at a hidden range's collapse point.
+  /// Affinity with which the start of the replaced range is recovered for an
+  /// edit that removes the first visible character after a hidden range.
   ///
-  /// [visibleAfter] is the value being applied and [visibleStart] the start
-  /// of the changed range in the visible text. Deletions that begin where a
-  /// folded block's hidden range collapses recover with
-  /// [TextAffinity.upstream] so the block's content is not swallowed by the
-  /// replacement; every other edit keeps [TextAffinity.downstream].
-  TextAffinity _deletionStartAffinity(
+  /// [visibleAfter] is the value being applied and [visibleRangeAfter] the
+  /// changed range in the old visible text. An edit whose first removed
+  /// character is the first visible character after a hidden range owned by
+  /// a folded block recovers with [TextAffinity.upstream] so the block's
+  /// content is not swallowed by the replacement. The guard is keyed on
+  /// what the edit removes, not on the direction the visible text's length
+  /// moved, so replacing the closer with longer text is protected like a
+  /// deletion is. A pure insertion at that point removes nothing and keeps
+  /// [TextAffinity.downstream], as does any edit at a hidden range no
+  /// folded block owns — a named section's marker comment.
+  TextAffinity _editStartAffinity(
     TextEditingValue visibleAfter,
-    int visibleStart,
+    TextRange visibleRangeAfter,
   ) {
-    if (visibleAfter.text.length >= visibleText.length) {
+    // The replaced range in the old visible text ends here; an empty one
+    // means the edit removed nothing — a pure insertion — and keeps the
+    // downstream recovery.
+    final removedEnd =
+        visibleText.length - visibleAfter.text.length + visibleRangeAfter.end;
+    if (removedEnd <= visibleRangeAfter.start) {
       return TextAffinity.downstream;
     }
 
+    final recoveredStart = hiddenRanges.recoverPosition(
+      visibleRangeAfter.start,
+      placeHiddenRanges: TextAffinity.downstream,
+    );
     final range = hiddenRanges.ranges.firstWhereOrNull(
       (range) =>
-          range.start ==
-              hiddenRanges.recoverPosition(
-                visibleStart,
-                placeHiddenRanges: TextAffinity.downstream,
-              ) &&
+          range.start == recoveredStart &&
           foldedBlocks.any(
             (block) =>
                 block.firstLine == range.firstLine &&

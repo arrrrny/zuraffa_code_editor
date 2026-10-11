@@ -22,11 +22,28 @@ visible text is `int a;\n{}\n\n\nint c;\n` and the body is
 3. A selection over the closer and the following newline deletes both and
    keeps the body: `int a;\n{\nint b;\n\n\nint c;\n`.
 
+### The defect's replacement shape
+
+4. Selecting the closer and typing `} else {` over it — the visible text
+   grows — keeps the body: `int a;\n{\nint b;\n} else {\n\n\nint c;\n`.
+5. Selecting the closer and typing `}}` over it keeps the body:
+   `int a;\n{\nint b;\n}}\n\n\nint c;\n`.
+
 ### Red → green evidence
 
-All three failed on the unfixed tree with the body spliced out
+All three defect tests failed on the unfixed tree with the body spliced out
 (`int a;\n{\n\n\nint c;\n` for 1 and 2, `int a;\n{\n\nint c;\n` for 3) — the
-mutation is the shipped behaviour, so the tests provably can fail.
+mutation is the shipped behaviour, so the tests provably can fail. The two
+replacement tests above failed the same way on the tree whose guard was
+length-gated, which is why the guard is keyed on the removed range instead
+of the length direction.
+
+### The boundary that stays downstream
+
+6. A pure insertion at the collapse point — cursor before `}`, `x` typed —
+   removes nothing and keeps the downstream recovery, so the text lands
+   right after the opener: `int a;\n{x\nint b;\n}\n\n\nint c;\n`. This pins
+   the insertion-side semantics the removal-keyed guard must not disturb.
 
 ## Existing suites that pin the unchanged behaviour (no new tests)
 

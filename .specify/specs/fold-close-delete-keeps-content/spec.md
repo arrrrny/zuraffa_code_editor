@@ -53,13 +53,18 @@ terminates the block, upstream #232, which is a deliberate no-op).
 
 ## What this spec adds
 
-A deletion whose first removed character is the first visible character after
-a hidden range **owned by a folded block** recovers its start with
+An edit whose first removed character is the first visible character after a
+hidden range **owned by a folded block** recovers its start with
 `TextAffinity.upstream` — after the hidden content — so only the removed
-characters are spliced out and the body survives. A hidden range no folded
-block owns (a named section's marker comment) keeps the downstream recovery:
-deleting the marker instead of the adjacent character is the documented
-behaviour for those, pinned by
+characters are spliced out and the body survives. The guard is keyed on what
+the edit removes, not on the direction the visible text's length moved, so a
+backspace and a replacement that grows the text (selecting the closer and
+typing `} else {` over it) are both protected; the latter used to splice the
+body out as well. A pure insertion at that point removes nothing and keeps
+the downstream recovery, which is the documented insertion-side behaviour.
+A hidden range no folded block owns (a named section's marker comment) keeps
+the downstream recovery: deleting the marker instead of the adjacent
+character is the documented behaviour for those, pinned by
 `code_controller_hidden_ranges_test.dart`.
 
 The ownership test is the folded block's own line span: a hidden range belongs
@@ -86,6 +91,6 @@ closer left to fold), so the body becomes visible.
 - The single-char guard stays as written: backspacing the newline immediately
   after a folded block remains a no-op (upstream #232, pinned by
   `code_controller_set_value_test.dart`).
-- Deletions that do not begin at a hidden range's collapse point are
-  unaffected: the two affinities only differ there.
+- Edits that do not begin with a removal at a hidden range's collapse point
+  are unaffected: the two affinities only differ there.
 - Named-section edits at a marker's collapse point still delete the marker.

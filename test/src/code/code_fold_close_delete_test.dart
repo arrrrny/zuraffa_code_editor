@@ -80,4 +80,71 @@ void main() {
       expect(result.fullTextAfter, 'int a;\n{\nint b;\n\n\nint c;\n');
     });
   });
+
+  group('replacing the closer of a folded block', () {
+    test('with longer text keeps the hidden content', () {
+      final code = _foldedCode();
+      final visible = code.visibleText;
+      final closer = visible.indexOf('}');
+      const replacement = '} else {';
+
+      // Select the closer and type `} else {` over it. The visible text
+      // grows, but the edit still starts by removing the closer, so the
+      // body must survive like it does for a backspace.
+      final result = code.getEditResult(
+        TextSelection(baseOffset: closer, extentOffset: closer + 1),
+        TextEditingValue(
+          text:
+              '${visible.substring(0, closer)}$replacement'
+              '${visible.substring(closer + 1)}',
+          selection: TextSelection.collapsed(
+            offset: closer + replacement.length,
+          ),
+        ),
+      );
+
+      expect(result.fullTextAfter, 'int a;\n{\nint b;\n} else {\n\n\nint c;\n');
+    });
+
+    test('with a longer brace pair keeps the hidden content', () {
+      final code = _foldedCode();
+      final visible = code.visibleText;
+      final closer = visible.indexOf('}');
+      const replacement = '}}';
+
+      final result = code.getEditResult(
+        TextSelection(baseOffset: closer, extentOffset: closer + 1),
+        TextEditingValue(
+          text:
+              '${visible.substring(0, closer)}$replacement'
+              '${visible.substring(closer + 1)}',
+          selection: TextSelection.collapsed(
+            offset: closer + replacement.length,
+          ),
+        ),
+      );
+
+      expect(result.fullTextAfter, 'int a;\n{\nint b;\n}}\n\n\nint c;\n');
+    });
+  });
+
+  group('inserting at the closer of a folded block', () {
+    test('a pure insertion keeps the documented downstream recovery', () {
+      final code = _foldedCode();
+      final visible = code.visibleText;
+      final closer = visible.indexOf('}');
+
+      // Typing at the collapse point removes nothing, so the edit keeps
+      // the downstream recovery and the text lands before the closer.
+      final result = code.getEditResult(
+        TextSelection.collapsed(offset: closer),
+        TextEditingValue(
+          text: '${visible.substring(0, closer)}x${visible.substring(closer)}',
+          selection: TextSelection.collapsed(offset: closer + 1),
+        ),
+      );
+
+      expect(result.fullTextAfter, 'int a;\n{x\nint b;\n}\n\n\nint c;\n');
+    });
+  });
 }
