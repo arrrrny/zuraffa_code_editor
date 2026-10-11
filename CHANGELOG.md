@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+### Added
+
+- **The cost of an unhighlighted editor is pinned by a test**
+  ([issue #111](https://github.com/arrrrny/zuraffa_code_editor/issues/111) and
+  [issue #93](https://github.com/arrrrny/zuraffa_code_editor/issues/93),
+  upstream `akvelon/flutter-code-editor#246`). `CodeController` calls
+  `highlight.parse` on every edit whether or not a language is configured, and
+  both reports read that as the cause of a ~20 s stall on a 4800-line document
+  with no language selected. Measured, it is not: `highlight` 0.7.0 resolves an
+  empty or unrecognised language name to `plaintext` — an empty mode with no
+  keywords, no sub-modes and no auto-detection — so the highlight step costs
+  10–18 µs against 78.9–96.5 ms with `java`, one keystroke medians 13–23 ms
+  against 119.9–129.5 ms, and a paste of the whole document 16–23 ms against
+  124.8–129.2 ms. Neither path approaches the reported stall, and skipping the parse
+  would remove at most ~18 µs from a ~14 ms keystroke, so no code changed.
+  `test/src/code_field/no_language_keystroke_test.dart` pins the conclusion as
+  ratios between the two paths plus absolute bounds of 100 ms per keystroke and
+  1 s per paste, and a fault injection that makes the no-language fallback
+  resolve to a real language (parse 80 532 µs against the with-language
+  76 120 µs, keystroke 109 045 µs, paste ratio 0.98) reddens it — so a future
+  change that makes an unhighlighted editor expensive fails the suite instead of
+  reaching users.
+
 ### Changed
 
 - **The code area's horizontal scroll is pinned on both of its paths**
