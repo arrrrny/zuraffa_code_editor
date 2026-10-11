@@ -13,6 +13,7 @@ import '../autocomplete/autocompleter.dart';
 import '../code/code_edit_result.dart';
 import '../code/key_event.dart';
 import '../code_modifiers/insertion.dart';
+import '../highlight/mode_patches.dart';
 import '../highlight/sub_languages.dart';
 import '../history/code_history_controller.dart';
 import '../history/code_history_record.dart';
@@ -272,7 +273,7 @@ class CodeController extends TextEditingController {
 
     if (language != null) {
       _languageId = language.hashCode.toString();
-      highlight.registerLanguage(_languageId, language);
+      highlight.registerLanguage(_languageId, modeToRegister(language));
       _registerSubLanguages(language);
     }
 
