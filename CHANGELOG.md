@@ -27,6 +27,28 @@
 
 ### Changed
 
+- **The gutter stays on the code line grid at any code font size**
+  ([issue #107](https://github.com/arrrrny/zuraffa_code_editor/issues/107),
+  upstream `akvelon/flutter-code-editor#312` and `#215`). The gutter lays its
+  rows out in a `Table`, whose row height is the tallest cell in it. The number
+  is one code line tall, but the two fixed icon columns always rendered their
+  glyph at 16px, so whenever the code's line box was shorter than 16 the icon
+  set the row's height instead: the row pitch exceeded the code line height by
+  the overshoot and the gutter separated from the code by that much again on
+  every line below. The reported configurations never reach the case — `height:
+  1.5` at `fontSize: 16` and `18` gives a 24-27px line box, and so does the
+  `fontSize: 13, height: 1.6` the existing grid pins use — which is why those
+  pins pass while the drift is real. Measured on master at `height: 1.0`, the
+  pitch ran 10.500 against a 9px line box at `fontSize: 9` (10.5px of drift by
+  the last row) and 13.643 against 13px at `fontSize: 13` (4.5px). Both icon
+  glyphs are now clamped to the code line height, which is a no-op above a 16px
+  line box, so every rendering that already fits is byte-identical — only the
+  column widths were fixed before and only the glyph now shrinks.
+  `test/src/gutter/gutter_icon_row_height_test.dart` pins the invariant across
+  the whole sub-16 range, and all three fault-detecting tests are red without
+  the fix (`Expected <30.5> Actual <32.0>`, the pitch of two stacked 16px
+  glyph boxes).
+
 - **The code area's horizontal scroll is pinned on both of its paths**
   ([issue #85](https://github.com/arrrrny/zuraffa_code_editor/issues/85),
   upstream `akvelon/flutter-code-editor#280`, reported as "horizontal scrolling
