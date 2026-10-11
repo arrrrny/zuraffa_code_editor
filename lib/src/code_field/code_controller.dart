@@ -110,6 +110,13 @@ class CodeController extends TextEditingController {
 
   Code _code;
 
+  /// The selection a fold truncated, kept in full-text coordinates.
+  ///
+  /// Set by [_getValueWithCode] and cleared by anything that re-establishes
+  /// the selection in the visible text: a change from the field, or an edit
+  /// of its own. See [_getValueWithCode].
+  TextSelection? _selectionHiddenByFold;
+
   final _styleList = <TextStyle>[];
   final _modifierMap = <String, CodeModifier>{};
 
@@ -600,6 +607,11 @@ class CodeController extends TextEditingController {
       return;
     }
 
+    // A change from the field re-establishes the selection in the visible
+    // text, so whatever a fold had truncated is no longer what the user is
+    // pointing at.
+    _selectionHiddenByFold = null;
+
     if (hasActiveComposingInNewValue || hadActiveCompositionInOldValue) {
       if (readOnly && hasTextChanged) {
         return;
@@ -742,6 +754,10 @@ class CodeController extends TextEditingController {
       record.selection,
     );
     final cutSelection = _code.hiddenRanges.cutSelection(fullSelection);
+
+    // The record carries its own selection, so any selection a fold truncated
+    // is superseded by it.
+    _selectionHiddenByFold = null;
 
     super.value = TextEditingValue(
       text: code.visibleText,
@@ -1076,13 +1092,28 @@ class CodeController extends TextEditingController {
   }
 
   /// The value with [newCode] preserving the current selection.
+  ///
+  /// The selection lives in the visible text, so a fold that hides the range
+  /// the selection sits in truncates it to the fold marker — and the visible
+  /// text alone cannot say what was truncated. Keeping the lifted selection
+  /// alongside it makes folding and unfolding inverse operations on the
+  /// selection, which is what routing both through here promises.
   TextEditingValue _getValueWithCode(Code newCode) {
-    return TextEditingValue(
-      text: newCode.visibleText,
-      selection: newCode.hiddenRanges.cutSelection(
-        _code.hiddenRanges.recoverSelection(value.selection),
-      ),
-    );
+    final fullSelection =
+        _selectionHiddenByFold ??
+        _code.hiddenRanges.recoverSelection(value.selection);
+    final cutSelection = newCode.hiddenRanges.cutSelection(fullSelection);
+
+    // The fold lost part of the selection exactly when lifting the truncated
+    // selection back through the new ranges does not return it. Anything
+    // else — a selection the fold left alone, or one the field has since
+    // moved — is not remembered.
+    _selectionHiddenByFold =
+        newCode.hiddenRanges.recoverSelection(cutSelection) == fullSelection
+        ? null
+        : fullSelection;
+
+    return TextEditingValue(text: newCode.visibleText, selection: cutSelection);
   }
 
   void foldCommentAtLineZero() {

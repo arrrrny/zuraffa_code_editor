@@ -267,6 +267,31 @@
   `test/src/highlight/java_language_test.dart` pins the repaired
   classification and the unchanged one side by side.
 
+- **Folding and unfolding no longer throw away the selection they cover**
+  ([issue #106](https://github.com/arrrrny/zuraffa_code_editor/issues/106),
+  upstream `akvelon/flutter-code-editor#189`, reported as "Fold-unfold deselects
+  text"). A selection lives in the visible text, so the part of a selection that
+  a folded block hides can only be shown truncated, clamped to the fold marker
+  — which is what `CodeController.foldAt`/`unfoldAt` did, via
+  `_getValueWithCode` lifting the selection into the full text and projecting it
+  straight back. The lifted selection was discarded, so unfolding had nothing to
+  restore from and recovered the truncated one: selecting `    return;` and its
+  brace and folding that block left the selection at `[42, 45]` instead of the
+  original `[43, 58]`, and it never came back. `_getValueWithCode` now keeps the
+  lifted selection when cutting it through the new ranges and lifting it back
+  does not return it — an exact predicate for "the fold truncated the
+  selection" — and drops it the moment anything else re-establishes the
+  selection: a change from the field, or `applyHistoryRecord`, whose record
+  carries a selection of its own. The report's own claim that a selection
+  *untouched* by the fold is dropped does not reproduce — a drag selection over
+  `void method2()` with `void method1()` folded tracks `[58, 97]` → `[45, 84]`
+  and unfolds back to `[58, 97]`, and that behaviour is pinned as well so the
+  fix cannot resurrect a selection the fold never hid.
+  `test/src/code_field/fold_unfold_keeps_selection_test.dart` pins the round
+  trip for a covered selection, a covered caret, a straddling one, an untouched
+  one, a selection the user moves while the block is folded, an unrelated
+  unfold, and a keystroke after the round trip.
+
 - **XML documents are foldable again**
   ([issue #103](https://github.com/arrrrny/zuraffa_code_editor/issues/103),
   upstream `akvelon/flutter-code-editor#311`, reported as "HTML/XML highlighting
