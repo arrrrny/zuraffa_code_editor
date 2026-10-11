@@ -4,7 +4,9 @@
 
 **Created**: 2026-10-11
 
-**Status**: Draft
+**Status**: Decision recorded — the reported stall is not reproducible on this
+fork; the no-language path is measured and pinned by
+`test/src/code_field/no_language_keystroke_test.dart`. No code change.
 
 **Input**: User description: "highlight.parse() still runs with no language set, so an
 unhighlighted 4800-line document hangs the same ~20s. Skipping the parse when the
@@ -119,7 +121,7 @@ numbers.
 
 ### Measurable Outcomes
 
-- **SC-001**: On a 4800-line (≈300 KB) document, the highlight step with no language
+- **SC-001**: On a 4800-line (≈85 KB) document, the highlight step with no language
   selected costs less than 5% of the same step with a language selected.
 - **SC-002**: On the same document, one keystroke with no language selected completes
   in under one tenth of a second.
@@ -132,8 +134,37 @@ numbers.
 
 - Measurements are taken in `flutter test` (unoptimized JIT) on the development
   machine, as the repo's existing perf specs do; the ratios are the durable part.
-- The document is Java-like source of ~60 characters per line, matching the repo's
-  existing perf fixtures.
+- The document is Java-like source of ~18 characters per line (84 552 chars at
+  4800 lines), the same fixture shape as the repo's existing latency guard
+  `test/src/code_field/edit_latency_test.dart`, so the two guards are directly
+  comparable.
+
+## Measurement (recorded)
+
+Taken by `test/src/code_field/no_language_keystroke_test.dart` on this fork,
+median of 5 after a warm-up run, five consecutive runs:
+
+| path | `highlight.parse` | one keystroke |
+|---|---|---|
+| no language (`_languageId == ''`) | 10–18 µs | 13.1–14.5 ms |
+| `java` | 78.9–96.5 ms | 119.9–129.5 ms |
+
+Conclusions:
+
+- **The premise is false.** `highlight` 0.7.0 resolves an empty or unknown
+  language to `plaintext` — an empty `Mode` — so the no-language parse is
+  ~0.1% of the no-language keystroke. There is no multi-second stall to fix.
+- **Neither path reaches "~20 s"** at this size: the with-language keystroke is
+  ~125 ms, two orders of magnitude below the report. Whatever the report's
+  author measured is not what this fork does.
+- **Skipping the parse is not worth a code change.** It would remove at most
+  ~18 µs from a ~14 ms keystroke.
+- **The decision is pinned, not asserted.** The test asserts ratios between the
+  two paths and a 100 ms absolute bound on the no-language keystroke, and a
+  fault injection registering `java` under the empty language id reddens it
+  (parse 80 532 µs vs the with-language 76 120 µs, keystroke 109 045 µs, parse
+  share 73.9%) — so a future change that makes the no-language fallback resolve
+  to a real language fails the suite instead of reaching users quietly.
 - "No language selected" means the controller was constructed without a `language`
   argument, which is the public API's zero-configuration path.
 - Skipping the parse outright is *not* required: the measurement decides between

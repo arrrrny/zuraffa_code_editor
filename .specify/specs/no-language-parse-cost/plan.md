@@ -16,13 +16,13 @@ pin that rather than to change code.** `CodeController._languageId`
 (`lib/src/code_field/code_controller.dart:97`) is `''` until `setLanguage`
 runs, and `highlight.parse(text, language: '')` resolves through
 `highlight`-0.7.0's `_getLanguage(name) ?? plaintext`
-(`~/.pub-cache/hosted/pub.dev/highlight-0.7.0/lib/src/highlight.dart:271`)
+(`highlight-0.7.0/lib/src/highlight.dart:271`)
 where `plaintext = Mode(refs: {}, disableAutodetect: true)` — an empty mode
-that performs no token work. Measured on a 4800-line / 297 960-char Java-like
-document: the highlight step costs **3.0 ms** (15 ms for 5 runs) with no
-language versus **318.2 ms** with `java`, and a single keystroke medians
-**43–46 ms** versus **378 ms**. There is no multi-second stall, and skipping
-the parse could save at most ~3 ms of a 43 ms keystroke.
+that performs no token work. Measured on a 4800-line / 84 552-char Java-like
+document: the highlight step costs **10–18 µs** with no language versus
+**78.9–96.5 ms** with `java`, and a single keystroke medians **13.1–14.5 ms**
+versus **119.9–129.5 ms**. The parse is ~0.1% of the no-language keystroke, and
+skipping it would save at most ~18 µs of a ~14 ms keystroke.
 
 The deliverable is therefore a **measurement-pinning test** — the same shape as
 `.specify/specs/lazy-loading-long-text/test-list.md` and its guard

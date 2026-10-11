@@ -18,10 +18,12 @@ Expected: green, with the measured pairs printed:
 
 ```text
 no-language keystroke pin: 4800 lines
-  highlight.parse  no language: 3000us
-  highlight.parse  java:        318200us
-  keystroke median  no language: 43000us
-  keystroke median  java:        378000us
+  languageId  no language: ""
+  highlight.parse  no language: 10us
+  highlight.parse  java:        78882us
+  keystroke median  no language: 14060us
+  keystroke median  java:        124255us
+  parse share of no-language keystroke: 0.1%
 ```
 
 ## What the assertions check

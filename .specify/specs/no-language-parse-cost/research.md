@@ -57,17 +57,20 @@ is stable to within a few percent, which is what
 local fixture, not a checked-in binary fixture.
 
 **Rationale**: `test/src/code_field/edit_latency_test.dart:31` already defines
-`_document(int lines)` producing ~60 chars/line with a comment, a method head,
-a declaration, a return and a closing brace every five lines. Reusing the same
-shape keeps the two latency guards comparable and avoids a second fixture to
-maintain. 4800 lines ≈ 298 000 chars, matching the size in the issue report.
+`_document(int lines)` producing ~18 chars/line with a comment, a method head,
+a declaration, a return and a closing brace every five lines — 84 552 chars at
+4800 lines. Reusing the same shape keeps the two latency guards comparable and
+avoids a second fixture to maintain. 4800 lines is the size the issue names;
+its byte size is not stated in the report, and the conclusion does not depend
+on it (see Decision 2 — the ratio is what is asserted).
 
 **Alternatives considered**:
 - A `String.fromCharCodes` blob. **Rejected**: no realistic keyword/comment
   density, and it does not match the fixture the existing guard uses.
-- A smaller document to keep the test fast. **Rejected**: the issue is about
-  large documents; at 200 lines the parse cost is indistinguishable from JIT
-  noise and the ratio assertion loses its teeth.
+- Padding the fixture to ~60 chars/line to reach ~300 KB. **Rejected**: a
+  second fixture shape to maintain, and the conclusion holds at both sizes — the
+  no-language parse is trivially cheap either way, so a bigger document only
+  makes the test slower.
 
 ## Decision 4: the no-language controller is built directly, not via `createController`
 

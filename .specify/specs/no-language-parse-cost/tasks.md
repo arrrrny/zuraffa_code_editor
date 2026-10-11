@@ -41,21 +41,30 @@ document, compared against the same document with `java`.
 
 ### Tests for User Story 1
 
-- [ ] T005 [US1] Write `test/src/code_field/no_language_keystroke_test.dart`:
+- [x] T005 [US1] [behavior: US1-AC1] Write `test/src/code_field/no_language_keystroke_test.dart`:
       a 4800-line Java-like document fixture matching `test/src/code_field/edit_latency_test.dart:31`,
       a no-language controller built directly (`CodeController` with no `setLanguage` call — do **not**
       change the shared `createController` default, see `research.md` Decision 4), a median-of-5
       keystroke measurement, and the printed breakdown of parse cost for both paths.
-- [ ] T006 [US1] Assert SC-002: no-language keystroke median < 100 ms (one tenth of a second).
-- [ ] T007 [US1] Assert SC-003: no-language keystroke median ≤ with-language keystroke median.
-- [ ] T008 [US1] Assert the unresolvable-alias edge case: a controller whose language is an unregistered
-      `Mode` costs the same as no language (FR-003).
-- [ ] T009 [US1] Run the file and record the measured numbers; they must match the spec's quoted
+- [x] T006 [US1] [behavior: US1-AC1] Assert SC-002: no-language keystroke median < 100 ms (one tenth of a second). MANDATORY.
+- [x] T007 [US1] [behavior: US1-AC1] Assert SC-003: no-language keystroke median ≤ with-language keystroke median. MANDATORY.
+- [x] T008 [US1] [behavior: US1-edge] Assert the unresolvable-name edge case: a language name that is
+      neither a registered language nor a registered alias costs the same as no language at all (FR-003).
+      MANDATORY.
+- [x] T009 [US1] Run the file and record the measured numbers; five consecutive runs recorded in
+      `tdd/cycle-log.md` and in the spec's Measurement section (10–18 µs parse / 13.1–14.5 ms keystroke
+      with no language vs 78.9–96.5 ms / 119.9–129.5 ms with `java`).
       3.0 ms / 318.2 ms parse costs to within JIT noise.
 
 ---
 
 ## Phase 4: User Story 2 - The cheap path cannot silently regress (Priority: P2)
+
+**Note from the TDD loop** (`tdd/cycle-log.md`): this story's assertions live in
+the same test body as US1's, because a second file would build and tear down a
+second 4800-line document for no additional coverage. The behaviour markers
+below are the tdd-plan sync; the implementation phase has nothing to do for
+either story — no `lib/` change ships (T018).
 
 **Goal**: the measurement is worth taking once because it is now pinned.
 
@@ -63,15 +72,17 @@ document, compared against the same document with `java`.
 
 ### Tests for User Story 2
 
-- [ ] T010 [US2] Assert SC-001: no-language `highlight.parse` cost < 5% of the with-language
-      `highlight.parse` cost on the same document (FR-004).
-- [ ] T011 [US2] Assert SC-004 (the tripwire): the ratio no-language-keystroke / with-language-keystroke
-      is bounded, so a change that makes the no-language parse comparable to the with-language parse
-      reddens the suite. Bound derived from the measured evidence, not from a round number.
-- [ ] T012 [US2] Prove the tripwire can fail: fault-inject a no-language path that does token work
-      (e.g. register a real language under the empty name in the test process) and confirm the
-      assertions redden; then remove the injection. Record both outcomes in the test's doc comment,
-      following `test/src/code_field/edit_latency_test.dart:126-141`.
+- [x] T010 [US2] [behavior: US1-AC1] Assert SC-001: no-language `highlight.parse` cost < 5% of the with-language
+      `highlight.parse` cost on the same document (FR-004). MANDATORY.
+- [x] T011 [US2] [behavior: US1-AC1] Assert SC-004 (the tripwire): the ratio no-language-keystroke / with-language-keystroke
+      is bounded (< 0.6 on the measured evidence of 0.105–0.117), so a change that makes the no-language
+      parse comparable to the with-language parse reddens the suite. MANDATORY.
+- [x] T012 [US2] [behavior: US1-AC1] Prove the tripwire can fail: DONE — fault-injected
+      `highlight.registerLanguage('', java)` in a scratch copy, which moved the no-language parse to
+      80 532 µs against the with-language 76 120 µs, the keystroke to 109 045 µs and the parse share to
+      73.9%, reddening SC-002. Injection and scratch deleted. Both outcomes are recorded in the test's
+      doc comment and `tdd/cycle-log.md`, following
+      `test/src/code_field/edit_latency_test.dart:126-141`.
 
 ---
 
@@ -86,7 +97,7 @@ document, compared against the same document with `java`.
 - [ ] T013 [US3] Post a comment on `arrrrny/zuraffa_code_editor#111` carrying the measured numbers,
       the mechanism (`highlight` 0.7.0's `plaintext` fallback), and the conclusion that no code change
       is warranted (FR-006).
-- [ ] T014 [US3] Update the spec's Status from Draft to reflect the recorded decision, and note the
+- [x] T014 [US3] Update the spec's Status from Draft to reflect the recorded decision, and note the
       test file as the pin.
 - [ ] T015 [US3] Run the coverage gate to confirm the new test cannot lower the 100% number
       (`tool/coverage_gate.py --min 100`).
