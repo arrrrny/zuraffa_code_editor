@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -7,10 +9,14 @@ import 'popup_controller.dart';
 /// Popup window displaying the list of possible completions
 class Popup extends StatefulWidget {
   final PopupController controller;
-  final Size editingWindowSize;
 
-  /// The window coordinates of the top-left corner of the editor widget.
-  final Offset? editorOffset;
+  /// The window size the popup has to stay inside.
+  ///
+  /// The field hands it the real window's size: the popup is inserted into the
+  /// root overlay, so it is placed at window coordinates, and the editor's own
+  /// render box is the smaller rectangle whenever the editor is narrower than
+  /// the window.
+  final Size editingWindowSize;
 
   /// The window coordinates of the highest allowed top-left corner
   /// of the popup if shown above the caret.
@@ -31,7 +37,6 @@ class Popup extends StatefulWidget {
     super.key,
     required this.controller,
     required this.editingWindowSize,
-    required this.editorOffset,
     required this.flippedOffset,
     required this.normalOffset,
     required this.parentFocusNode,
@@ -60,14 +65,13 @@ class PopupState extends State<Popup> {
 
   @override
   Widget build(BuildContext context) {
-    final verticalFlipRequired = _isVerticalFlipRequired();
-    final bool isHorizontalOverflowed = _isHorizontallyOverflowed();
-    final double leftOffsetLimit =
-        // TODO(nausharipov): find where 100 comes from
-        widget.editingWindowSize.width -
-        Sizes.autocompletePopupMaxWidth +
-        (widget.editorOffset?.dx ?? 0) -
-        100;
+    // The window this popup has to stay inside. The field hands it the real
+    // window's size — not the editor's own render box, which is the smaller
+    // rectangle whenever the editor is narrower than the window.
+    final windowSize = widget.editingWindowSize;
+    final neededHeight = _neededPopupHeight(context);
+    final verticalFlipRequired =
+        widget.normalOffset.dy + neededHeight > windowSize.height;
 
     // Fixes assertion error when ISC isn't attached but _attach method
     // of ISC instance are being called
@@ -76,13 +80,29 @@ class PopupState extends State<Popup> {
       isc = widget.controller.itemScrollController;
     }
 
+    // The popup is in the root overlay at window coordinates, so its position
+    // is clamped into the window itself. The flipped box is bottom-aligned and
+    // as tall as the popup's maximum, while the unflipped one is top-aligned
+    // and as tall as the suggestions need — each clamps on the edge its own
+    // alignment can cross.
+    final double top = verticalFlipRequired
+        ? _clampIntoWindow(
+            widget.flippedOffset.dy,
+            windowSize.height - Sizes.autocompletePopupMaxHeight,
+          )
+        : _clampIntoWindow(
+            widget.normalOffset.dy,
+            windowSize.height - neededHeight,
+          );
+
     return PageStorage(
       bucket: pageStorageBucket,
       child: Positioned(
-        left: isHorizontalOverflowed ? leftOffsetLimit : widget.normalOffset.dx,
-        top: verticalFlipRequired
-            ? widget.flippedOffset.dy
-            : widget.normalOffset.dy,
+        left: _clampIntoWindow(
+          widget.normalOffset.dx,
+          windowSize.width - Sizes.autocompletePopupMaxWidth,
+        ),
+        top: top,
         child: Container(
           alignment: verticalFlipRequired
               ? Alignment.bottomCenter
@@ -115,23 +135,35 @@ class PopupState extends State<Popup> {
     );
   }
 
-  bool _isVerticalFlipRequired() {
-    final isPopupShorterThanWindow =
-        Sizes.autocompletePopupMaxHeight < widget.editingWindowSize.height;
-    final isPopupOverflowingHeight =
-        widget.normalOffset.dy +
-            Sizes.autocompletePopupMaxHeight -
-            (widget.editorOffset?.dy ?? 0) >
-        widget.editingWindowSize.height;
+  double _clampIntoWindow(double offset, double limit) =>
+      offset.clamp(0, math.max(0, limit));
 
-    return isPopupOverflowingHeight && isPopupShorterThanWindow;
+  /// The height the suggestions actually need: one row each, capped at the
+  /// popup's maximum height. The flip is decided on this rather than on the
+  /// maximum, so a single suggestion near the bottom of the window no longer
+  /// jumps above the caret.
+  double _neededPopupHeight(BuildContext context) {
+    final suggestions = widget.controller.suggestions;
+    if (suggestions.isEmpty) {
+      return 0;
+    }
+    return math.min(
+      suggestions.length * _rowHeight(context),
+      Sizes.autocompletePopupMaxHeight,
+    );
   }
 
-  bool _isHorizontallyOverflowed() {
-    return widget.normalOffset.dx -
-            (widget.editorOffset?.dx ?? 0) +
-            Sizes.autocompletePopupMaxWidth >
-        widget.editingWindowSize.width;
+  /// Height of one suggestion row. The rows render a `Text` that inherits the
+  /// ambient default style, so the same merged style is measured here.
+  double _rowHeight(BuildContext context) {
+    final style = DefaultTextStyle.of(context).style.merge(widget.style);
+    final painter = TextPainter(
+      text: TextSpan(text: widget.controller.suggestions.first, style: style),
+      textDirection: Directionality.of(context),
+    )..layout();
+    final height = painter.height;
+    painter.dispose();
+    return height;
   }
 
   Widget _buildListItem(int index) {
@@ -139,10 +171,6 @@ class PopupState extends State<Popup> {
       color: Colors.grey.withOpacity(0.1),
       child: InkWell(
         onTap: () {
-          widget.controller.selectedIndex = index;
-          widget.parentFocusNode.requestFocus();
-        },
-        onDoubleTap: () {
           widget.controller.selectedIndex = index;
           widget.parentFocusNode.requestFocus();
           widget.controller.onCompletionSelected();

@@ -27,6 +27,20 @@
 
 ### Changed
 
+- **A single tap commits an autocomplete suggestion, and the popup stays inside
+  the window** ([issue #84](https://github.com/arrrrny/zuraffa_code_editor/issues/84),
+  upstream `akvelon/flutter-code-editor#205`). On mobile the suggestion popup
+  needed a double tap and was cut off, because `Popup`'s row had the commit on
+  its `onDoubleTap` — so the gesture arena held the first tap back until the
+  double tap timeout — and the popup was placed against the *editor's* render
+  box while it actually renders in the full-screen overlay: the horizontal clamp
+  subtracted an unexplained 100 px, which put the popup off the left edge of any
+  editor narrower than 400 px, and the vertical flip was refused outright when
+  the editor was shorter than the popup's maximum height. A tap now commits the
+  word on its row exactly as Enter does, the popup is clamped into the window it
+  is measured against — the real window, which `CodeField` now hands it instead
+  of its own box — and the flip is decided by the height the suggestions
+  actually need, capped at the popup's maximum height.
 - **A visible section renders flush with its contents** ([issue #35](https://github.com/arrrrny/zuraffa_code_editor/issues/35),
   upstream `akvelon/flutter-code-editor#109`). A section whose `[START name]`
   and `[END name]` tags sit on lines of their own used to present a blank line
