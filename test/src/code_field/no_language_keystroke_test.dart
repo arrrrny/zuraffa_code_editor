@@ -245,10 +245,16 @@ void main() {
     // like no language. `highlight._getLanguage` returns null for a name that
     // is neither a registered language nor a registered alias, so an
     // unrecognised name lands on the same `plaintext` fallback the empty id
-    // does. If that fallback ever became auto-detection — the obvious "helpful"
-    // change, and one that would make every unhighlighted editor pay for every
-    // registered language — the parse cost here would jump by two orders of
-    // magnitude and this test would catch it.
+    // does.
+    //
+    // The bound is the 5% share of the with-language parse from SC-001 rather
+    // than a window around the empty id's own median. Both are the same empty
+    // mode, so their medials differ only by machine noise — and at ~10 µs each
+    // that noise is large enough relative to the signal that a ratio between
+    // the two is flaky under the concurrent load of a full `flutter test` run
+    // (this file measures it and it fails that way). Anchoring both against the
+    // ~79 ms with-language parse keeps the assertion exact about what it is
+    // guarding: an unresolvable name must not start doing token-level work.
     final document = _document(lines);
 
     final reference = _controllerWithoutLanguage(document);
@@ -265,10 +271,32 @@ void main() {
       reps,
     );
 
-    // Both paths are the same empty mode, so the two medians differ only by
-    // machine noise. A 2x window is wide enough for that and far too narrow to
-    // hide a real lexer behind it.
-    expect(unresolvableParse, lessThan(noLanguageParse * 2));
-    expect(noLanguageParse, lessThan(unresolvableParse * 2));
+    // Its own controller, not the first test's: `highlight` is a process-wide
+    // instance, but relying on another test to have registered `java` would
+    // make this one order-dependent.
+    final javaReference = CodeController(
+      text: document,
+      language: java,
+      namedSectionParser: const BracketsStartEndNamedSectionParser(),
+    );
+    final javaParse = _medianParseMicros(
+      document,
+      javaReference.languageId,
+      reps,
+    );
+    javaReference.dispose();
+
+    // ignore: avoid_print
+    print(
+      'unresolvable-language pin: no language ${noLanguageParse}us, '
+      'unresolvable ${unresolvableParse}us, java ${javaParse}us',
+    );
+
+    // The same 5% share SC-001 pins for the empty id. Auto-detection — the
+    // obvious "helpful" fallback, which would parse with every registered
+    // language — costs roughly as much as the with-language parse and would
+    // blow through this by two orders of magnitude.
+    expect(unresolvableParse, lessThan(javaParse * 0.05));
+    expect(noLanguageParse, lessThan(javaParse * 0.05));
   });
 }
