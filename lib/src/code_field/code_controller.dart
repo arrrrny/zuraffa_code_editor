@@ -598,12 +598,12 @@ class CodeController extends TextEditingController {
   /// The rewrite is scoped to a keystroke the platform applied at the caret:
   /// [_insertedLoc] states that the text grew by exactly one at a collapsed
   /// caret, and [newValue]'s own selection has to have landed one past that
-  /// insertion. Anything else — a deletion, a paste, a selection, an edit a
-  /// code modifier transformed, or a caret at the end of the text — falls
-  /// through to the ordinary insert.
+  /// insertion. Anything else — a deletion, a paste, a selection, a line
+  /// break, an edit a code modifier transformed, or a caret at the end of the
+  /// text — falls through to the ordinary insert.
   TextEditingValue? _overtypedValue(TextEditingValue newValue) {
     final loc = _insertedLoc(text, newValue.text);
-    if (loc == null || loc >= text.length) {
+    if (loc == null || loc >= text.length || newValue.text[loc] == '\n') {
       return null;
     }
 
@@ -612,8 +612,16 @@ class CodeController extends TextEditingController {
       return null;
     }
 
+    // A character outside the BMP spans two code units: replacing only the
+    // lead surrogate would strand the trailing half in the document, so the
+    // whole pair is consumed either way.
+    final unit = text.codeUnitAt(loc);
+    final end = unit >= 0xD800 && unit <= 0xDBFF && loc + 1 < text.length
+        ? loc + 2
+        : loc + 1;
+
     return TextEditingValue(
-      text: text.replaceRange(loc, loc + 1, newValue.text[loc]),
+      text: text.replaceRange(loc, end, newValue.text[loc]),
       selection: TextSelection.collapsed(offset: loc + 1),
     );
   }

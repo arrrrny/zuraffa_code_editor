@@ -124,6 +124,22 @@ void main() {
       controller.dispose();
     });
 
+    test('Overtype consumes a whole astral character', () {
+      final controller = createController('a😀b');
+      controller.isOvertypeMode = true;
+      controller.selection = const TextSelection.collapsed(offset: 1);
+
+      controller.value = _typedAt(controller.text, 'x', 1);
+
+      expect(controller.text, 'axb');
+      expect(
+        controller.text.codeUnits.any((u) => u >= 0xD800 && u <= 0xDFFF),
+        false,
+        reason: 'The trailing half of the surrogate pair must not survive',
+      );
+      controller.dispose();
+    });
+
     test('Overtype inserts past the last character', () {
       final controller = createController('int a = 1;');
       controller.isOvertypeMode = true;
@@ -135,6 +151,34 @@ void main() {
 
       expect(controller.text, 'int a = 1;x');
       controller.dispose();
+    });
+
+    test('Enter in overtype mode inserts a line break, not a deletion', () {
+      final inserted = createController('int a = 1;');
+      inserted.selection = const TextSelection.collapsed(offset: 4);
+      inserted.onEnterKeyAction();
+
+      final overtyped = createController('int a = 1;');
+      overtyped.isOvertypeMode = true;
+      overtyped.selection = const TextSelection.collapsed(offset: 4);
+      overtyped.onEnterKeyAction();
+
+      expect(
+        overtyped.text,
+        inserted.text,
+        reason:
+            'The editor\'s own Enter path grows the text by one code unit, '
+            'the same fingerprint as a typed character; the line break must '
+            'not overwrite the character after the caret',
+      );
+      expect(
+        overtyped.text,
+        'int \na = 1;',
+        reason: 'The character after the caret survives the line break',
+      );
+
+      inserted.dispose();
+      overtyped.dispose();
     });
 
     test('Overtype replaces under a folded block', () {
