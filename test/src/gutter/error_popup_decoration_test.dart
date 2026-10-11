@@ -224,5 +224,68 @@ void main() {
         Colors.white,
       );
     });
+
+    testWidgets('two issues on different lines share one decoration', (
+      wt,
+    ) async {
+      wt.view.physicalSize = const Size(800, 1000);
+      wt.view.devicePixelRatio = 1.0;
+      addTearDown(wt.view.reset);
+
+      final analyzer = TestAnalyzer();
+      analyzer.setIssues(const [
+        Issue(line: 1, message: 'first', type: IssueType.error),
+        Issue(line: 2, message: 'second', type: IssueType.warning),
+      ]);
+      final controller = CodeController(
+        text: source,
+        language: java,
+        analyzer: analyzer,
+      );
+      addTearDown(controller.dispose);
+
+      await wt.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CodeField(
+              controller: controller,
+              gutterStyle: GutterStyle(
+                errorPopupTextStyle: _popupStyle,
+                errorPopupDecoration: const BoxDecoration(color: Colors.black),
+              ),
+            ),
+          ),
+        ),
+      );
+      await wt.pumpAndSettle();
+
+      final gesture = await wt.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+
+      BoxDecoration decorationFor(String message) {
+        final container = wt.widget<Container>(
+          find
+              .ancestor(
+                of: find.text(message),
+                matching: find.byType(Container),
+              )
+              .first,
+        );
+        return container.decoration! as BoxDecoration;
+      }
+
+      await gesture.moveTo(wt.getCenter(find.byType(GutterErrorWidget).first));
+      await wt.pump();
+      final first = decorationFor('first');
+
+      await gesture.moveTo(wt.getCenter(find.byType(GutterErrorWidget).last));
+      // Leaving the first icon schedules its popup's delayed 50 ms close; flush
+      // it so no timer is left pending when the tree is disposed.
+      await wt.pump(const Duration(milliseconds: 100));
+      final second = decorationFor('second');
+
+      expect(second, first);
+    });
   });
 }

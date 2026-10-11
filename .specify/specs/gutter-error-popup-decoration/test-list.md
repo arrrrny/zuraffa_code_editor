@@ -41,11 +41,8 @@ Shared harness, copied in shape from `error_popup_content_test.dart`: mount a
   `GutterErrorWidget` positionally.
 - `test/src/gutter/gutter_folding_test.dart` — asserts on
   `findsOneWidget`/`findsNothing` for `GutterErrorWidget`.
-
-`test/src/gutter/error_icon_override_test.dart` is not in this branch's history:
-it lands with #81, which adds `GutterErrorWidget.icon` to the same constructor.
-Rebasing this branch onto it after #81 merges adds the parameter and changes
-nothing here.
+- `test/src/gutter/error_icon_override_test.dart` — asserts the per-issue
+  `GutterErrorWidget.icon` resolution (#81).
 
 ## CHANGELOG
 
