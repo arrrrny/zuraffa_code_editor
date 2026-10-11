@@ -115,8 +115,14 @@ either story — no `lib/` change ships (T018).
       acceptance criteria — measuring the whole 4800-line document pasted
       through the `value` setter on an empty controller, bounded at 1 s absolute
       and against the `java` paste.)
-- [ ] T018 Decide whether to open a PR: **only if the audit demands a code change.** The deliverable is
-      a test that pins a decision, which belongs on `master` via the pool like any other change.
+- [x] T018 Decide whether to open a PR: **yes** — the audit found no code change
+      to make, but the deliverable is a test that pins a decision, and a pin only
+      protects anyone if it is on `master`. It goes through the pool like any
+      other change.
+- [x] T019 Audit remediation: the paste pin had no tripwire (its absolute and
+      ordering bounds both survive a no-language-pays-for-lexing mutant). Added
+      `noLanguagePaste / javaPaste < 0.5`; mutant re-injected and killed
+      (0.984 ratio). Recorded in `tdd/verification.md`.
 
 ---
 

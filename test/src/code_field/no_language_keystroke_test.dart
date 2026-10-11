@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:highlight/highlight_core.dart' show highlight;
+import 'package:highlight/highlight_core.dart' show Mode, highlight;
 import 'package:highlight/languages/java.dart';
 import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 
@@ -155,6 +155,42 @@ int _medianKeystrokeMicros(CodeController controller, int reps) {
   return _median(samples);
 }
 
+/// The median time one paste of [document] into an empty controller takes —
+/// the shape upstream issue #246 actually reports ("4800+ lines of output into
+/// the editor"), as distinct from a keystroke: the whole document arrives in a
+/// single `value` assignment, so every whole-document term is paid once and in
+/// the same frame.
+CodeController _pasteTarget(Mode? language) {
+  return CodeController(
+    text: '',
+    language: language,
+    namedSectionParser: const BracketsStartEndNamedSectionParser(),
+  );
+}
+
+int _medianPasteMicros(String document, Mode? language, int reps) {
+  final samples = <int>[];
+  final stopwatch = Stopwatch();
+
+  for (int i = 0; i < reps; i++) {
+    final controller = _pasteTarget(language);
+
+    stopwatch
+      ..reset()
+      ..start();
+    controller.value = TextEditingValue(
+      text: document,
+      selection: TextSelection.collapsed(offset: document.length),
+    );
+    stopwatch.stop();
+    samples.add(stopwatch.elapsedMicroseconds);
+
+    controller.dispose();
+  }
+
+  return _median(samples);
+}
+
 /// A controller that never had a language set — the public
 /// zero-configuration path the issue reports.
 ///
@@ -215,28 +251,27 @@ void main() {
     );
 
     // SC-002 / FR-002: a keystroke with no language completes well inside a
-    // tenth of a second. The measured value is ~43 ms; the bound is 2.3x that
-    // because the whole keystroke is whole-document work whose cost moves with
-    // the machine, and a ratio-only gate for this leg would be blind to the
-    // absolute stall the issue reports.
+    // tenth of a second. The measured value is 13.1–14.5 ms and the bound is
+    // absolute, not a ratio, because the absolute stall is what the issue
+    // reports: a ratio gate alone would stay green while both paths crawled.
     expect(noLanguageKeystroke, lessThan(100 * 1000));
 
     // SC-003: the no-language path is never slower than the with-language one.
-    // It is roughly 8x faster here.
+    // It is roughly 9x faster here.
     expect(noLanguageKeystroke, lessThanOrEqualTo(javaKeystroke));
 
     // SC-001 / FR-004: the no-language parse costs a small fraction of the
-    // with-language parse. Measured ~0.9%; the bound is 5% per the spec.
+    // with-language parse. Measured 10–18 µs against 78.9–96.5 ms, i.e.
+    // 0.013–0.021%; the bound is 5% per the spec.
     expect(noLanguageParse, lessThan(javaParse * 0.05));
 
     // SC-004: the tripwire. The ratio between the two keystroke paths is
     // bounded well below 1, so a change that makes the no-language parse
     // expensive — a fallback to auto-detection, or a real language registered
     // under the empty name — pushes it toward 1 and reddens this file rather
-    // than reaching users quietly. The measured ratio is ~0.12 and with-language
-    // parsing is ~100x the no-language parse, so any bound below ~0.6 keeps the
-    // tripwire sharp while leaving ordinary machine noise an order of magnitude
-    // of headroom.
+    // than reaching users quietly. The measured ratio is 0.105–0.117, so the
+    // 0.6 bound keeps ~5x of headroom for machine noise while staying far below
+    // the 1.0 a regression would reach.
     expect(noLanguageKeystroke / javaKeystroke, lessThan(0.6));
   });
 
@@ -298,5 +333,45 @@ void main() {
     // blow through this by two orders of magnitude.
     expect(unresolvableParse, lessThan(javaParse * 0.05));
     expect(noLanguageParse, lessThan(javaParse * 0.05));
+  });
+
+  test('Pasting a large document with no language does not block', () {
+    // Upstream issue #246 (fork #111 and #93) reports the stall on a *paste* —
+    // "4800+ lines of output into the editor" — not on a keystroke. A paste
+    // pays every whole-document term once, in the same frame, so it is the
+    // shape most likely to turn into the multi-second freeze the report
+    // describes. This pins it separately from the keystroke.
+    final document = _document(lines);
+
+    // Warm up: the first paste of a fresh document pays for JIT compilation of
+    // the whole path.
+    _medianPasteMicros(document, null, 1);
+
+    final noLanguagePaste = _medianPasteMicros(document, null, reps);
+    final javaPaste = _medianPasteMicros(document, java, reps);
+
+    // ignore: avoid_print
+    print(
+      'no-language paste pin: $lines lines\n'
+      '  paste median  no language: ${noLanguagePaste}us\n'
+      '  paste median  java:        ${javaPaste}us',
+    );
+
+    // The acceptance criterion of fork #93: a paste with no language selected
+    // must not block for seconds. Measured in the high tens of milliseconds;
+    // the bound is one second, a full order of magnitude of headroom, because
+    // the absolute stall is what is being ruled out and a CI machine a few
+    // times slower than this one must still be able to pass.
+    expect(noLanguagePaste, lessThan(1000 * 1000));
+
+    // The no-language paste is not slower than the highlighted one — it is
+    // cheaper, because the highlighted paste also pays for the lexer.
+    expect(noLanguagePaste, lessThanOrEqualTo(javaPaste));
+
+    // The tripwire. A paste pays the whole-document terms once each, so a
+    // change that makes the no-language path do token-level work moves this
+    // ratio toward 1. Measured 0.128–0.137; the 0.5 bound keeps the same
+    // headroom as the keystroke pin above.
+    expect(noLanguagePaste / javaPaste, lessThan(0.5));
   });
 }
