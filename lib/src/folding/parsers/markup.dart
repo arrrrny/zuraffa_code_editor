@@ -19,8 +19,7 @@ const _closingTagOpener = '</';
 /// or `<img src="x" />`.
 const _selfClosingTagSuffix = '/>';
 
-/// A parser for foldable blocks in markup: XML, and every language that
-/// highlights as XML — HTML included.
+/// A parser for foldable blocks in markup: XML.
 ///
 /// Markup nests on `<element>` / `</element>` rather than on brackets, so the
 /// generic bracket-driven parser opens no blocks in it at all. The structure
