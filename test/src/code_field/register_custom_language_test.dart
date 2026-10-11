@@ -43,20 +43,19 @@ void main() {
       final controller = CodeController(text: 'world "a string"');
       addTearDown(controller.dispose);
 
+      // setLanguage notifies listeners; assign before the build phase so the
+      // notification never fires mid-build.
+      controller.language = _hello;
+
       await wt.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: Builder(
-              builder: (context) {
-                controller.language = _hello;
-                return EditableText(
-                  controller: controller,
-                  focusNode: FocusNode(),
-                  style: const TextStyle(),
-                  cursorColor: Colors.black,
-                  backgroundCursorColor: Colors.black,
-                );
-              },
+            body: EditableText(
+              controller: controller,
+              focusNode: FocusNode(),
+              style: const TextStyle(),
+              cursorColor: Colors.black,
+              backgroundCursorColor: Colors.black,
             ),
           ),
         ),
@@ -68,11 +67,10 @@ void main() {
         ),
       );
 
-      // The mode's own keyword and string rules reach the output, which is only
-      // possible if the parse ran under the mode it was handed.
-      expect(spans.join(''), contains('world'));
-      expect(spans.join(''), contains('a string'));
-      expect(spans, isNotEmpty);
+      // Standalone span fragments exist only if the parse ran under the mode
+      // it was handed; a degraded parse leaves one raw-text span. The keyword
+      // fragment carries the trailing space the highlighter consumes with it.
+      expect(spans, containsAllInOrder([startsWith('world'), '"a string"']));
     });
 
     test('switching to an unlisted language then back keeps both working', () {
