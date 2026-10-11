@@ -60,6 +60,8 @@ class GutterWidget extends StatelessWidget {
   Widget _buildOnChange(BuildContext context, Widget? child) {
     final code = codeController.code;
 
+    final iconSize = _iconSize;
+
     final issueColumnWidth = style.showErrors ? _issueColumnWidth : 0.0;
     final foldingColumnWidth = style.showFoldingHandles
         ? _foldingColumnWidth
@@ -95,10 +97,10 @@ class GutterWidget extends StatelessWidget {
     _fillLineNumbers(tableRows);
 
     if (style.showErrors) {
-      _fillIssues(tableRows);
+      _fillIssues(tableRows, iconSize);
     }
     if (style.showFoldingHandles) {
-      _fillFoldToggles(tableRows);
+      _fillFoldToggles(tableRows, iconSize);
     }
 
     return Container(
@@ -211,7 +213,7 @@ class GutterWidget extends StatelessWidget {
     }
   }
 
-  void _fillIssues(List<TableRow> tableRows) {
+  void _fillIssues(List<TableRow> tableRows, double iconSize) {
     for (final issue in codeController.analysisResult.issues) {
       if (issue.line >= codeController.code.lines.length) {
         continue;
@@ -232,7 +234,7 @@ class GutterWidget extends StatelessWidget {
           icon: Icon(
             style.issueIcon(issue.type),
             color: Colors.red,
-            size: _iconSize,
+            size: iconSize,
           ),
           popupDecoration: style.errorPopupDecoration,
         ),
@@ -241,7 +243,7 @@ class GutterWidget extends StatelessWidget {
     }
   }
 
-  void _fillFoldToggles(List<TableRow> tableRows) {
+  void _fillFoldToggles(List<TableRow> tableRows, double iconSize) {
     final code = codeController.code;
 
     for (final block in code.foldableBlocks) {
@@ -259,7 +261,7 @@ class GutterWidget extends StatelessWidget {
           onTap: isFolded
               ? () => codeController.unfoldAt(block.firstLine)
               : () => codeController.foldAt(block.firstLine),
-          iconSize: _iconSize,
+          iconSize: iconSize,
         ),
         lineIndex,
       );
@@ -278,7 +280,7 @@ class GutterWidget extends StatelessWidget {
           color: style.textStyle?.color,
           isFolded: true,
           onTap: () => codeController.unfoldAt(block.firstLine),
-          iconSize: _iconSize,
+          iconSize: iconSize,
         ),
         lineIndex,
       );
