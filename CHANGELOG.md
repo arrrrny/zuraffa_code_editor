@@ -178,6 +178,19 @@
   Edits at any other hidden range — a named section's marker comment — are
   unchanged.
 
+- **Folding a two-line block no longer deletes the line that starts the next
+  one** ([issue #99](https://github.com/arrrrny/zuraffa_code_editor/issues/99),
+  upstream `akvelon/flutter-code-editor#213`). When a block's closing line was
+  also the opening line of the next block and only one content line separated
+  them (`if (a &&` / `b) {`), the guard that gives the closer a row of its own
+  had nothing to work with and the fold hid the shared line whole — taking the
+  following block's first line, its line number and its fold toggle off the
+  screen. The range now ends at the shared line's start instead, gluing it onto
+  the opener's row: the same shape a leading closer (`}void main(){`) already
+  folds to, and the most a two-line fold can offer, since a `HiddenRange`
+  cannot be empty. Multi-line touching blocks keep their closer's own row, and
+  a leading-closer two-line shape folds exactly as before.
+
 - **`dart analyze` warnings in the new tests** — unused imports removed.
 
 - **A keystroke no longer rebuilds the visible highlight or re-indexes the whole
