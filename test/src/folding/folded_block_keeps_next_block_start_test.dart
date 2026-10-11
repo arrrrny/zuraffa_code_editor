@@ -213,4 +213,111 @@ int factorial(int n){
       expect(find.byType(FoldToggle), findsNWidgets(3));
     });
   });
+
+  group('A two-line block that also starts the next one.', () {
+    //  0  void f() {
+    //  1    int value = 1;
+    //  2    if (a &&
+    //  3        b) {   <- closes the parentheses block (2..3), opens the braces block (3..5)
+    //  4      g();
+    //  5    }
+    //  6  }
+    //
+    // The multi-line shape above keeps the closer's own row. Here the block is
+    // only two lines long, so there is no content row between the opener and
+    // the closer and the two positions coincide: folding the condition hid
+    // the shared line whole, which is the reported symptom (akvelon#213).
+    const source =
+        'void f() {\n'
+        '  int value = 1;\n'
+        '  if (a &&\n'
+        '      b) {\n'
+        '    g();\n'
+        '  }\n'
+        '}\n';
+
+    // The shared line cannot keep a row of its own — a two-line fold always
+    // shares one, exactly as upstream glues `method(){}` — so it is glued onto
+    // the opener's row, the shape a leading closer already folds to.
+    const foldedText = '''
+void f() {
+  int value = 1;
+  if (a &&      b) {
+    g();
+  }
+}
+''';
+
+    test('is a foldable block of its own', () {
+      final code = CodeController(text: source, language: java).code;
+
+      expect(
+        code.foldableBlocks.map((b) => '${b.firstLine}..${b.lastLine}'),
+        containsAllInOrder(<String>['2..3', '3..5']),
+      );
+    });
+
+    test('keeps the shared line on screen when the block above it is folded', () {
+      final controller = CodeController(text: source, language: java);
+
+      controller.foldAt(2); // `if (a &&`
+
+      expect(
+        controller.text,
+        foldedText,
+        reason:
+            '`b) {` closes the condition and opens the next block, so its text '
+            'must survive the fold',
+      );
+      expect(controller.text, contains('b) {'));
+    });
+
+    test('keeps the gutter and the editor in agreement on the row count', () {
+      final controller = CodeController(text: source, language: java);
+
+      controller.foldAt(2);
+
+      expect(
+        controller.code.hiddenLineRanges.visibleLineNumbers.length,
+        controller.code.visibleText.split('\n').length,
+      );
+    });
+
+    test('round-trips losslessly', () {
+      final controller = CodeController(text: source, language: java);
+
+      controller.foldAt(2);
+      expect(controller.code.text, source, reason: 'the full text survives');
+
+      controller.unfoldAt(2);
+      expect(controller.text, source);
+      expect(controller.code.foldedBlocks, isEmpty);
+    });
+
+    test('glues the leading-closer two-line shape as before', () {
+      // 0  int factorial(int n){
+      // 1  }void main(){
+      // 2    int num = 5;
+      // 3  }
+      //
+      // The shared line starts with the closer, so `_isClosingLine` already
+      // ends the range at its start and the fold glues the two rows. This pins
+      // that the new path produces the same shape rather than a different one.
+      const leadingCloser =
+          'int factorial(int n){\n'
+          '}void main(){\n'
+          '  int num = 5;\n'
+          '}\n';
+      final controller = CodeController(text: leadingCloser, language: java);
+
+      controller.foldAt(0);
+
+      expect(
+        controller.text,
+        'int factorial(int n){}void main(){\n'
+        '  int num = 5;\n'
+        '}\n',
+      );
+    });
+  });
 }

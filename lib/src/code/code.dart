@@ -628,15 +628,24 @@ class Code {
       final closerOnItsOwnRow = lastLine.textRange.start - 1;
       if (closerOnItsOwnRow > startOfRange) {
         endOfRange = closerOnItsOwnRow;
+      } else if (closerOnItsOwnRow == startOfRange) {
+        // Two-line touching block (`if (a &&` / `b) {`): the closer is the
+        // block's only content line, so there is no preceding row to preserve
+        // and the guard above is inert. Hiding through the end of the line
+        // then takes the shared line — and with it the following block's
+        // start, line number and fold toggle — off the screen
+        // (akvelon/flutter-code-editor#213). Ending at the line's start
+        // instead hides only the newline that ends the opener, which glues
+        // the shared line onto the opener's row: the same shape
+        // `_isClosingLine` already produces for a leading closer, and the
+        // most a two-line fold can offer, since a [HiddenRange] cannot be
+        // empty. The equality is what keeps this narrow — a block whose last
+        // line is a later line has `closerOnItsOwnRow > startOfRange`, and the
+        // degenerate single-line block has it *before* `startOfRange`, so
+        // neither reaches this branch.
+        endOfRange = lastLine.textRange.start;
       }
     }
-
-    // Known limitation, same family: when the touching blocks are only two
-    // lines (`if (a &&` / `b) {`), `startOfRange == closerOnItsOwnRow`, so the
-    // `>` check above is false and this guard is inert however it is gated —
-    // the shared line has no preceding content row to preserve and stays
-    // hidden. That sub-shape wants its own fix, not a widening of this narrow
-    // guard.
 
     return HiddenRange(
       startOfRange,
