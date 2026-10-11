@@ -267,6 +267,31 @@
   `test/src/highlight/java_language_test.dart` pins the repaired
   classification and the unchanged one side by side.
 
+- **XML documents are foldable again**
+  ([issue #103](https://github.com/arrrrny/zuraffa_code_editor/issues/103),
+  upstream `akvelon/flutter-code-editor#311`, reported as "HTML/XML highlighting
+  is broken"). The highlighting half of the report does not reproduce:
+  `highlight.parse(src, language: 'xml')` classifies a document into `meta`,
+  `comment` and `tag` nodes carrying `name`, `attr` and `string`, and driving
+  `SpanBuilder` with `vsTheme` over those nodes paints them in six distinct
+  colours, so the widget path is the same path and cannot differ. What does
+  reproduce is the other half, "the document structure is lost":
+  `CodeController(text: ..., language: xml).code.foldableBlocks` is empty, where
+  java yields two brace blocks on `class A { void m() { } }`.
+  `FoldableBlockParserFactory` special-cased python, java and yaml and sent
+  everything else to `HighlightFoldableBlockParser`, which opens blocks on `(`,
+  `[` and `{` only — and markup nests on `<tag>`/`</tag>`, so no bracket ever
+  appears and no block is ever opened. Markup now has its own parser, driven by
+  the highlight nodes rather than a text scan so a `<` inside a comment or an
+  attribute string can never look like an element: nested elements produce
+  nested `FoldableBlockType.markup` blocks, self-closing tags (`<br/>`,
+  `<img src="x" />`) and the `<?xml ?>` declaration produce none, a
+  `<a>text</a>` pair on one line produces none because `endBlock` already drops
+  same-line blocks, and an unclosed element or a stray closing tag is reported
+  as an `InvalidFoldableBlock` the way an unclosed brace is. The Android layout
+  in `test/src/folding/parsers/markup_parser_test.dart` now folds its
+  `LinearLayout` and `FrameLayout` instead of neither.
+
 - **Deleting a folded block's closer no longer destroys the block's content**
   ([issue #98](https://github.com/arrrrny/zuraffa_code_editor/issues/98),
   upstream `akvelon/flutter-code-editor#176`). Backspacing the `}` of a folded
