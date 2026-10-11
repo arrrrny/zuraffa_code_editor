@@ -94,20 +94,27 @@ either story — no `lib/` change ships (T018).
 
 ### Implementation for User Story 3
 
-- [ ] T013 [US3] Post a comment on `arrrrny/zuraffa_code_editor#111` carrying the measured numbers,
+- [ ] T013 [US3] Post a comment on `arrrrny/zuraffa_code_editor#111` (and cross-link #93) carrying
+      the measured numbers,
       the mechanism (`highlight` 0.7.0's `plaintext` fallback), and the conclusion that no code change
       is warranted (FR-006).
 - [x] T014 [US3] Update the spec's Status from Draft to reflect the recorded decision, and note the
       test file as the pin.
-- [ ] T015 [US3] Run the coverage gate to confirm the new test cannot lower the 100% number
+- [x] T015 [US3] Run the coverage gate to confirm the new test cannot lower the 100% number
       (`tool/coverage_gate.py --min 100`).
 
 ---
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T016 [P] `dart format` the new test; `dart analyze --fatal-infos` the package.
-- [ ] T017 Run the full suite and record the test count.
+- [x] T016 [P] `dart format` the new test; `dart analyze --fatal-infos` the package.
+- [x] T017 Run the full suite and record the test count: 734 tests, all green
+      (731 on `master` @ `a02539a` + 3 new), coverage gate 100.00% (3360/3360
+      lines).
+- [x] T017b [US1] [behavior: US1-paste] Add the paste pin — fork #93's
+      acceptance criteria — measuring the whole 4800-line document pasted
+      through the `value` setter on an empty controller, bounded at 1 s absolute
+      and against the `java` paste.)
 - [ ] T018 Decide whether to open a PR: **only if the audit demands a code change.** The deliverable is
       a test that pins a decision, which belongs on `master` via the pool like any other change.
 

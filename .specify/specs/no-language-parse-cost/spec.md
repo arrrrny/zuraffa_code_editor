@@ -138,16 +138,22 @@ numbers.
   4800 lines), the same fixture shape as the repo's existing latency guard
   `test/src/code_field/edit_latency_test.dart`, so the two guards are directly
   comparable.
+- "No language selected" means the controller was constructed without a `language`
+  argument, which is the public API's zero-configuration path.
+- Skipping the parse outright is *not* required: the measurement decides between
+  skipping it and keeping it, and the outcome is recorded either way.
+- This spec answers both fork #111 (`spec`) and fork #93 (`bug`), which are the
+  same upstream #246 report filed under two labels.
 
 ## Measurement (recorded)
 
 Taken by `test/src/code_field/no_language_keystroke_test.dart` on this fork,
 median of 5 after a warm-up run, five consecutive runs:
 
-| path | `highlight.parse` | one keystroke |
-|---|---|---|
-| no language (`_languageId == ''`) | 10–18 µs | 13.1–14.5 ms |
-| `java` | 78.9–96.5 ms | 119.9–129.5 ms |
+| path | `highlight.parse` | one keystroke | paste of the whole document |
+|---|---|---|---|
+| no language (`_languageId == ''`) | 10–18 µs | 13.1–14.5 ms | 16.1–17.0 ms |
+| `java` | 78.9–96.5 ms | 119.9–129.5 ms | 124.8–129.2 ms |
 
 Conclusions:
 
@@ -155,17 +161,16 @@ Conclusions:
   language to `plaintext` — an empty `Mode` — so the no-language parse is
   ~0.1% of the no-language keystroke. There is no multi-second stall to fix.
 - **Neither path reaches "~20 s"** at this size: the with-language keystroke is
-  ~125 ms, two orders of magnitude below the report. Whatever the report's
-  author measured is not what this fork does.
+  ~125 ms and the with-language paste ~127 ms, two orders of magnitude below the
+  report. Whatever the report's author measured is not what this fork does —
+  including the paste, which is the shape upstream #246 actually describes and
+  which the same file covers (`Pasting a large document with no language does
+  not block`).
 - **Skipping the parse is not worth a code change.** It would remove at most
-  ~18 µs from a ~14 ms keystroke.
+  ~18 µs from a ~14 ms keystroke and a ~17 ms paste.
 - **The decision is pinned, not asserted.** The test asserts ratios between the
-  two paths and a 100 ms absolute bound on the no-language keystroke, and a
+  two paths plus absolute bounds of 100 ms per keystroke and 1 s per paste, and a
   fault injection registering `java` under the empty language id reddens it
   (parse 80 532 µs vs the with-language 76 120 µs, keystroke 109 045 µs, parse
   share 73.9%) — so a future change that makes the no-language fallback resolve
   to a real language fails the suite instead of reaching users quietly.
-- "No language selected" means the controller was constructed without a `language`
-  argument, which is the public API's zero-configuration path.
-- Skipping the parse outright is *not* required: the measurement decides between
-  skipping it and keeping it, and the outcome is recorded either way.

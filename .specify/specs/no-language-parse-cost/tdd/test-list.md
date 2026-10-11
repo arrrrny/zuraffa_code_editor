@@ -52,6 +52,17 @@ mechanism the behaviour rests on is verified in the dependency, not the package:
 - `lib/src/code_field/code_controller.dart:97` and `:274` — `_languageId` is `''`
   until `setLanguage` assigns it
 
+## Measured, five consecutive runs
+
+```text
+highlight.parse  no language: 10 / 11 / 11 / 14 / 16 / 18 us
+highlight.parse  java:        81604 / 81074 / 96509 / 80681 / 78882 / 87821 us
+keystroke median  no language: 13139 / 13986 / 14475 / 13871 / 13941 / 14060 us
+keystroke median  java:        127246 / 123692 / 129519 / 122746 / 124255 / 128465 us
+paste median      no language: 16096 / 16569 / 16602 / 17044 us
+paste median      java:        124787 / 127422 / 128335 / 129234 us
+```
+
 ## Fault injections (all measured on this machine)
 
 | Fault | Result |
@@ -62,6 +73,24 @@ mechanism the behaviour rests on is verified in the dependency, not the package:
 SC-003 alone survives the injection, because the two paths then genuinely do the
 same work. That is why the tripwire is SC-001 + SC-002 + the ratio, not the
 ordering.
+
+### behavior: US1-paste — a paste of a large document with no language does not block
+
+`Pasting a large document with no language does not block` (same file) — the
+acceptance criterion of fork #93, whose report (upstream #246, the same report
+as #111) is specifically about a paste: "4800+ lines of output into the editor".
+
+Builds an empty controller with and without a language, assigns the whole
+4800-line document through the `value` setter (a fresh controller per rep, so
+each rep pays the same whole-document terms), and medians 5 reps after a
+warm-up rep.
+
+Asserts:
+1. `noLanguagePaste < 1_000_000 µs` — "does not block for seconds". Measured
+   16.1–17.0 ms; the bound is a full order of magnitude of headroom so a CI
+   machine several times slower still passes.
+2. `noLanguagePaste <= javaPaste` — the no-language paste is not slower than the
+   highlighted one. Measured 16.1–17.0 ms against 124.8–129.2 ms.
 
 ## Existing suites that pin the unchanged behaviour (no new tests)
 
