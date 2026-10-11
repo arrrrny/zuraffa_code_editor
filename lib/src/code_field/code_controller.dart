@@ -771,7 +771,10 @@ class CodeController extends TextEditingController {
       final selectionSnapshot = code.hiddenRanges.recoverSelection(
         newValue.selection,
       );
-      _updateCodeIfChanged(editResult.fullTextAfter);
+      _updateCodeIfChanged(
+        editResult.fullTextAfter,
+        changedOldLines: editResult.linesChanged,
+      );
 
       if (newValue.text != _code.visibleText) {
         if (!newValue.selection.isCollapsed &&
@@ -1078,15 +1081,15 @@ class CodeController extends TextEditingController {
     return null;
   }
 
-  void _updateCodeIfChanged(String text) {
+  void _updateCodeIfChanged(String text, {TextRange? changedOldLines}) {
     if (text != _code.text) {
-      _updateCode(text);
+      _updateCode(text, changedOldLines: changedOldLines);
     }
   }
 
-  void _updateCode(String text) {
+  void _updateCode(String text, {TextRange? changedOldLines}) {
     final newCode = _createCode(text);
-    _code = newCode.foldedAs(_code);
+    _code = newCode.foldedAs(_code, changedOldLines: changedOldLines);
   }
 
   Code _createCode(String text) {

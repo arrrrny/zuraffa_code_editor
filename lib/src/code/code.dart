@@ -726,12 +726,18 @@ class Code {
   }
 
   /// Folds this code at the same blocks as the [oldCode] is.
-  Code foldedAs(Code oldCode) {
+  /// Re-folds [oldCode]'s blocks in this code.
+  ///
+  /// [changedOldLines] is the range of lines the edit that produced this code
+  /// replaced in [oldCode], when the caller knows it. See
+  /// [FoldableBlockMatcher.changedOldLines].
+  Code foldedAs(Code oldCode, {TextRange? changedOldLines}) {
     final matcher = FoldableBlockMatcher(
       oldLines: oldCode.lines.lines,
       newBlocks: foldableBlocks,
       newLines: lines.lines,
       oldFoldedBlocks: oldCode.foldedBlocks,
+      changedOldLines: changedOldLines,
     );
 
     final newHiddenRangesBuilder = _hiddenRangesBuilder.copyMergingSourceMap({

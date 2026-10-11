@@ -577,9 +577,8 @@ private class MyClass {
         );
       });
 
-      // TODO(alexeyinkin): Fix, https://github.com/akvelon/flutter-code-editor/issues/83
       testWidgets(
-        'When deleting 2nd identical folded block, 1st one incorrectly folds',
+        'When deleting 2nd identical folded block, 1st one does not fold',
         (WidgetTester wt) async {
           final controller = await pumpController(wt, '''
 {
@@ -596,18 +595,24 @@ if (true) {
 
           controller.value = controller.value.replacedSelection(';');
 
+          // The fold belonged to the deleted block, so it is gone and does not
+          // transfer to the identical block above. The value therefore holds
+          // the full text.
           expect(
             controller.value,
             const TextEditingValue(
               text: '''
 {
-if (true) {}
+if (true) {
+}
 if (true) ;}
 ''',
-              // TODO(alexeyinkin): Selection.
-              selection: TextSelection.collapsed(offset: 13),
+              selection: TextSelection(baseOffset: 26, extentOffset: 27),
             ),
           );
+          // The deleted block's fold must not transfer to the identical
+          // surviving block above.
+          expect(controller.code.foldedBlocks, isEmpty);
         },
       );
 
