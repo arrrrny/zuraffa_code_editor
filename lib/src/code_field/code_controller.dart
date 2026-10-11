@@ -42,6 +42,14 @@ class CodeController extends TextEditingController {
   /// A highlight language to parse the text with
   ///
   /// Setting a language will change the analyzer to [DefaultLocalAnalyzer].
+  ///
+  /// Any [Mode] works, including one this package does not ship: the controller
+  /// registers the mode it is handed under a key of its own and parses with that
+  /// key, so an unlisted language highlights without any extra call. Do
+  /// **not** call `highlight.registerLanguage` yourself — the name you pick is
+  /// not the key the controller parses with, so that registration is either
+  /// unused or, if you happened to collide with the controller's synthetic key,
+  /// actively harmful. Hand your mode straight to `language` and it is used.
   Mode? get language => _language;
 
   set language(Mode? language) {
