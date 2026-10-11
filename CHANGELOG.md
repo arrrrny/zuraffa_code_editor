@@ -239,6 +239,34 @@
 
 ### Fixed
 
+- **A `#` no longer costs a Java file its highlighting**
+  ([issue #104](https://github.com/arrrrny/zuraffa_code_editor/issues/104),
+  upstream `akvelon/flutter-code-editor#42`). `highlight` 0.7.0's `java` mode
+  declares `illegal: "<\\/|#"`, and `_parse` treats an illegal lexeme as a
+  silent bail — it throws, catches the throw itself and hands back the entire
+  document as one unclassified node, so a single `#` outside a comment or a
+  string literal (or a stray `</`) erased every class in the file. A
+  triple-quoted string literal reached the same end by another route: with no
+  triple-quote mode, the third `"` of `"""` opens an ordinary string whose
+  content crosses a newline, and an ordinary `java` string declares a newline
+  illegal. `CodeController` now registers a repaired copy of the `java` mode
+  with the highlighter — the `illegal` regex dropped, a `"""`…`"""` string mode
+  listed ahead of the single-quoted ones. It has to be a copy rather than the
+  shipped mode with a field cleared, because `Mode` caches the regexes compiled
+  from `illegal` and `contains` on the first parse, so a cleared field leaves
+  the stale regexes in place and the defect alive. Only the highlight parse
+  sees the copy: `controller.language` is still the mode the caller supplied,
+  and every other language is registered exactly as it was given. Measured on
+  master, both `public class A {\n}\n#\n` and
+  `String s = """\nmultiline\n""";` came back as
+  `Result(relevance: 0, nodes: [one node])`; after the repair the first
+  classifies `public`, `class`, `title` and the second classifies the literal
+  as one `string` run spanning all three lines. A raw newline inside an
+  ordinary `"..."` still bails — a Java syntax error rather than a defect, and
+  the other side of that trade has no clear winner — while
+  `test/src/highlight/java_language_test.dart` pins the repaired
+  classification and the unchanged one side by side.
+
 - **Deleting a folded block's closer no longer destroys the block's content**
   ([issue #98](https://github.com/arrrrny/zuraffa_code_editor/issues/98),
   upstream `akvelon/flutter-code-editor#176`). Backspacing the `}` of a folded
