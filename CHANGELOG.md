@@ -27,6 +27,24 @@
 
 ### Changed
 
+- **The code area's horizontal scroll is pinned on both of its paths**
+  ([issue #85](https://github.com/arrrrny/zuraffa_code_editor/issues/85),
+  upstream `akvelon/flutter-code-editor#280`, reported as "horizontal scrolling
+  does not work on iOS, works on Android"). Measured, the platform claim is the
+  wrong way round: on a 240 px drag over the code text the code area scrolls
+  0 → 201 px under an iOS platform override and stays at 0 under an android one.
+  The split is Flutter's, not this package's — `TextField` registers a
+  `TapAndHorizontalDragGestureRecognizer` whose `eagerVictoryOnDrag` is
+  `defaultTargetPlatform != TargetPlatform.iOS`, and being deeper in the hit-test
+  tree than the code area's `SingleChildScrollView` it enters the gesture arena
+  first and, on non-Apple platforms, claims the drag for text selection. Nothing
+  in `lib/` changed and no behaviour is new: the caret reveal already works on
+  every platform and is pinned with it, and the drag split is now pinned so a
+  Flutter upgrade that flips `eagerVictoryOnDrag` fails the suite instead of
+  silently changing who wins the drag. The correct follow-up — an interactive
+  horizontal `Scrollbar`, whose thumb drag uses its own recognizer deeper than the
+  `TextField`'s and so wins the same arena without touching selection — is
+  recorded in `.specify/bugs/ios-horizontal-scroll-85/assessment.md`.
 - **A single tap commits an autocomplete suggestion, and the popup stays inside
   the window** ([issue #84](https://github.com/arrrrny/zuraffa_code_editor/issues/84),
   upstream `akvelon/flutter-code-editor#205`). On mobile the suggestion popup
