@@ -16,6 +16,18 @@ private class MyClass {
 }
 ''';
 
+const _otherSource = '''
+class Other {
+  int method() {
+    return 1;
+  }
+
+  int another() {
+    return 2;
+  }
+}
+''';
+
 void main() {
   group('CodeController. Fold and unfold preserve the selection.', () {
     test('a selection inside the folded block survives the round trip', () {
@@ -158,6 +170,60 @@ void main() {
 
       expect(controller.selection.start, start + 1);
       expect(controller.fullText, contains('x    return;'));
+    });
+
+    test('replacing the full text forgets the folded selection', () {
+      final controller = createController(_source);
+
+      final start = controller.text.indexOf('    return;');
+      final selection = TextSelection(
+        baseOffset: start,
+        extentOffset: start + 15,
+      );
+
+      controller.selection = selection;
+      controller.foldAt(1);
+
+      // The document is replaced while the block is still folded: the
+      // remembered offsets belong to the old document, so the next fold must
+      // neither cut nor restore them.
+      controller.fullText = _otherSource;
+      controller.foldAt(1);
+
+      expect(
+        controller.selection,
+        isNot(selection),
+        reason: 'the stale offsets refer to the replaced document',
+      );
+
+      controller.unfoldAt(1);
+
+      expect(controller.fullText, _otherSource);
+      expect(controller.selection, isNot(selection));
+    });
+
+    test('indenting the selected lines forgets the folded selection', () {
+      final controller = createController(_source);
+
+      final start = controller.text.indexOf('    return;');
+      final selection = TextSelection(
+        baseOffset: start,
+        extentOffset: start + 15,
+      );
+
+      controller.selection = selection;
+      controller.foldAt(1);
+      controller.indentSelection();
+      final afterIndent = controller.selection;
+
+      controller.unfoldAt(1);
+
+      expect(
+        controller.selection,
+        isNot(selection),
+        reason: 'the indent re-established the selection in the visible text',
+      );
+      expect(controller.selection, afterIndent);
     });
   });
 }

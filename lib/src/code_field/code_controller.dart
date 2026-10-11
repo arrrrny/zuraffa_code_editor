@@ -555,6 +555,9 @@ class CodeController extends TextEditingController {
 
   set fullText(String fullText) {
     _updateCodeIfChanged(_replaceTabsWithSpacesIfNeeded(fullText));
+    // The new text carries a selection of its own, so any selection a fold
+    // truncated from the previous document is superseded by it.
+    _selectionHiddenByFold = null;
     super.value = TextEditingValue(text: _code.visibleText);
   }
 
@@ -973,6 +976,10 @@ class CodeController extends TextEditingController {
       selection: finalVisibleSelection,
       isTextChanging: true,
     );
+
+    // The edit selects the modified lines, so any selection a fold truncated
+    // is superseded by that new selection.
+    _selectionHiddenByFold = null;
 
     super.value = TextEditingValue(
       text: _code.visibleText,

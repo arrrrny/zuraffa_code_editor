@@ -281,8 +281,10 @@
   lifted selection when cutting it through the new ranges and lifting it back
   does not return it — an exact predicate for "the fold truncated the
   selection" — and drops it the moment anything else re-establishes the
-  selection: a change from the field, or `applyHistoryRecord`, whose record
-  carries a selection of its own. The report's own claim that a selection
+  selection: a change from the field, `applyHistoryRecord` (whose record
+  carries a selection of its own), a whole-document replacement through
+  `fullText`, or a line-modifying edit, whose direct `super.value` write
+  bypasses the setter. The report's own claim that a selection
   *untouched* by the fold is dropped does not reproduce — a drag selection over
   `void method2()` with `void method1()` folded tracks `[58, 97]` → `[45, 84]`
   and unfolds back to `[58, 97]`, and that behaviour is pinned as well so the
@@ -290,7 +292,9 @@
   `test/src/code_field/fold_unfold_keeps_selection_test.dart` pins the round
   trip for a covered selection, a covered caret, a straddling one, an untouched
   one, a selection the user moves while the block is folded, an unrelated
-  unfold, and a keystroke after the round trip.
+  unfold, a keystroke after the round trip, and the two bypass paths — a
+  `fullText` replacement and an indent while the block is folded, each red
+  without the clear beside it.
 
 - **XML documents are foldable again**
   ([issue #103](https://github.com/arrrrny/zuraffa_code_editor/issues/103),
