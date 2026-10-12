@@ -1346,10 +1346,19 @@ class CodeController extends TextEditingController {
       );
     }
 
-    final spanBeforeSearch = _createTextSpan(context: context, style: style);
-
     final visibleSearchResult = _code.hiddenRanges.cutSearchResult(
       fullSearchResult,
+    );
+
+    // Match offsets are cut against `Code.visibleText`, which carries no fold
+    // marker, so the tree must not carry one either while they are being
+    // sliced out of it: every marker would shift each match that follows it
+    // off its own text. The panel is transient, and the marker returns the
+    // moment the pattern is cleared.
+    final spanBeforeSearch = _createTextSpan(
+      context: context,
+      style: style,
+      withFoldEllipsis: visibleSearchResult.matches.isEmpty,
     );
 
     // TODO(alexeyinkin): Return cached if the value did not change, https://github.com/akvelon/flutter-code-editor/issues/127
@@ -1363,13 +1372,18 @@ class CodeController extends TextEditingController {
     return lastTextSpan!;
   }
 
-  TextSpan _createTextSpan({required BuildContext context, TextStyle? style}) {
+  TextSpan _createTextSpan({
+    required BuildContext context,
+    TextStyle? style,
+    bool withFoldEllipsis = true,
+  }) {
     // Return parsing
     if (_language != null) {
       return SpanBuilder(
         code: _code,
         theme: _getTheme(context),
         rootStyle: style,
+        withFoldEllipsis: withFoldEllipsis,
       ).build();
     }
 
