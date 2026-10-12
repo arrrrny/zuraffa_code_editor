@@ -4,6 +4,21 @@
 
 ### Added
 
+- **Current-line highlight**: `CodeController.currentLineColor`, a nullable
+  `Color?`, tints the whole row of the line the caret is on — VSCode's
+  `editor.renderLineHighlight: all`
+  ([issue #113](https://github.com/arrrrny/zuraffa_code_editor/issues/113),
+  upstream `akvelon/flutter-code-editor#194`). The tint follows the caret
+  through typing, tapping, arrow keys and a programmatic selection change, and
+  the caret's character offset is converted to a line index by the editor, not
+  by the host. It composes with `lineBackgroundBuilder`, which wins on the
+  lines it colours while `currentLineColor` fills in the rest, and left null —
+  with `lineBackgroundBuilder` also null — the field renders exactly as
+  before: the layer is not in the tree at all.
+  The doc example on `lineBackgroundBuilder` also compared a line index
+  against a character offset, which misattributed the tint to whichever line
+  happened to contain that offset; it now points here.
+
 - **Customizable suggestion rows**: `CodeField.suggestionItemBuilder`, a
   nullable `Widget Function(BuildContext, String suggestion, bool isSelected,
   VoidCallback onSelect)?`, builds one row of the autocomplete popup, so a host

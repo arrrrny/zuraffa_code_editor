@@ -677,8 +677,11 @@ class _CodeFieldState extends State<CodeField> {
         context,
       ).copyWith(textSelectionTheme: widget.textSelectionTheme),
       // The tint layer is only in the tree when a host asked for one, so a
-      // field with no lineBackgroundBuilder keeps its exact widget tree.
-      child: widget.controller.lineBackgroundBuilder == null
+      // field with neither lineBackgroundBuilder nor currentLineColor keeps its
+      // exact widget tree.
+      child:
+          widget.controller.lineBackgroundBuilder == null &&
+              widget.controller.currentLineColor == null
           ? editingText
           : Stack(
               children: [

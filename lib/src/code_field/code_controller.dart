@@ -185,14 +185,47 @@ class CodeController extends TextEditingController {
   ///
   /// Left null, the editor renders exactly as it does without this field: the
   /// background layer is not built at all. Reassign it and notify listeners to
-  /// re-render — for example to follow the cursor:
+  /// re-render.
+  ///
+  /// A line index is not a character offset, so following the cursor means
+  /// converting the caret's offset first. [currentLineColor] does that
+  /// conversion and is the easier way to write this:
   ///
   /// ```dart
-  /// controller.lineBackgroundBuilder = (line) =>
-  ///     line == controller.selection.base.offset ? Colors.yellow : null;
-  /// controller.notifyListeners();
+  /// controller.currentLineColor = Colors.yellow.withValues(alpha: 0.1);
   /// ```
   Color? Function(int lineIndex)? lineBackgroundBuilder;
+
+  /// Tints the background of the line the caret is on, across the full width of
+  /// that line's row — VSCode's `editor.renderLineHighlight: all`.
+  ///
+  /// The tint follows the caret as it moves, by whatever moves it: typing,
+  /// tapping, arrow keys, or assigning a new selection to this controller.
+  /// "The line the caret is on" is the line of [TextSelection.extentOffset] —
+  /// the end that moves, so a shift-arrow from line 2 down to line 10
+  /// highlights line 10, the caret, and not line 2, the anchor. With a
+  /// collapsed caret — the common case — the two are the same line. A selection
+  /// spanning several lines is tinted on the caret's line only, never across
+  /// the whole selection.
+  ///
+  /// The offset-to-line conversion is the editor's job, not a host's: it uses
+  /// `Code.lines.characterIndexToLineIndex`, which maps a character offset onto
+  /// the line's index in the full, unfolded buffer. A caret at the very end of
+  /// the text counts as being on the last line. A caret with no selection at
+  /// all — the `-1` offset an untouched [TextEditingValue] carries — and a
+  /// caret whose offset is past the text while the code catches up with an
+  /// edit both tint nothing.
+  ///
+  /// Composes with [lineBackgroundBuilder], and the builder wins: for each line
+  /// the builder's answer is used when it returns one, and this colour fills in
+  /// only the lines the builder leaves null. A host that already tints specific
+  /// lines therefore keeps that behaviour and gains a cursor follower underneath
+  /// it.
+  ///
+  /// Left null — and with [lineBackgroundBuilder] also null — the editor
+  /// renders exactly as it does without either field: the background layer is
+  /// not built at all.
+  Color? currentLineColor;
 
   bool _disposed = false;
 
