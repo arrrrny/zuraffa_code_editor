@@ -84,8 +84,10 @@ character, is what handles a value ending in more than one `'\n'`.
   (`span_builder.dart:30`), the style Flutter hands `buildTextSpan`, falling back
   to the terminating node's own resolved style when the root style is null
   (`span_builder.dart:176`). It never inherits the style of the token it
-  follows, so an ellipsis after a string literal is not string-coloured, and one
-  after a `//` comment is not comment-coloured.
+  follows, so an ellipsis after a string literal is not string-coloured, one
+  after a `//` comment is not comment-coloured, and one on a read-only line —
+  where `_paleIfRequired` palls the text around it — is not palled either: the
+  marker is decoration, not content.
 - **The marker is not selectable as an extra character.** Caret and selection
   offsets are derived from `value.text`, which does not contain it.
 - **The marker is absent when the marker cannot be built.** No language set

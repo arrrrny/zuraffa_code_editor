@@ -18,7 +18,8 @@
   and paints at the line's own baseline through the same `TextPainter`, at any
   wrapping. It carries the field's base style rather than the style of the
   token it follows, so an ellipsis after a string literal is not
-  string-coloured. One marker per kept line: a block swallowed by an outer fold
+  string-coloured, and one on a read-only line is not palled with the text
+  around it. One marker per kept line: a block swallowed by an outer fold
   contributes none, because its kept line is hidden. Nothing is configurable —
   no glyph, colour or position — and no public API was added.
   The marker is suppressed while the search panel is slicing matches out of the
