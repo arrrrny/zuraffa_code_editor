@@ -44,44 +44,60 @@ TODO — paste the GREEN line, e.g. `00:08 +N: All tests passed!`
 
 ## Test inventory
 
-TODO — fill the counts once both files are final.
+TODO — fill the counts once the gate has run.
 
-`test/src/code_field/fold_ellipsis_test.dart`, `TODO` tests:
+`test/src/code_field/fold_ellipsis_test.dart`, 16 tests:
 
 | Test | Acceptance criterion |
 |---|---|
-| shows an ellipsis at the end of the kept line of a folded block | FR-001 |
-| shows no ellipsis when nothing is folded | FR-002 |
-| puts the ellipsis after the closer when the closer shares the kept row | FR-006 |
-| puts no ellipsis on the closer's own row when the closer gets a row of its own | FR-007 |
-| shows the ellipsis on a kept line that is the last line with no trailing newline | FR-008 |
-| leaves controller.text byte-for-byte unchanged by folding and unfolding | FR-003 |
-| drops the ellipsis when the block is unfolded | FR-004 |
-| keeps the ellipsis across a re-parse | FR-005 |
-| shows one marker per kept line when a nested fold is swallowed | FR-009 |
-| shows a marker on each of two nested folds | FR-010 |
-| shows a marker on each of two adjacent folds | FR-010 |
-| styles the ellipsis with the base style, not the token style | FR-011 |
-| falls back to the node style when the base style is null | RB-004 |
-| carries the ellipsis through the search-match build path | FR-012 |
-| shows no ellipsis when no language is set | RB-005 |
-| drops the ellipsis while an IME composition is active | RB-005 |
+| The kept line carries a trailing marker | FR-001 |
+| An unfolded document carries no marker | FR-002 |
+| Unfolding removes the marker and nothing else | FR-004 |
+| Folding does not touch the editing buffer | FR-003 |
+| A keystroke after a fold keeps the marker on the kept line | FR-005 |
+| The marker rides after a closer that shares the kept row | FR-006 |
+| A closer on its own row gets no marker of its own | FR-007 |
+| The last visible line gets a marker with no newline to splice before | FR-008 |
+| Two open folds each carry a marker | FR-010 |
+| A fold swallowed by another fold carries no marker | FR-009 |
+| The marker carries the base style, not the token style | FR-011 |
+| With no base style the marker falls back to the line style | RB-004 |
+| The painted tree of a folded field carries the marker | FR-001 |
+| A match after a folded line still lands on its own text | FR-012 |
+| no ellipsis while an IME composition is active | RB-005 |
+| no ellipsis when no language is set | RB-005 |
 
-`test/src/code_field/span_builder_test.dart`, `TODO` added examples — one per
-folded shape, whole tree asserted in the file's existing style:
-
-| Example | Acceptance criterion |
-|---|---|
-| the shared-row fold (`parsers: [` → `parsers: [  ], …`) | FR-001, FR-006 |
-| the own-row closer (`}void main(){`, marker on the opener's row only) | FR-007 |
-| the swallowed nested fold (one marker) | FR-009 |
-| the last line with no trailing newline (marker on the final span) | FR-008 |
+`test/src/code_field/span_builder_test.dart`: **no examples added.** That file
+asserts whole trees and every one of its examples is a document with nothing
+folded, so the marker cannot appear in any of them and each expected tree is
+unchanged. Adding an example there would mean writing a whole expected tree out
+for a behaviour the new file already pins leaf by leaf; the decision is recorded
+here rather than left as a gap. The three regression files from T002 carry that
+net instead.
 
 TODO — record any test that started out wrong and was corrected rather than the
 implementation bent to fit it, and what the correction taught about the contract.
-The three #113 discoveries worth the same treatment here, if they occur: the
-exact visible text a fold produces, which node terminates a line, and whether
-`controller.lastTextSpan` is the same object `EditableText` receives.
+Two occurred here and are worth the treatment #113 gave its three:
+
+1. **The expected visible text of `foldAt(0)` on the shared-closing-line
+   fixture.** The first draft of that test's fixture had `}` alone on the last
+   line, which reads as "the closer gets a row of its own". It does not: the
+   `_isClosingLine` branch glues it to the opener, so the rendered line is
+   `int factorial(int n){}` and the marker follows the glued closer. The
+   closer only takes a row of its own when the closing line also opens the next
+   foldable block — hence the `}void main(){` fixture, which is the shape the
+   repo already pins in `folded_block_keeps_next_block_start_test.dart`. The
+   correction taught that "closer on its own row" is a property of what follows
+   the closer, not of the fold itself.
+2. **The line index a terminating node reports.** The first draft assumed
+   `_visibleLineIndex` after `_updateLineIndex` is the line the node ends. It is
+   the line the node *starts on* plus its own newline count, so a node ending
+   with `'\n'` terminates the line *before* the counter's current value. The
+   splice accordingly targets `_visibleLineIndex - 1`, and the final visible
+   line — which has no terminating newline at all — is the one case where the
+   counter itself is the line. This is also why `_paleIfRequired` reads
+   correctly with the pre-increment counter and the splice reads correctly with
+   the post-increment one.
 
 ## Regression net
 

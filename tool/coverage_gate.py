@@ -105,7 +105,7 @@ EXEMPT_LINES: Dict[str, Dict[int, str]] = {
     # than the full text `code.lines` was split from, so the index tops out at
     # `lines.length - 1` and the clamp never engages.
     "lib/src/code_field/span_builder.dart": {
-        75: "_visibleLineIndex cannot reach code.lines.length",
+        143: "the _visibleLineIndex clamp never engages",
     },
     # The fold toggle of a block that is already folded is always overwritten by
     # the second loop below, which adds a toggle for every folded block — so the
