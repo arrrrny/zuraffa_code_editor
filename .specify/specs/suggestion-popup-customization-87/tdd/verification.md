@@ -22,6 +22,17 @@ written before the field existed.
 Tests 1–8 were written before `CodeField.suggestionItemBuilder` and
 `Popup.suggestionItemBuilder` existed and run RED.
 
+`test/src/code_field/suggestion_item_builder_test.dart` — 2 more, added after,
+for the half the direct-pump tests cannot reach: that `CodeField` actually
+hands the builder to the popup it builds for its overlay. The shape follows
+`autocomplete_popup_background_test.dart`, which pins the sibling parameter the
+same way.
+
+| # | Test | Guards |
+| - | ---- | ---- |
+| 9 | a builder set on the field reaches the popup rows | the wiring |
+| 10 | no builder renders the built-in row through the field | the default path, end to end |
+
 ## RED evidence
 
 First RED run (`flutter test --concurrency=2
