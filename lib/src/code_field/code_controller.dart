@@ -148,6 +148,30 @@ class CodeController extends TextEditingController {
   @visibleForTesting
   TextSpan? lastTextSpan;
 
+  /// Tints the background of individual lines.
+  ///
+  /// Called once per rendered line with the line's index in the full, unfolded
+  /// buffer — 0-based, the same coordinate space as [Issue.line] and
+  /// [FoldableBlock.firstLine]. Return the colour to tint that line's row with,
+  /// or null to leave it untinted.
+  ///
+  /// The tint covers the full width of the line's row, including the stretch
+  /// past the last character, and it sits behind the editor's search-match
+  /// highlighting, which still wins on a matched run. Lines inside a folded
+  /// block or a hidden section are not rendered, so the builder is not called
+  /// for them.
+  ///
+  /// Left null, the editor renders exactly as it does without this field: the
+  /// background layer is not built at all. Reassign it and notify listeners to
+  /// re-render — for example to follow the cursor:
+  ///
+  /// ```dart
+  /// controller.lineBackgroundBuilder = (line) =>
+  ///     line == controller.selection.base.offset ? Colors.yellow : null;
+  /// controller.notifyListeners();
+  /// ```
+  Color? Function(int lineIndex)? lineBackgroundBuilder;
+
   bool _disposed = false;
 
   /// Whether typing replaces the character after the caret (overtype) instead

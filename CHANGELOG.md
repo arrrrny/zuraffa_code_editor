@@ -4,6 +4,22 @@
 
 ### Added
 
+- **Per-line background colour**: `CodeController.lineBackgroundBuilder`, a
+  nullable `Color? Function(int lineIndex)?`, tints the background of
+  individual lines — the mechanism behind a current-line highlight, search-hit
+  tints and error-line tints
+  ([issue #86](https://github.com/arrrrny/zuraffa_code_editor/issues/86),
+  upstream `akvelon/flutter-code-editor#239`). The builder is called once per
+  rendered line with the line's 0-based index in the full, unfolded buffer —
+  the same coordinate space as `Issue.line` and `FoldableBlock.firstLine` — and
+  returning `null` leaves that line untinted. The tint covers the whole width of
+  the line's row, including the stretch past its last character, and sits behind
+  the editor's search-match highlighting, which still wins on a matched run.
+  Lines inside a folded block or a hidden section are not rendered, so the
+  builder is not asked about them, and the tint tracks the same per-row heights
+  the gutter uses, so it lands on the right row through wraps and folds. Left
+  null the field renders exactly as before: the layer is not in the tree at all.
+
 - **A multi-line Scala selective import folds as one imports block**
   ([issue #117](https://github.com/arrrrny/zuraffa_code_editor/issues/117),
   upstream `akvelon/flutter-code-editor#78`). `import users.{ User,
