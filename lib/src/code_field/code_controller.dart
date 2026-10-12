@@ -20,7 +20,6 @@ import '../history/code_history_record.dart';
 import '../search/controller.dart';
 import '../search/result.dart';
 import '../search/search_navigation_controller.dart';
-import '../search/search_navigation_state.dart';
 import '../search/settings_controller.dart';
 import '../single_line_comments/parser/single_line_comments.dart';
 import '../util/string_util.dart';
@@ -43,14 +42,14 @@ import 'span_builder.dart';
 ///
 /// A record rather than a class so the comparison is the language's own
 /// structural `==`, which is exactly the semantics this key needs:
-/// [TextStyle] and [SearchResult] implement value equality, and the four
-/// components that do not — [Code], [CodeThemeData], [Mode] and
-/// [SearchNavigationState] — compare by identity. Picking that per component by
-/// hand is how a cache key gets one of them wrong, and a key that is wrong is
-/// not a slower version of this feature: `RenderParagraph` trusts an identical
-/// span unconditionally
-/// (`rendering/paragraph.dart`, `case RenderComparison.identical: return;`),
-/// so a hit on an unchanged key paints a stale tree.
+/// [TextStyle], [SearchResult] and the navigation index implement value
+/// equality, and the three components that do not — [Code], [CodeThemeData]
+/// and [Mode] — compare by identity. Picking that per component by hand is how
+/// a cache key gets one of them wrong, and a key that is wrong is not a slower
+/// version of this feature: `RenderParagraph` trusts an identical span
+/// unconditionally (`rendering/paragraph.dart`,
+/// `case RenderComparison.identical: return;`), so a hit on an unchanged key
+/// paints a stale tree.
 ///
 /// A component missing from here is a stale render; a component here that never
 /// changes is only a missed cache hit. So the list is every input the build
@@ -61,7 +60,7 @@ typedef _SpanCacheKey = ({
   CodeThemeData? theme,
   Mode? language,
   SearchResult searchResult,
-  SearchNavigationState searchNavigationState,
+  int? currentMatchIndex,
 });
 
 class CodeController extends TextEditingController {
@@ -1392,13 +1391,20 @@ class CodeController extends TextEditingController {
     // scope, and that class implements no `==`, so keying on the fabricated
     // object would make every such call a miss — and a cache that never hits is
     // indistinguishable from no cache by anything observable.
+    //
+    // Navigation is keyed by `currentMatchIndex` rather than by the
+    // `SearchNavigationState` object: the state implements no `==`, while the
+    // controller hands out a new instance on every search-result change and on
+    // every move, so identity would invalidate on things the tree never shows —
+    // the total match count, the index of a match that is not current — and the
+    // highlight builder reads nothing but the current index.
     final spanCacheKey = (
       code: _code,
       style: style,
       theme: CodeTheme.of(context),
       language: _language,
       searchResult: visibleSearchResult,
-      searchNavigationState: _searchNavigationController.value,
+      currentMatchIndex: _searchNavigationController.value.currentMatchIndex,
     );
 
     if (spanCacheKey == _spanCacheKey) {

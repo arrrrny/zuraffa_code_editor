@@ -13,8 +13,12 @@
   rebuild — and each call re-ran `SpanBuilder` over the parsed tree and then
   flattened it again through `SearchResultHighlightedBuilder`. The cache is
   keyed on everything the build reads: the `Code`, the style, the theme in scope,
-  the language, the search result and the search navigation state, compared by
-  the language's own structural equality. It holds one entry, it is replaced
+  the language, the search result and the current search match, compared by
+  the language's own structural equality. The navigation state itself is
+  deliberately not keyed as an object: the search controller hands out a fresh
+  instance on every change of the search result, and the rendered tree depends
+  only on which match is current, so keying the object would invalidate on
+  notifications that change nothing the tree shows. It holds one entry, it is replaced
   rather than grown, and it is invisible: no new field, no new public API, no way
   to turn it off or observe it. A hit returns the same *object* rather than a
   copy because `RenderParagraph` only takes its `identical` fast path for the

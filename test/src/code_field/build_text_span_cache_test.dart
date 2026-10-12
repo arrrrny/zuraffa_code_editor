@@ -86,11 +86,32 @@ String _currentMatchTextOf(InlineSpan span) => _leavesOf(span)
     .map((leaf) => leaf.text)
     .join();
 
+/// Text of every match-painted leaf, current or not. Which matches are painted
+/// is part of the tree, so this is what separates two patterns that leave the
+/// current match in the same place.
+String _matchTextsOf(InlineSpan span) => _leavesOf(span)
+    .where(
+      (leaf) =>
+          leaf.style?.backgroundColor == matchBackgroundColor ||
+          leaf.style?.backgroundColor == currentMatchBackgroundColor,
+    )
+    .map((leaf) => leaf.text)
+    .join();
+
 CodeThemeData get _theme =>
     CodeThemeData(keywordStyle: const TextStyle(color: Color(0xFFE040FB)));
 
 SearchSettings get _patternA =>
     const SearchSettings(isCaseSensitive: false, isRegExp: false, pattern: 'a');
+
+/// Over `'int Aa = 1;\nint ab = 2;\n'` this matches the one word `Aa` where
+/// `_patternA` matches three single characters, and both leave the current
+/// match at index 0.
+SearchSettings get _patternB => const SearchSettings(
+  isCaseSensitive: false,
+  isRegExp: false,
+  pattern: 'Aa',
+);
 
 void main() {
   group('CodeController.buildTextSpan caching', () {
@@ -294,6 +315,27 @@ void main() {
       await _settle(wt, controller);
     });
 
+    testWidgets('dropping the language invalidates', (wt) async {
+      final (controller, context) = await _pump(wt);
+
+      final parsed = _span(controller, context);
+      expect(identical(parsed, _span(controller, context)), isTrue);
+
+      controller.language = null;
+
+      final flat = _span(controller, context);
+      expect(identical(parsed, flat), isFalse);
+      expect(
+        flat.children,
+        isNull,
+        reason:
+            'A parsed tree must not outlive the language it was parsed with',
+      );
+      expect(flat.toPlainText(), parsed.toPlainText());
+
+      await _settle(wt, controller);
+    });
+
     testWidgets('an active search invalidates and follows navigation', (
       wt,
     ) async {
@@ -352,6 +394,40 @@ void main() {
           closed,
         ).any((leaf) => leaf.style?.backgroundColor == matchBackgroundColor),
         isFalse,
+      );
+
+      await _settle(wt, controller);
+    });
+
+    testWidgets('a second pattern with the same current match invalidates', (
+      wt,
+    ) async {
+      // The shape that separates the search half of the key from the navigation
+      // half. `_patternA` and `_patternB` both leave the current match at index
+      // 0, so `currentMatchIndex` is equal across the two calls and the match
+      // set is the only component that can tell them apart. A pattern change
+      // that moved the current match would invalidate through the navigation
+      // half and hide the result half completely.
+      final (controller, context) = await _pump(
+        wt,
+        text: 'int Aa = 1;\nint ab = 2;\n',
+      );
+
+      controller.showSearch();
+      controller.searchController.settingsController.value = _patternA;
+
+      final broad = _span(controller, context);
+      expect(identical(broad, _span(controller, context)), isTrue);
+      expect(_matchTextsOf(broad), 'Aaa');
+
+      controller.searchController.settingsController.value = _patternB;
+
+      final narrow = _span(controller, context);
+      expect(identical(broad, narrow), isFalse);
+      expect(
+        _matchTextsOf(narrow),
+        'Aa',
+        reason: 'The cached tree must not outlive the pattern it was built for',
       );
 
       await _settle(wt, controller);

@@ -2,6 +2,36 @@ import hashlib
 import os
 import subprocess
 
+"""Mutation audit for the span cache.
+
+One mutant at a time is applied to lib/src/code_field/code_controller.dart,
+the cache test file is run, and the mutant is killed iff some test fails.
+A mutant that does not compile is not a kill: the run is reported UNRESOLVED
+and must be fixed, not counted.
+
+Dropped on purpose, with reasons, rather than bent into existence:
+
+- M-noLastTextSpan (return the cached span without assigning `lastTextSpan`).
+  A no-op. The miss path writes `_cachedTextSpan` and `lastTextSpan` together,
+  so the object a hit returns is always the object `lastTextSpan` already holds.
+  No test of `lastTextSpan` can see the difference.
+- M-buildBeforeCheck (build the tree before comparing the key). Not a mutant of
+  this implementation: the committed code already compares first, so the `old`
+  pattern does not exist. It is also unobservable — a discarded extra build
+  produces the same trees and the same objects.
+
+Two mutants survive only under masking, and the tests are shaped around it:
+
+- The navigation half of the key is `currentMatchIndex`, not the
+  `SearchNavigationState` object. The state implements no `==`, and the
+  controller hands out a new instance on every pattern change and every move,
+  so keying on the object would invalidate on things the tree never shows.
+- `setLanguage` rebuilds `_code`, so no test can change the language without
+  also changing the code, so M-noLanguageKey cannot be isolated by a language
+  change. `Mode()` as its replacement is also a fresh instance per key build,
+  so that mutant is killed by the plain repeated-call hit instead.
+"""
+
 WT = os.path.abspath(
     os.path.join(
         os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', '..'
@@ -41,47 +71,46 @@ MUTANTS = {
         "      theme: _getTheme(context),",
     ),
     # M-noStyleKey: the style is not part of the key. A stale tree is painted at
-    # the old font size.
+    # the old font size. The `code` line above is part of the pattern because a
+    # bare `      style: style,` also matches the 8-space composing branch and
+    # the SpanBuilder call -- an audit that replaces the first of those mutates
+    # the wrong line and reports a phantom survivor.
     'M-noStyleKey': (
         CC,
-        "      style: style,",
-        "      style: const TextStyle(),",
+        "      code: _code,\n      style: style,",
+        "      code: _code,\n      style: const TextStyle(),",
     ),
     # M-noCodeKey: `_code` is not part of the key. A stale tree survives a
     # keystroke, a fold and an unfold.
     'M-noCodeKey': (
         CC,
-        "      code: _code,",
-        "      code: Code.empty,",
+        "    final spanCacheKey = (\n      code: _code,",
+        "    final spanCacheKey = (\n      code: Code.empty,",
     ),
-    # M-noSearchKey: the search result is not part of the key, so the highlight
-    # never appears and never disappears.
+    # M-noSearchKey: the search result is not part of the key. Killed by the
+    # test that swaps one pattern for another with the current match in the
+    # same place, so the navigation half cannot answer for it.
     'M-noSearchKey': (
         CC,
-        "      searchResult: visibleSearchResult,",
-        "      searchResult: SearchResult.empty,",
+        "      language: _language,\n      searchResult: visibleSearchResult,",
+        "      language: _language,\n      searchResult: SearchResult.empty,",
     ),
-    # M-noNavKey: only the *current* match is missing from the key, which is the
-    # half of the search state that a "result has not changed" check misses.
+    # M-noNavKey: the current match is not part of the key, which is the half
+    # of the navigation state the rendered tree depends on: the highlight
+    # builder reads `currentMatchIndex` and nothing else from it.
     'M-noNavKey': (
         CC,
-        "      searchNavigationState: _searchNavigationController.value,",
-        "      searchNavigationState: const SearchNavigationState.noMatches,",
+        "      currentMatchIndex: _searchNavigationController.value.currentMatchIndex,",
+        "      currentMatchIndex: null,",
     ),
     # M-noLanguageKey: the language is not part of the key. Every key component
     # after it is one the tests assert; this one guards the branch that chooses
-    # the builder at all.
+    # the builder at all. `Mode()` is a fresh instance on every key build, so
+    # the key never compares equal and the cache never hits at all.
     'M-noLanguageKey': (
         CC,
         "      language: _language,",
         "      language: Mode(),",
-    ),
-    # M-noLastTextSpan: a hit returns the cached span without recording it, so
-    # `lastTextSpan` drifts from what was served.
-    'M-noLastTextSpan': (
-        CC,
-        "      return lastTextSpan = _cachedTextSpan!;",
-        "      return _cachedTextSpan!;",
     ),
     # M-cacheAboveComposing: the composing guard is moved below the lookup, so
     # a composing range is served a cached, non-composing span. `hasActiveComposition`
@@ -107,44 +136,16 @@ MUTANTS = {
         "    _spanCacheKey = spanCacheKey;",
         "",
     ),
-    # M-buildBeforeCheck: the tree is built before the key is compared, so a hit
-    # pays for the whole walk it exists to skip.
-    'M-buildBeforeCheck': (
-        CC,
-        """    if (spanCacheKey == _spanCacheKey) {
-      return lastTextSpan = _cachedTextSpan!;
-    }
-
-    final span = SearchResultHighlightedBuilder(
-      searchResult: visibleSearchResult,
-      rootStyle: style,
-      textSpan: _createTextSpan(
-        context: context,
-        style: style,
-        withFoldEllipsis: visibleSearchResult.matches.isEmpty,
-      ),
-      searchNavigationState: _searchNavigationController.value,
-    ).build();""",
-        """    final span = SearchResultHighlightedBuilder(
-      searchResult: visibleSearchResult,
-      rootStyle: style,
-      textSpan: _createTextSpan(
-        context: context,
-        style: style,
-        withFoldEllipsis: visibleSearchResult.matches.isEmpty,
-      ),
-      searchNavigationState: _searchNavigationController.value,
-    ).build();
-
-    if (spanCacheKey == _spanCacheKey) {
-      return lastTextSpan = _cachedTextSpan!;
-    }""",
-    ),
 }
 
 results = {}
 for name, (path, old, new) in MUTANTS.items():
     assert old in ORIG[path], name + ': pattern not found in ' + path
+    # An ambiguous pattern silently mutates the wrong line: the audit then
+    # reports a survivor that says nothing about the key.
+    assert (
+        ORIG[path].count(old) == 1
+    ), name + ': pattern is not unique in ' + path
     assert old != new, name + ': pattern is a no-op'
     open(path, 'w').write(ORIG[path].replace(old, new, 1))
 
