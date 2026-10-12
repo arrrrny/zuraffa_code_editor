@@ -51,7 +51,7 @@ abstract class TextFoldableBlockParser extends AbstractFoldableBlockParser {
   @protected
   void setFoundMultilineComment() => _foundMultilineComment = true;
 
-  /// If in the current line we found a non-whitespace character that is
+  /// If in the current we found a non-whitespace character that is
   /// not a comment.
   bool _foundNonWhitespace = false;
 
@@ -59,6 +59,25 @@ abstract class TextFoldableBlockParser extends AbstractFoldableBlockParser {
 
   @protected
   void setFoundNonWhitespace() => _foundNonWhitespace = true;
+
+  /// > 0 while inside a pair-character block that opened on a line with
+  /// import semantics.
+  ///
+  /// Such a block belongs to the import statement, not to the code, so its
+  /// lines continue the import sequence instead of terminating it. This is
+  /// parser state rather than a per-line flag: it is not touched by
+  /// [clearLineFlags] because it must outlive the lines it spans.
+  int _importPairBlockDepth = 0;
+
+  @protected
+  void enterImportPairBlock() => _importPairBlockDepth++;
+
+  @protected
+  void exitImportPairBlock() => _importPairBlockDepth--;
+
+  /// Whether the parser is inside a pair-character block absorbed by a
+  /// multi-line import statement.
+  bool get inImportPairBlock => _importPairBlockDepth > 0;
 
   @protected
   void submitCurrentLine() {
@@ -72,6 +91,12 @@ abstract class TextFoldableBlockParser extends AbstractFoldableBlockParser {
       _endCommentSequence();
       endImportSequenceIfAny(_lineIndex);
       _submitLineSemantics(LineSemantics.singleLineCommentAndImportTerminator);
+      return;
+    }
+
+    if (_importPairBlockDepth > 0) {
+      _endCommentSequence();
+      _submitLineSemantics(LineSemantics.possibleImport);
       return;
     }
 

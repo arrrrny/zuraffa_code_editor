@@ -4,7 +4,7 @@
 
 ## Phase 1 — the tests (red)
 
-- [ ] T1 `test/src/folding/parsers/highlight_parser_scala_test.dart`: replace
+- [x] T1 `test/src/folding/parsers/highlight_parser_scala_test.dart`: replace
       the TODO-pinned "Multiline imports form braces foldable block" with
       "Multiline imports form one imports foldable block" expecting
       `FB(firstLine: 0, lastLine: 3, type: FBT.imports)` only, and add the
@@ -14,15 +14,15 @@
 
 ## Phase 2 — the semantics arm (behaviour)
 
-- [ ] T2 `lib/src/folding/parsers/text.dart`: `_importPairBlockDepth`,
+- [x] T2 `lib/src/folding/parsers/text.dart`: `_importPairBlockDepth`,
       `enterImportPairBlock`, `exitImportPairBlock` (protected, parser state —
       not cleared by `clearLineFlags`).
-- [ ] T3 `lib/src/folding/parsers/text.dart`: the `submitCurrentLine` arm
+- [x] T3 `lib/src/folding/parsers/text.dart`: the `submitCurrentLine` arm
       submitting `possibleImport` while depth > 0, after the terminator arm.
 
 ## Phase 3 — the absorption (behaviour)
 
-- [ ] T4 `lib/src/folding/parsers/highlight.dart`: absorb the open pair
+- [x] T4 `lib/src/folding/parsers/highlight.dart`: absorb the open pair
       character when `foundImport || depth > 0` (no `startBlock`), exit and
       `setFoundPossibleImport()` on the matching close when depth > 0.
 

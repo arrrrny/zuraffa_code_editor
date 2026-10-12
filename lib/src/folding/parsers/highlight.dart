@@ -145,29 +145,63 @@ class HighlightFoldableBlockParser extends TextFoldableBlockParser {
           break;
 
         case $openParenthesis: // (
-          startBlock(lineIndex, FoldableBlockType.parentheses);
+          _startPairOrBlock(lineIndex, FoldableBlockType.parentheses);
           break;
 
         case $closeParenthesis: // )
-          endBlock(lineIndex, FoldableBlockType.parentheses);
+          _endPairOrBlock(lineIndex, FoldableBlockType.parentheses);
           break;
 
         case $openBracket: // [
-          startBlock(lineIndex, FoldableBlockType.brackets);
+          _startPairOrBlock(lineIndex, FoldableBlockType.brackets);
           break;
 
         case $closeBracket: // ]
-          endBlock(lineIndex, FoldableBlockType.brackets);
+          _endPairOrBlock(lineIndex, FoldableBlockType.brackets);
           break;
 
         case $openBrace: // {
-          startBlock(lineIndex, FoldableBlockType.braces);
+          _startPairOrBlock(lineIndex, FoldableBlockType.braces);
           break;
 
         case $closeBrace: // }
-          endBlock(lineIndex, FoldableBlockType.braces);
+          _endPairOrBlock(lineIndex, FoldableBlockType.braces);
           break;
       }
     }
+  }
+
+  /// Opens [type] unless the pair character belongs to a multi-line import.
+  ///
+  /// Only a brace opened on an import line is absorbed: Scala's selective
+  /// import `import users.{ User, UserPreferences }` selects members, so the
+  /// braces are part of the statement. A parenthesized group such as Go's
+  /// `import ( ... )` is a clause users fold on its own — pinned by the Go
+  /// tests. Pair characters inside an absorbed block are absorbed too.
+  void _startPairOrBlock(int line, FoldableBlockType type) {
+    final absorb =
+        inImportPairBlock ||
+        (foundImport && type == FoldableBlockType.braces);
+
+    if (absorb) {
+      enterImportPairBlock();
+      return;
+    }
+
+    startBlock(line, type);
+  }
+
+  /// Closes [type] unless the pair character closes an absorbed import block.
+  ///
+  /// The closing line is submitted as an import line, so the imports sequence
+  /// extends through it.
+  void _endPairOrBlock(int line, FoldableBlockType type) {
+    if (inImportPairBlock) {
+      exitImportPairBlock();
+      setFoundPossibleImport();
+      return;
+    }
+
+    endBlock(line, type);
   }
 }

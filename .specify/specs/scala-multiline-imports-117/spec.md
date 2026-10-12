@@ -54,10 +54,14 @@ the import, not to the code:
   afterwards" — the braces block is never created. Merging after the fact
   would still expose a toggle on the inner lines during the transition, and
   `joinIntersecting` already declines to merge different block types.
-- **All three pair characters, not just braces.** The parser treats `(`, `[`
-  and `{` uniformly; the import rule is stated once for all of them rather
-  than special-casing the brace. In practice only Scala's selective import
-  uses it today.
+- **Braces only, not all three pair characters.** The parser treats `(`, `[`
+  and `{` uniformly for blocks, so a single rule for all of them looks tidy —
+  but Go's `import ( ... )` is a parenthesized import *group* that users fold
+  on its own, and the Go parser tests pin it as a separate block. Scala's
+  `{ ... }` is different in kind: the brace is part of the import statement
+  (a member selector), so it is absorbed. Pair characters *inside* an absorbed
+  block are absorbed regardless of type — a member list can hold its own
+  calls and maps.
 - **Nested pairs inside an absorbed block are absorbed too.** A member list
   containing its own `(`…`)` must not re-open a block; the depth counter
   keeps the pairing correct.

@@ -4,6 +4,21 @@
 
 ### Added
 
+- **A multi-line Scala selective import folds as one imports block**
+  ([issue #117](https://github.com/arrrrny/zuraffa_code_editor/issues/117),
+  upstream `akvelon/flutter-code-editor#78`). `import users.{ User,
+  UserPreferences }` spread over several lines used to produce two foldable
+  blocks — an `imports` block that stopped at the `import` line and a stray
+  `braces` block over the member list — so folding the import left the
+  members on screen. A brace opened on an import line is now part of the
+  import statement: it is absorbed instead of reported, and every line it
+  spans counts as an import line, so the whole statement folds once. Go's
+  parenthesized import group (`import ( ... )`) keeps folding as its own
+  block, and a member list holding its own pairs (`Map("k" -> "v")`)
+  produces no extra block. This also reaches `setFoundPossibleImport` and the
+  `possibleImport` branch of `submitCurrentLine`, previously dead code, so
+  four line exemptions were removed from the coverage gate rather than
+  renumbered.
 - **The gutter error popup is replaceable**
   ([issue #81](https://github.com/arrrrny/zuraffa_code_editor/issues/81),
   upstream `akvelon/flutter-code-editor#216`). The ask named both a custom

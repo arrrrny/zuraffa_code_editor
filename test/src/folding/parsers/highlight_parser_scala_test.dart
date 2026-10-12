@@ -143,17 +143,48 @@ import users.{ User, UserPreferences}  // Only imports selected members''';
       _Tester.parseAndCheck(mode: scala, code: code, expected: expected);
     });
 
-    test('Multiline imports form braces foldable block', () {
-      // TODO(Malarg): handle scala multiline blocks
-      //  https://github.com/akvelon/flutter-code-editor/issues/78
+    test('Multiline imports form one imports foldable block', () {
       const code = '''
-import users.User // Without this, it is 'braces' block.
-import users.{ 
+import users.User // Without this, the imports block would be a single line.
+import users.{
+  User
+}''';
+      const expected = [FB(firstLine: 0, lastLine: 3, type: FBT.imports)];
+      _Tester.parseAndCheck(mode: scala, code: code, expected: expected);
+    });
+
+    test('Member list with its own pair characters', () {
+      const code = '''
+import users.User
+import users.{
+  User,
+  (a, b),
+  Map("k" -> "v")
+}''';
+      const expected = [FB(firstLine: 0, lastLine: 5, type: FBT.imports)];
+      _Tester.parseAndCheck(mode: scala, code: code, expected: expected);
+    });
+
+    test('A lone multiline import still folds', () {
+      const code = '''
+import users.{
+  User
+}''';
+      const expected = [FB(firstLine: 0, lastLine: 2, type: FBT.imports)];
+      _Tester.parseAndCheck(mode: scala, code: code, expected: expected);
+    });
+
+    test('Multiline comment inside an absorbed member list', () {
+      const code = '''
+import users.User
+import users.{ /*
+  a comment
+  */
   User
 }''';
       const expected = [
-        FB(firstLine: 0, lastLine: 1, type: FBT.imports),
-        FB(firstLine: 1, lastLine: 3, type: FBT.braces),
+        FB(firstLine: 0, lastLine: 5, type: FBT.imports),
+        FB(firstLine: 1, lastLine: 3, type: FBT.multilineComment),
       ];
       _Tester.parseAndCheck(mode: scala, code: code, expected: expected);
     });
