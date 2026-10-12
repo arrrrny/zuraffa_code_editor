@@ -4,6 +4,22 @@
 
 ### Added
 
+- **The Insert key toggles insert/overtype mode**
+  ([issue #83](https://github.com/arrrrny/zuraffa_code_editor/issues/83),
+  upstream `akvelon/flutter-code-editor#200`, which points at the still-open
+  `flutter/flutter#122673`). Flutter's `DefaultTextEditingShortcuts` binds only
+  Ctrl-Insert (copy) and Shift-Insert (paste), so bare Insert falls through to
+  the editor's own bindings and is now the overtype toggle. While overtype is
+  on, a plain one-character keystroke at a collapsed caret replaces the character
+  after the caret instead of inserting in front of it; the caret at the end of
+  the text, a deletion, a paste, a multi-character selection, a keystroke a
+  modifier transforms (auto-pairing) and a read-only field all keep inserting as
+  before. The mode is a public `CodeController.isOvertypeMode`, defaults to
+  insert, and the key binding lives in `_shortcutsIgnoredWhileComposing` so a
+  keystroke mid-IME-composition still belongs to the IME.
+  `test/src/code_field/insert_overtype_test.dart` pins both halves, and Ctrl-Insert
+  keeps copying.
+
 - **The cost of an unhighlighted editor is pinned by a test**
   ([issue #111](https://github.com/arrrrny/zuraffa_code_editor/issues/111) and
   [issue #93](https://github.com/arrrrny/zuraffa_code_editor/issues/93),

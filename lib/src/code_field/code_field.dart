@@ -14,6 +14,7 @@ import 'actions/comment_uncomment.dart';
 import 'actions/enter_key.dart';
 import 'actions/indent.dart';
 import 'actions/outdent.dart';
+import 'actions/overtype.dart';
 import 'actions/page_scroll.dart';
 import 'actions/search.dart';
 import 'actions/tab.dart';
@@ -99,6 +100,15 @@ final _shortcutsIgnoredWhileComposing = <ShortcutActivator, Intent>{
 
   // TabKey
   LogicalKeySet(LogicalKeyboardKey.tab): const TabKeyIntent(),
+
+  // Overtype: bare Insert. Flutter has no overtype hook
+  // (flutter/flutter#122673) and `DefaultTextEditingShortcuts` binds only
+  // Ctrl-Insert (copy) and Shift-Insert (paste), so the bare key reaches here.
+  // A SingleActivator with no modifiers does not match a modified Insert, so
+  // the copy binding above keeps working. Ignored while composing for the same
+  // reason as Enter and Tab: the keystroke belongs to the IME.
+  const SingleActivator(LogicalKeyboardKey.insert):
+      const ToggleOvertypeIntent(),
 };
 
 /// The vertical insets both the editor's `TextField` (`contentPadding`, set

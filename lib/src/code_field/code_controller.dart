@@ -30,6 +30,7 @@ import 'actions/dismiss.dart';
 import 'actions/enter_key.dart';
 import 'actions/indent.dart';
 import 'actions/outdent.dart';
+import 'actions/overtype.dart';
 import 'actions/redo.dart';
 import 'actions/search.dart';
 import 'actions/tab.dart';
@@ -149,6 +150,24 @@ class CodeController extends TextEditingController {
 
   bool _disposed = false;
 
+  /// Whether typing replaces the character after the caret (overtype) instead
+  /// of inserting in front of it.
+  ///
+  /// Starts false: the editor inserts. The Insert key toggles it while the
+  /// field is focused, and the host can read or set it directly.
+  ///
+  /// Only a plain one-character keystroke at a collapsed caret replaces: an
+  /// edit a code modifier transforms (auto-pairing, smart indent), a deletion,
+  /// a paste, or a caret at the end of the text all behave as they do in
+  /// insert mode.
+  bool isOvertypeMode = false;
+
+  /// Flips [isOvertypeMode]. Wired to the Insert key by
+  /// `ToggleOvertypeAction`.
+  void toggleOvertypeMode() {
+    isOvertypeMode = !isOvertypeMode;
+  }
+
   late final actions = <Type, Action<Intent>>{
     CommentUncommentIntent: CommentUncommentAction(controller: this),
     CopySelectionTextIntent: CopyAction(controller: this),
@@ -160,6 +179,7 @@ class CodeController extends TextEditingController {
     DismissIntent: CustomDismissAction(controller: this),
     EnterKeyIntent: EnterKeyAction(controller: this),
     TabKeyIntent: TabKeyAction(controller: this),
+    ToggleOvertypeIntent: ToggleOvertypeAction(controller: this),
   };
 
   static const defaultCodeModifiers = [
@@ -571,6 +591,41 @@ class CodeController extends TextEditingController {
     return sel.start;
   }
 
+  /// [newValue] as the platform would deliver it, rewritten so that a plain
+  /// one-character keystroke replaces the character after the caret instead of
+  /// inserting in front of it, or null when [newValue] is not such a keystroke.
+  ///
+  /// The rewrite is scoped to a keystroke the platform applied at the caret:
+  /// [_insertedLoc] states that the text grew by exactly one at a collapsed
+  /// caret, and [newValue]'s own selection has to have landed one past that
+  /// insertion. Anything else — a deletion, a paste, a selection, a line
+  /// break, an edit a code modifier transformed, or a caret at the end of the
+  /// text — falls through to the ordinary insert.
+  TextEditingValue? _overtypedValue(TextEditingValue newValue) {
+    final loc = _insertedLoc(text, newValue.text);
+    if (loc == null || loc >= text.length || newValue.text[loc] == '\n') {
+      return null;
+    }
+
+    final newSelection = newValue.selection;
+    if (!newSelection.isCollapsed || newSelection.start != loc + 1) {
+      return null;
+    }
+
+    // A character outside the BMP spans two code units: replacing only the
+    // lead surrogate would strand the trailing half in the document, so the
+    // whole pair is consumed either way.
+    final unit = text.codeUnitAt(loc);
+    final end = unit >= 0xD800 && unit <= 0xDBFF && loc + 1 < text.length
+        ? loc + 2
+        : loc + 1;
+
+    return TextEditingValue(
+      text: text.replaceRange(loc, end, newValue.text[loc]),
+      selection: TextSelection.collapsed(offset: loc + 1),
+    );
+  }
+
   /// The offset of the character a single-character deletion removed from [a],
   /// or null when [b] was not produced by exactly that.
   ///
@@ -701,6 +756,10 @@ class CodeController extends TextEditingController {
 
       if (_isTabReplacementEnabled) {
         newValue = newValue.tabsToSpaces(params.tabSpaces);
+      }
+
+      if (isOvertypeMode && !readOnly) {
+        newValue = _overtypedValue(newValue) ?? newValue;
       }
 
       final editResult = _getEditResultNotBreakingReadOnly(newValue);
