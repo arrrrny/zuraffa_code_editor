@@ -4,21 +4,21 @@
 
 ## Phase 1 — the test file (red)
 
-- [ ] T1 `test/src/line_numbers/gutter_error_widget_builder_test.dart`: the
+- [x] T1 `test/src/line_numbers/gutter_error_widget_builder_test.dart`: the
       tests below. Red on the old base because `GutterStyle` has no
       `errorPopupBuilder` and the file does not compile.
 
 ## Phase 2 — the field (behaviour)
 
-- [ ] T2 `lib/src/line_numbers/gutter_style.dart`: `errorPopupBuilder` field —
+- [x] T2 `lib/src/line_numbers/gutter_style.dart`: `errorPopupBuilder` field —
       `Widget Function(Issue, TextStyle, BoxDecoration?)?` — plus the
       `../analyzer/models/issue.dart` import and its doc comment.
-- [ ] T3 `lib/src/line_numbers/gutter_style.dart`: `copyWith` parameter and
+- [x] T3 `lib/src/line_numbers/gutter_style.dart`: `copyWith` parameter and
       relay, matching the sibling fields.
 
 ## Phase 3 — the call site (behaviour)
 
-- [ ] T4 `lib/src/gutter/gutter.dart` `_fillIssues`: resolve the popup text
+- [x] T4 `lib/src/gutter/gutter.dart` `_fillIssues`: resolve the popup text
       style once, call the builder when set, otherwise construct
       `GutterErrorWidget` as today.
 

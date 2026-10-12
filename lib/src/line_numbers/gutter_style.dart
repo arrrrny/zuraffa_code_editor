@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../analyzer/models/issue.dart';
 import '../analyzer/models/issue_type.dart';
 
 /// The glyph the gutter shows for an issue when the style overrides nothing.
@@ -55,6 +56,25 @@ class GutterStyle {
   /// `color`, which is what the popup has always done.
   final BoxDecoration? errorPopupDecoration;
 
+  /// Builds the widget the gutter shows for an issue, replacing
+  /// [GutterErrorWidget] outright.
+  ///
+  /// Null keeps [GutterErrorWidget] with the icon the style resolves and the
+  /// [errorPopupDecoration] applied, which is what the gutter has always
+  /// rendered. The builder receives the issue, the already-resolved
+  /// [errorPopupTextStyle] and the already-resolved [errorPopupDecoration],
+  /// so a host that only wants to re-skin the built-in popup can forward them
+  /// to a `GutterErrorWidget` it constructs itself.
+  ///
+  /// The returned widget is placed in the fixed-width issue column, sized by
+  /// the column geometry like every other child of that column.
+  final Widget Function(
+    Issue issue,
+    TextStyle popupTextStyle,
+    BoxDecoration? popupDecoration,
+  )?
+  errorPopupBuilder;
+
   /// Background of the line number column.
   final Color? background;
 
@@ -104,6 +124,7 @@ class GutterStyle {
     this.warningIcon,
     this.infoIcon,
     this.errorPopupDecoration,
+    this.errorPopupBuilder,
     this.textStyle,
   });
 
@@ -125,6 +146,12 @@ class GutterStyle {
     IconData? warningIcon,
     IconData? infoIcon,
     BoxDecoration? errorPopupDecoration,
+    Widget Function(
+      Issue issue,
+      TextStyle popupTextStyle,
+      BoxDecoration? popupDecoration,
+    )?
+    errorPopupBuilder,
   }) => GutterStyle(
     width: width,
     textAlign: textAlign,
@@ -134,6 +161,7 @@ class GutterStyle {
     warningIcon: warningIcon ?? this.warningIcon,
     infoIcon: infoIcon ?? this.infoIcon,
     errorPopupDecoration: errorPopupDecoration ?? this.errorPopupDecoration,
+    errorPopupBuilder: errorPopupBuilder ?? this.errorPopupBuilder,
     background: background,
     margin: margin,
     padding: padding ?? this.padding,

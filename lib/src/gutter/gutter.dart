@@ -223,21 +223,28 @@ class GutterWidget extends StatelessWidget {
       if (lineIndex == null || lineIndex >= tableRows.length) {
         continue;
       }
-      tableRows[lineIndex].children[_issueColumn] = _sized(
-        GutterErrorWidget(
-          issue,
+      final popupTextStyle =
           style.errorPopupTextStyle ??
-              (throw Exception('Error popup style should never be null')),
-          // Resolved per issue from the style, not once for the gutter: two
-          // issues of different types on different lines can carry different
-          // glyphs.
-          icon: Icon(
-            style.issueIcon(issue.type),
-            color: Colors.red,
-            size: iconSize,
-          ),
-          popupDecoration: style.errorPopupDecoration,
-        ),
+          (throw Exception('Error popup style should never be null'));
+      tableRows[lineIndex].children[_issueColumn] = _sized(
+        style.errorPopupBuilder?.call(
+              issue,
+              popupTextStyle,
+              style.errorPopupDecoration,
+            ) ??
+            GutterErrorWidget(
+              issue,
+              popupTextStyle,
+              // Resolved per issue from the style, not once for the gutter: two
+              // issues of different types on different lines can carry different
+              // glyphs.
+              icon: Icon(
+                style.issueIcon(issue.type),
+                color: Colors.red,
+                size: iconSize,
+              ),
+              popupDecoration: style.errorPopupDecoration,
+            ),
         lineIndex,
       );
     }
