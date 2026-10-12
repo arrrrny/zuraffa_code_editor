@@ -57,7 +57,7 @@ class GutterStyle {
   final BoxDecoration? errorPopupDecoration;
 
   /// Builds the widget the gutter shows for an issue, replacing
-  /// [GutterErrorWidget] outright.
+  /// [GutterErrorWidget] outright when the returned widget is non-null.
   ///
   /// Null keeps [GutterErrorWidget] with the icon the style resolves and the
   /// [errorPopupDecoration] applied, which is what the gutter has always
@@ -65,6 +65,10 @@ class GutterStyle {
   /// [errorPopupTextStyle] and the already-resolved [errorPopupDecoration],
   /// so a host that only wants to re-skin the built-in popup can forward them
   /// to a `GutterErrorWidget` it constructs itself.
+  ///
+  /// A builder that returns null is treated exactly as if no builder were
+  /// set: the gutter falls back to the default [GutterErrorWidget] for that
+  /// issue, which lets a host replace only some issues' widgets.
   ///
   /// The returned widget is placed in the fixed-width issue column, sized by
   /// the column geometry like every other child of that column.
