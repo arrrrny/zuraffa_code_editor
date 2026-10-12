@@ -102,6 +102,26 @@ void main() {
       expect(controller.code, codeBefore);
     });
 
+    test('A fold that cannot happen leaves the Code itself untouched', () {
+      // The no-assignment guard in foldBlocks rests on this: a block that is
+      // already folded, or that the current code does not hold, folds into
+      // the very same Code instance. Were Code.foldedBlock to hand back an
+      // equal-but-fresh Code instead, a batch of only such blocks would still
+      // replace the code, and this pin says so.
+      final controller = createController(TwoMethodsSnippet.full);
+      final other = createController(MethodSnippet.full);
+      final blocks = controller.code.foldableBlocks.toList();
+
+      final folded = controller.code.foldedBlock(blocks.first);
+      expect(folded.foldedBlocks, contains(blocks.first));
+
+      expect(identical(folded.foldedBlock(blocks.first), folded), true);
+      expect(
+        identical(folded.foldedBlock(other.code.foldableBlocks.first), folded),
+        true,
+      );
+    });
+
     test('Selection recovery through a batch matches the single-fold path', () {
       final batch = createController(TwoMethodsSnippet.full);
       final loop = createController(TwoMethodsSnippet.full);
