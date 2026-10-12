@@ -72,7 +72,7 @@ jobs:
           echo "\n"
 
       - name: Test
-        run: flutter test --coverage
+        run: flutter test --concurrency=2 --coverage
 
       # Ratchet: the number only ever rises, and only in the PR that adds the
       # tests behind it — the step below refuses a PR that lowers it.
