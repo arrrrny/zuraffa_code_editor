@@ -19,6 +19,21 @@
   `possibleImport` branch of `submitCurrentLine`, previously dead code, so
   four line exemptions were removed from the coverage gate rather than
   renumbered.
+- **Batch folding API** ([issue #116](https://github.com/arrrrny/zuraffa_code_editor/issues/116),
+  upstream `akvelon/flutter-code-editor#106`). `CodeController` folds blocks
+  one at a time, so folding many meant a loop of `foldAt` calls — each
+  rebuilding the `Code`, assigning `super.value` and notifying listeners,
+  producing N intermediate states the user never sees (a 300-import file paid
+  for 300 value assignments before settling). `CodeController.foldBlocks(
+  Iterable<FoldableBlock>)` folds the given blocks in one pass: one new
+  `Code`, one value assignment, one notification, regardless of count.
+  Blocks that are already folded, or that the current code no longer holds,
+  are skipped. `foldImports()` and `foldOutsideSections()` now delegate to it
+  and keep their exact behaviour; the upstream TODOs are removed.
+  `test/src/code_field/code_controller_fold_blocks_test.dart` pins the
+  loop-equivalent result, the single notification, the skips, and the
+  selection-recovery parity.
+
 - **The gutter error popup is replaceable**
   ([issue #81](https://github.com/arrrrny/zuraffa_code_editor/issues/81),
   upstream `akvelon/flutter-code-editor#216`). The ask named both a custom

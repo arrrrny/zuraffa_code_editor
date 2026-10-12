@@ -1142,6 +1142,27 @@ class CodeController extends TextEditingController {
     _code = newCode;
   }
 
+  /// Folds [blocks] in one pass: one new [Code], one value assignment and
+  /// one listener notification, regardless of how many blocks are folded.
+  ///
+  /// A block that is already folded, or that the current code no longer
+  /// holds, is skipped. When nothing remains to fold, no value is assigned.
+  void foldBlocks(Iterable<FoldableBlock> blocks) {
+    var newCode = _code;
+
+    for (final block in blocks) {
+      newCode = newCode.foldedBlock(block);
+    }
+
+    if (identical(newCode, _code)) {
+      return;
+    }
+
+    super.value = _getValueWithCode(newCode);
+
+    _code = newCode;
+  }
+
   Set<String> get readOnlySectionNames => _readOnlySectionNames;
 
   set readOnlySectionNames(Set<String> newValue) {
@@ -1196,12 +1217,7 @@ class CodeController extends TextEditingController {
   }
 
   void foldImports() {
-    // TODO(alexeyinkin): An optimized method to fold multiple blocks, https://github.com/akvelon/flutter-code-editor/issues/106
-    for (final block in _code.foldableBlocks) {
-      if (block.isImports) {
-        foldAt(block.firstLine);
-      }
-    }
+    foldBlocks(_code.foldableBlocks.where((block) => block.isImports));
   }
 
   /// Folds blocks that are outside all of the [names] sections.
@@ -1223,8 +1239,15 @@ class CodeController extends TextEditingController {
       }
     }
 
-    // TODO(alexeyinkin): An optimized method to fold multiple blocks, https://github.com/akvelon/flutter-code-editor/issues/106
-    foldLines.forEach(foldAt);
+    foldBlocks(
+      foldLines
+          .map(
+            (line) => _code.foldableBlocks.firstWhereOrNull(
+              (block) => block.firstLine == line,
+            ),
+          )
+          .whereType<FoldableBlock>(),
+    );
   }
 
   @override
