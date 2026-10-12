@@ -62,14 +62,16 @@ EXEMPT_LINES: Dict[str, Dict[int, str]] = {
     # enum value itself is load-bearing elsewhere (LineSemantics,
     # AbstractFoldableBlockParser.endImportSequenceIfAny) so the branch stays.
     "lib/src/folding/parsers/highlight.dart": {
-        93: "KeywordSemantics.possibleImport is never produced",
+        120: "KeywordSemantics.possibleImport is never produced",
     },
     "lib/src/folding/parsers/text.dart": {
-        27: "decorator of setFoundPossibleImport, only called from highlight.dart:93",
-        28: "setFoundPossibleImport, only called from highlight.dart:93",
+        # 27-28 (setFoundPossibleImport) and the possibleImport branch of
+        # submitCurrentLine were exempted while the only call site was the dead
+        # highlight.dart:93 case. Absorbing a pair block opened on an import
+        # line (Scala selective imports, #117) calls setFoundPossibleImport
+        # from highlight.dart's closing-arm and reaches that branch via the
+        # closing line, so all four are covered now and no longer exempt.
         49: "foundMultilineComment getter, never read from lib/",
-        79: "the possibleImport branch of submitCurrentLine, unreachable",
-        80: "the possibleImport branch of submitCurrentLine, unreachable",
     },
     # A private const constructor whose only job is to stop the class being
     # instantiated: every member is static, so there is no call site to cover.
