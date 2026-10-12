@@ -48,3 +48,11 @@ Canonical copy: `arrrrny/forklift` → `scripts/local_ci.sh` (reference:
 <!-- local-ci:end -->
 
 
+
+## Test concurrency (fleet guard)
+
+Cap test concurrency at **2** — one un-capped `flutter test` fan starved the
+shared host's services once (load 260; arrrrrny/forklift#176). This repo's
+`dart_test.yaml` carries `concurrency: 2`, so a bare `flutter test` /
+`dart test` already defaults to it; when you pass a flag, pass
+`--concurrency=2` (Flutter) or `-j 2` (Dart) and never raise it on that host.
