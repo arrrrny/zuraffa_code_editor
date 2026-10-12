@@ -180,8 +180,7 @@ class HighlightFoldableBlockParser extends TextFoldableBlockParser {
   /// tests. Pair characters inside an absorbed block are absorbed too.
   void _startPairOrBlock(int line, FoldableBlockType type) {
     final absorb =
-        inImportPairBlock ||
-        (foundImport && type == FoldableBlockType.braces);
+        inImportPairBlock || (foundImport && type == FoldableBlockType.braces);
 
     if (absorb) {
       enterImportPairBlock();
