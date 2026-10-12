@@ -62,7 +62,7 @@ EXEMPT_LINES: Dict[str, Dict[int, str]] = {
     # enum value itself is load-bearing elsewhere (LineSemantics,
     # AbstractFoldableBlockParser.endImportSequenceIfAny) so the branch stays.
     "lib/src/folding/parsers/highlight.dart": {
-        93: "KeywordSemantics.possibleImport is never produced",
+        111: "KeywordSemantics.possibleImport is never produced",
     },
     "lib/src/folding/parsers/text.dart": {
         # 27-28 (setFoundPossibleImport) and the possibleImport branch of

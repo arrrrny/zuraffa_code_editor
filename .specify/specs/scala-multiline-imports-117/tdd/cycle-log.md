@@ -41,3 +41,39 @@ red proven → smallest change → green → tick.
   exemption (no mode produces `possibleImport` keyword semantics) still holds.
 - Behaviors DONE: 8/8 (A1–A4, C1). Tasks T1–T4 ticked.
 
+## Audit — 2026-10-12
+
+- **Rebase**: branch rebased onto `25e4c1a` (PR #134 merge). CHANGELOG
+  conflict resolved by keeping both the #81 and #117 entries (#117 first).
+- **Mutation audit (full folding suite, 88 tests — scope matters: the Go
+  guard lives in a different test file)**:
+  - M-abs "absorb any pair type": **KILLED** (Go tests red — an earlier run
+    scoped to the Scala file only reported a false SURVIVED).
+  - M-close "closing line submits no possibleImport": **KILLED** (Scala tests
+    red).
+  - M1 "the `submitCurrentLine` depth arm never fires": **SURVIVED** — and for
+    a real reason. Inner lines of an absorbed block are no-ops for
+    `endImportSequenceIfAny` (`singleLineCommentTerminator`/`possibleImport`
+    both `break`), so their per-line semantics never reach the block. Only
+    the closing line's `possibleImport` sets `last`, and that comes from
+    `highlight.dart`'s closing arm, not the arm in `text.dart`. The arm was
+    dead weight.
+- **Prune**: rather than exempt the dead arm, `_importPairBlockDepth` +
+  `enter/exitImportPairBlock` + `inImportPairBlock` moved from `text.dart`
+  into `highlight.dart` (its only consumer) and the `submitCurrentLine` arm
+  was deleted. M1's target no longer exists, so it cannot survive.
+  `text.dart` now differs from master only by a doc-typo fix ("current we" →
+  "current line"), and the four `text.dart` exemptions stay removed.
+- **Re-audit on the pruned code**: M-noabs "absorption never fires"
+  **KILLED**, M-close **KILLED**, M-abs **KILLED** — 3/3, no survivors.
+- **Exemption renumber**: the `highlight.dart` `possibleImport` exemption
+  moved 93 → 111 after the 18-line insertion. `text.dart:49` unchanged.
+- **Perf pin**: `no_language_keystroke_test.dart` failed once during a
+  `--coverage` run. Control on clean master 813/813 green; standalone on the
+  branch 64 ms vs the 100 ms bound. The fixture has no imports so the
+  absorption path never fires — machine load under instrumentation, not a
+  regression. No code change.
+- **Final**: folding 88 green; full suite 822 green (819 + 3 net);
+  `flutter test --coverage` + `tool/coverage_gate.py --min 100` →
+  **100.00% (3446/3446)** — OK.
+

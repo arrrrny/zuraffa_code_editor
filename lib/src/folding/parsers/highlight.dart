@@ -11,6 +11,24 @@ import 'text.dart';
 
 /// A parser for foldable blocks from highlight's [Result].
 class HighlightFoldableBlockParser extends TextFoldableBlockParser {
+  /// > 0 while inside a pair-character block that opened on a line with
+  /// import semantics.
+  ///
+  /// Such a block belongs to the import statement, not to the code, so the
+  /// absorption decision and the closing line's semantics are handled here,
+  /// in the parser that owns the pair characters. Unlike the per-line flags
+  /// of [TextFoldableBlockParser] this state must outlive the lines it spans,
+  /// so it is not cleared between lines.
+  int _importPairBlockDepth = 0;
+
+  void enterImportPairBlock() => _importPairBlockDepth++;
+
+  void exitImportPairBlock() => _importPairBlockDepth--;
+
+  /// Whether the parser is inside a pair-character block absorbed by a
+  /// multi-line import statement.
+  bool get inImportPairBlock => _importPairBlockDepth > 0;
+
   @override
   void parse({
     required Result highlighted,
