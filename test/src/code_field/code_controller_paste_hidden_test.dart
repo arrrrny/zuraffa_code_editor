@@ -87,5 +87,50 @@ void main() {
       expect(controller.fullText, endsWith('  }// [END section4]\n}\n'));
       expect(controller.fullText.length, 183);
     });
+
+    test(
+      'a selection-ed paste into hidden text collapses to the visible text',
+      () {
+        final controller = CodeController(
+          text: '// [START section2]\nvoid method() {\n}\n',
+          language: TwoMethodsSnippet.mode,
+          namedSectionParser: const BracketsStartEndNamedSectionParser(),
+        );
+
+        // The same paste with a plain caret, as the caret test above performs:
+        // the service comments hide away and the visible text is the class body.
+        final caret = CodeController(
+          text: '// [START section2]\nvoid method() {\n}\n',
+          language: TwoMethodsSnippet.mode,
+          namedSectionParser: const BracketsStartEndNamedSectionParser(),
+        );
+        caret.value = _paste(caret, _pasted);
+
+        // Now the same paste delivered with a selection covering the run. The
+        // framework hands the controller a visible text that is longer than the
+        // re-parsed visible text, and an uncollapsed selection, so the
+        // controller re-anchors the selection to where the visible text
+        // diverges instead of trusting the framework's offsets.
+        final visible = controller.text;
+        final newText = '$visible$_pasted'.replaceAll('\t', '  ');
+        controller.value = TextEditingValue(
+          text: newText,
+          selection: TextSelection(
+            baseOffset: visible.length - 1,
+            extentOffset: newText.length - 1,
+          ),
+        );
+
+        expect(controller.value.text, caret.value.text);
+        expect(
+          controller.selection,
+          const TextSelection.collapsed(offset: 60),
+          reason:
+              'the selection collapses to where the pasted hidden ranges '
+              'begin, not the end of the pasted run',
+        );
+        expect(controller.fullText, endsWith('  }// [END section4]\n}\n'));
+      },
+    );
   });
 }

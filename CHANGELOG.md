@@ -255,6 +255,21 @@
 
 ### Fixed
 
+- **A deleted folded block no longer folds its surviving identical twin**
+  ([issue #108](https://github.com/arrrrny/zuraffa_code_editor/issues/108),
+  upstream `akvelon/flutter-code-editor#83`). Folding one of two textually
+  identical blocks and then deleting the folded one folded the survivor:
+  `FoldableBlockMatcher` decides a fold survived an edit by comparing the
+  fold's hidden content lines, and identical blocks have identical content, so
+  the deleted block's fold re-attached itself to the twin. The edit's changed
+  old-line range now travels with the re-match, and a fold whose first hidden
+  line overlaps it is dropped with the block that was edited away — while the
+  block's own first line stays exempt, so editing the visible line still keeps
+  the fold. Pinned by
+  `test/src/folding/fold_survives_identical_blocks_test.dart` (4 tests) and
+  the flipped upstream-recorded scenario in
+  `test/src/code_field/code_controller_folding_editing_test.dart`.
+
 - **A `#` no longer costs a Java file its highlighting**
   ([issue #104](https://github.com/arrrrny/zuraffa_code_editor/issues/104),
   upstream `akvelon/flutter-code-editor#42`). `highlight` 0.7.0's `java` mode

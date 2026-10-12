@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import '../code/code_line.dart';
 import '../code/string.dart';
 import 'foldable_block.dart';
@@ -11,6 +13,17 @@ class FoldableBlockMatcher {
   final List<CodeLine> oldLines;
   final List<FoldableBlock> newBlocks;
   final List<CodeLine> newLines;
+
+  /// The lines the edit that produced the new code replaced in the old code,
+  /// or null when the caller does not know where the edit landed — a whole
+  /// document replacement, an undo, a programmatic refold.
+  ///
+  /// Without it the matcher cannot tell two textually identical blocks apart:
+  /// deleting the folded one of two leaves the other's text matching, and the
+  /// fold transfers to a block that was never folded. With it, a fold whose
+  /// hidden content the edit touched is dropped instead.
+  final TextRange? changedOldLines;
+
   final oldToNew = <FoldableBlock, FoldableBlock>{};
   final newFoldedBlocks = <FoldableBlock>{};
   final newFoldableBlocksMap = <int, FoldableBlock>{};
@@ -20,6 +33,7 @@ class FoldableBlockMatcher {
     required this.newBlocks,
     required this.newLines,
     required Set<FoldableBlock> oldFoldedBlocks,
+    this.changedOldLines,
   }) {
     // If no foldable blocks were folded, there is nothing to match.
     // Because we generate foldable blocks anyway.
@@ -64,6 +78,22 @@ class FoldableBlockMatcher {
     }
   }
 
+  /// Whether the lines the fold hides are lines this edit replaced.
+  ///
+  /// The block's own first line is exempt: it stays visible while the block is
+  /// folded, so an edit that only touches it leaves the hidden content intact —
+  /// which is the one case the content comparison below is written to allow.
+  bool _editTouchedHiddenContent(FoldableBlock oldFoldedBlock) {
+    final changed = changedOldLines;
+    if (changed == null) {
+      return false;
+    }
+
+    final firstHiddenLine = oldFoldedBlock.firstLine + 1;
+    return firstHiddenLine < changed.end &&
+        oldFoldedBlock.lastLine >= changed.start;
+  }
+
   /// Adds the folded block to newFoldedBlocks
   /// if its hidden part is not changed.
   ///
@@ -102,6 +132,14 @@ class FoldableBlockMatcher {
       // If the new code has foldable block on the same line,
       // that differs in lineCount with old folded block.
       // E.g. add new import after folded imports block.
+      return;
+    }
+
+    if (_editTouchedHiddenContent(oldFoldedBlock)) {
+      // The edit replaced lines this block hides, so the block the user
+      // folded is not the block whose text now matches — whatever that
+      // text is. The most it could match is a textually identical block
+      // elsewhere, which is a different block that was never folded.
       return;
     }
 
