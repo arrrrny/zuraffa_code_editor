@@ -4,6 +4,20 @@
 
 ### Added
 
+- **Customizable suggestion rows**: `CodeField.suggestionItemBuilder`, a
+  nullable `Widget Function(BuildContext, String suggestion, bool isSelected,
+  VoidCallback onSelect)?`, builds one row of the autocomplete popup, so a host
+  can put an icon, a second line or its own selection affordance on a
+  suggestion
+  ([issue #87](https://github.com/arrrrny/zuraffa_code_editor/issues/87),
+  upstream `akvelon/flutter-code-editor#211`). The builder is handed the
+  suggestion's text — neither `Popup` nor `PopupController` is exported from
+  the package — whether that row is the selected one, and a callback that
+  commits it exactly as the built-in row does, focus return included. The
+  popup's own placement, flip and clamping stay the package's, because that is
+  the part positioning tests pin. Left null the popup renders the same
+  `Material` → `InkWell` → `ColoredBox` → `Padding` → `Text` row as before.
+
 - **Per-line background colour**: `CodeController.lineBackgroundBuilder`, a
   nullable `Color? Function(int lineIndex)?`, tints the background of
   individual lines — the mechanism behind a current-line highlight, search-hit

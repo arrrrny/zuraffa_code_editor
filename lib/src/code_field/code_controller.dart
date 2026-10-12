@@ -125,6 +125,28 @@ class CodeController extends TextEditingController {
   /// — the deletion counterpart of [_modifierMap]. See
   /// [CodeModifier.deletesChar].
   final _deletionModifierMap = <String, CodeModifier>{};
+
+  /// Commands the suggestion popup.
+  ///
+  /// The popup is a *view of state this controller owns* — which completions
+  /// exist, whether they are showing, which one is selected — so every move it
+  /// makes is driven from here rather than from the widget that paints it.
+  /// The call sites, and why each exists:
+  ///
+  /// - [_onKeyDownRepeat] — arrow keys move the selection;
+  /// - [onEnterKeyAction] and [onTabKeyAction] — enter/tab commit the selected
+  ///   completion, which reads as inserting a word here;
+  /// - [insertSelectedWord] — hides the popup once the word is in;
+  /// - `set value` — a selection change or the end of an IME composition
+  ///   dismisses suggestions, because the text they were computed from moved;
+  /// - [generateSuggestions] — shows or hides after recomputing;
+  /// - [_dismissSuggestions] — honours the popup's own `enabled` gate.
+  ///
+  /// The popup is wired to the field by `CodeField`, which listens for changes
+  /// here to insert or remove its overlay. A host does not need to touch this
+  /// to theme the popup: `CodeField.suggestionItemBuilder` builds its rows and
+  /// `CodeField.autocompleteBackground` sets its background, both without
+  /// reaching into this controller.
   late PopupController popupController;
   final autocompleter = Autocompleter();
   late final historyController = CodeHistoryController(codeController: this);
