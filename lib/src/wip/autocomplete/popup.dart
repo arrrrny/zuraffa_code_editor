@@ -43,6 +43,11 @@ class Popup extends StatefulWidget {
   /// The suggestion's text is passed because neither this widget nor
   /// `PopupController` is exported from the package, so a builder running
   /// outside it cannot read the list itself.
+  ///
+  /// A host reaches this through `CodeField.suggestionItemBuilder`, which
+  /// documents the row-height caveat: the popup measures each row as the
+  /// built-in single line, so a taller row can overflow the space the flip
+  /// reserved for the list.
   final Widget Function(
     BuildContext context,
     String suggestion,
@@ -194,11 +199,25 @@ class PopupState extends State<Popup> {
   Widget _buildListItem(int index) {
     final builder = widget.suggestionItemBuilder;
     if (builder != null) {
-      return builder(
-        context,
-        widget.controller.suggestions[index],
-        widget.controller.selectedIndex == index,
-        _commitAt(index),
+      // A `Material` ancestor, for two reasons. It is what the built-in row
+      // below gives a host for free, and dropping it silently breaks the most
+      // obvious builder there is: `ListTile` asserts it has a `Material`
+      // ancestor — `No Material widget found` — so the shape this feature
+      // advertises in its own doc example would crash a host in debug.
+      // Transparency keeps the host's own surface, or the popup's background,
+      // visible through it. It also makes the row render one level below a
+      // `Material` exactly as the built-in row does, which is the ambient
+      // `bodyMedium` `DefaultTextStyle` `_rowHeight` measures against — so a
+      // host row's own text still lays out at the height the flip was decided
+      // on.
+      return Material(
+        type: MaterialType.transparency,
+        child: builder(
+          context,
+          widget.controller.suggestions[index],
+          widget.controller.selectedIndex == index,
+          _commitAt(index),
+        ),
       );
     }
 

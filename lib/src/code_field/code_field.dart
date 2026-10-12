@@ -228,6 +228,14 @@ class CodeField extends StatefulWidget {
   /// selection affordance on a suggestion; the popup's own placement, flip and
   /// clamping stay the package's, because that is the part positioning tests
   /// pin.
+  ///
+  /// The one thing the hook cannot change is **the row's height**: the popup
+  /// measures each suggestion as the built-in row's single line — the ambient
+  /// `bodyMedium` style merged with `style` — and decides the flip and the
+  /// clamp on that. A builder that returns a taller row is laid out at its own
+  /// height, so a list of them can be taller than the space the flip reserved
+  /// for it and overflow either edge of the window. Keep a built row to one
+  /// line, or give it the same height as one, if it has to fit.
   final Widget Function(
     BuildContext context,
     String suggestion,

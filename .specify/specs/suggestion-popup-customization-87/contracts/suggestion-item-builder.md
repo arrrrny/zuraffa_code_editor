@@ -69,6 +69,29 @@ without exporting a `wip` type. `isSelected` is passed for the same reason — a
 host that paints its own selected state does not need the controller to know
 which row is selected.
 
+## What a host row is wrapped in
+
+The builder's widget is returned inside a `Material(type:
+MaterialType.transparency)`. Two reasons, both found in review of #140 rather
+than in the original spec:
+
+1. **It is the one thing the built-in row gives a host for free.** A `ListTile`
+   — the builder a host is most likely to reach for — needs a `Material`
+   ancestor, and without the wrapper the popup hands it the surrounding app's
+   or asserts. The doc example advertised a shape that would have crashed a host
+   in debug.
+2. **It keeps the row's own height the height the flip was measured at.** Every
+   row's `Text` renders one level below a `Material`, which is what installs the
+   ambient `bodyMedium` `DefaultTextStyle` `_rowHeight` measures against. A
+   `MaterialType.transparency` box paints nothing, so the host's own surface —
+   or the popup's `backgroundColor` — shows through unchanged.
+
+The row height itself is **not** customizable, and this is now documented on
+both widgets: the popup measures each suggestion as the built-in row's single
+line and decides the flip and the clamp on that. A builder returning a taller
+row is laid out at its own height, so a list of them can be taller than the
+space the flip reserved. A host that needs taller rows has to accept that.
+
 ## Default behaviour
 
 With the field `null` the popup runs the built-in row, widget for widget, with
@@ -86,3 +109,4 @@ before this change and nothing about placement is touched.
 | 4 | `onSelect` commits the right suggestion and returns focus | commit path |
 | 5 | a builder ignoring `isSelected` still commits correctly | contract |
 | 6 | the documented `show`/`hide` sequence on `PopupController` | coupling pin |
+| 7 | a host row gets a `Material` ancestor of its own | the wrapper above |

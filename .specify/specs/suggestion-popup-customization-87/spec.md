@@ -130,9 +130,37 @@ colours and the same arguments — the default tree is unchanged.
       suggestion and returns focus to the editor.
 - [ ] The `CodeController` → `PopupController` contract is documented at the
       field and pinned by a test.
+- [ ] A host row is built inside a `Material(type: MaterialType.transparency)`
+      ancestor, so the `ListTile` shape the hook advertises is legal and a
+      host row's own text still renders at the height the flip was measured
+      at.
+- [ ] The row height is documented as beyond the hook's reach: the popup
+      measures each suggestion as the built-in single line, and a taller row
+      can overflow the space the flip reserved.
 - [ ] Flip-on-needed-height and the placement tests are named in the PR as the
       criteria they already satisfy, not re-implemented.
 - [ ] Coverage stays at the 100% gate; new branches are covered or proved dead.
+
+## Pool review of #140
+
+Two findings came back from `zuraffa-review[bot]` and are folded into the
+criteria above rather than deferred:
+
+- **🟠 actionable** — host rows had no `Material` ancestor, so the documented
+  `ListTile` example would assert in debug. Fixed by wrapping the builder branch,
+  and pinned by a test that checks the **nearest** `Material` above the row is
+  the transparency one. That distinction is the whole test: without the wrapper
+  the nearest `Material` is the surrounding `Scaffold`'s, and the assertion
+  would read `MaterialType.canvas` — verified by removing the wrapper and
+  watching exactly that happen.
+- **🟡** — the flip and clamp measure the built-in one-line row only, so an
+  advertised "second line" could overflow. Documented on both
+  `CodeField.suggestionItemBuilder` and `Popup.suggestionItemBuilder`, with the
+  latter pointing at the former so there is one place to read it.
+
+The 🟡 nit about the doc paragraph being duplicated verbatim on both widgets was
+resolved the same way — by making the `Popup` copy reference the `CodeField`
+one rather than repeat it.
 
 ## Gates
 

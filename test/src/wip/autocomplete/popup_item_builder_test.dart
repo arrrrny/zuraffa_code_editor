@@ -204,6 +204,30 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
   });
 
+  testWidgets('a host row gets a Material ancestor of its own', (wt) async {
+    // A `ListTile` is the builder a host is most likely to reach for, and one
+    // of the shapes that needs a `Material`: without the wrapper this popup
+    // puts around a host row it has to walk up to whatever Material the
+    // surrounding app happens to have, and asserts when there is none. Pool
+    // review of #140 caught that the wrapper was missing.
+    final (_, _, _) = await pumpPopup(
+      wt,
+      itemBuilder: (context, suggestion, isSelected, onSelect) =>
+          ListTile(title: Text(suggestion), onTap: onSelect),
+    );
+
+    // Pinning the *nearest* ancestor — and its type — rather than merely that
+    // one exists is what makes this a test instead of a tautology: without the
+    // wrapper the nearest `Material` is the Scaffold's own, and this would
+    // read `MaterialType.canvas`.
+    final material = find.ancestor(
+      of: find.text('alpha'),
+      matching: find.byType(Material),
+    );
+    expect(material, findsWidgets);
+    expect(wt.widget<Material>(material.first).type, MaterialType.transparency);
+  });
+
   testWidgets('show resets the selection to the first row', (wt) async {
     final (controller, _, _) = await pumpPopup(wt);
 
