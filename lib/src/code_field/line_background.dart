@@ -16,8 +16,9 @@ import '../sizes.dart';
 /// line high when the editor does not wrap), so the tint lands on the line it
 /// labels through wraps and folds.
 ///
-/// Only built when `CodeController.lineBackgroundBuilder` is set; with it null
-/// the layer is not in the tree at all.
+/// Built only when a hook can produce a tint: either
+/// `CodeController.lineBackgroundBuilder` or `CodeController.currentLineColor`.
+/// With both null the layer is not in the tree at all.
 @internal
 class LineBackgroundLayer extends StatelessWidget {
   final CodeController controller;
