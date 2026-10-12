@@ -174,6 +174,36 @@ import users.{
       _Tester.parseAndCheck(mode: scala, code: code, expected: expected);
     });
 
+    test('An unclosed import brace keeps the block below it folding.', () {
+      // The absorption is abandoned at the keyword line, and the pair it
+      // held open is re-registered as a started block — so the class below
+      // folds exactly as it does without the import, and the unmatched brace
+      // is reported at the import line that left it open, not at the last
+      // line of the file.
+      const code = '''
+import users.{
+  User
+
+class MyClass {
+  def method() = {
+    body
+  }
+}''';
+      const expected = [
+        FB(firstLine: 3, lastLine: 7, type: FBT.braces),
+        FB(firstLine: 4, lastLine: 6, type: FBT.braces),
+      ];
+      final expectedInvalid = [
+        InvalidFoldableBlock(startLine: 0, type: FBT.braces),
+      ];
+      _Tester.parseAndCheck(
+        mode: scala,
+        code: code,
+        expected: expected,
+        invalid: expectedInvalid,
+      );
+    });
+
     test('An unclosed import brace stops absorbing after a keyword line.', () {
       const code = '''
 import users.{
@@ -182,9 +212,12 @@ class Foo {
     ???
   }
 }''';
-      const expected = [FB(firstLine: 2, lastLine: 4, type: FBT.braces)];
+      const expected = [
+        FB(firstLine: 1, lastLine: 5, type: FBT.braces),
+        FB(firstLine: 2, lastLine: 4, type: FBT.braces),
+      ];
       final expectedInvalid = [
-        InvalidFoldableBlock(endLine: 5, type: FBT.braces),
+        InvalidFoldableBlock(startLine: 0, type: FBT.braces),
       ];
       _Tester.parseAndCheck(
         mode: scala,
