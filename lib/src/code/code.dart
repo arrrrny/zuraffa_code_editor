@@ -576,7 +576,17 @@ class Code {
 
   Code foldedAt(int line) {
     final block = _getFoldableBlockByStartLine(line);
-    if (block == null || foldedBlocks.contains(block)) {
+    return block == null ? this : foldedBlock(block);
+  }
+
+  /// Folds [block] unless it is already folded or the current code no longer
+  /// holds it.
+  ///
+  /// Unlike [foldedAt] this takes the block itself, so a caller holding
+  /// blocks from an older parse cannot silently fold a different block that
+  /// happens to start on the same line — a stale block is skipped.
+  Code foldedBlock(FoldableBlock block) {
+    if (foldedBlocks.contains(block) || !foldableBlocks.contains(block)) {
       // ignore: avoid_returning_this
       return this;
     }
