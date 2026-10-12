@@ -89,8 +89,13 @@ EXEMPT_LINES: Dict[str, Dict[int, str]] = {
     # attached. Attaching it to a second list instead trips
     # `ItemScrollController._attach`'s "already attached" assertion, so the
     # branch is dead both in production and in tests.
+    #
+    # Pinned by line number, so it moves when the file does: it was line 80
+    # until #87 added `suggestionItemBuilder` above it, and is 99 as of that
+    # branch. The gate prints "stale line exemption" when it goes out of date,
+    # which is how this one was caught drifting.
     "lib/src/wip/autocomplete/popup.dart": {
-        80: "ItemScrollController can never be attached before it is assigned",
+        99: "ItemScrollController can never be attached before it is assigned",
     },
     # `_visibleLineIndex` counts the newlines of the highlighted nodes, which
     # concatenate to the *visible* text; that text can never carry more newlines
