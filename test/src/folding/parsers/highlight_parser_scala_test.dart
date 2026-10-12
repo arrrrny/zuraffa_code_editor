@@ -174,6 +174,26 @@ import users.{
       _Tester.parseAndCheck(mode: scala, code: code, expected: expected);
     });
 
+    test('An unclosed import brace stops absorbing after a keyword line.', () {
+      const code = '''
+import users.{
+class Foo {
+  def bar: Int = {
+    ???
+  }
+}''';
+      const expected = [FB(firstLine: 2, lastLine: 4, type: FBT.braces)];
+      final expectedInvalid = [
+        InvalidFoldableBlock(endLine: 5, type: FBT.braces),
+      ];
+      _Tester.parseAndCheck(
+        mode: scala,
+        code: code,
+        expected: expected,
+        invalid: expectedInvalid,
+      );
+    });
+
     test('Multiline comment inside an absorbed member list', () {
       const code = '''
 import users.User

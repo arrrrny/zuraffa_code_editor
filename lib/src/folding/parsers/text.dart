@@ -71,6 +71,7 @@ abstract class TextFoldableBlockParser extends AbstractFoldableBlockParser {
     if (_foundImportTerminator) {
       _endCommentSequence();
       endImportSequenceIfAny(_lineIndex);
+      onImportTerminatorLine();
       _submitLineSemantics(LineSemantics.singleLineCommentAndImportTerminator);
       return;
     }
@@ -100,6 +101,13 @@ abstract class TextFoldableBlockParser extends AbstractFoldableBlockParser {
 
     _submitLineSemantics(LineSemantics.blank);
   }
+
+  /// Called when a line terminates the import sequence.
+  ///
+  /// Lets subclasses release state that was tied to the import statement,
+  /// e.g. an unclosed pair-character block absorbed from a multi-line
+  /// import line.
+  void onImportTerminatorLine() {}
 
   @protected
   void clearLineFlags() {

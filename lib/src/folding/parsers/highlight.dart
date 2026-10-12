@@ -29,6 +29,15 @@ class HighlightFoldableBlockParser extends TextFoldableBlockParser {
   /// multi-line import statement.
   bool get inImportPairBlock => _importPairBlockDepth > 0;
 
+  /// Whether non-whitespace content other than the import keyword was
+  /// seen on the current line before the current pair character.
+  ///
+  /// This distinguishes Scala's selective import `import users.{ ... }`,
+  /// where the braces are part of the statement and are absorbed, from
+  /// JS/TS `import { ... } from 'module'`, where the braces are the
+  /// import list syntax and keep their own fold.
+  bool _foundImportQualifier = false;
+
   @override
   void parse({
     required Result highlighted,
@@ -151,8 +160,19 @@ class HighlightFoldableBlockParser extends TextFoldableBlockParser {
         case $cr:
         case $lf:
           break;
+
+        case $openParenthesis: // (
+        case $closeParenthesis: // )
+        case $openBracket: // [
+        case $closeBracket: // ]
+        case $openBrace: // {
+        case $closeBrace: // }
+          setFoundNonWhitespace();
+          break;
+
         default:
           setFoundNonWhitespace();
+          _foundImportQualifier = true;
       }
 
       switch (code) {
@@ -191,14 +211,20 @@ class HighlightFoldableBlockParser extends TextFoldableBlockParser {
 
   /// Opens [type] unless the pair character belongs to a multi-line import.
   ///
-  /// Only a brace opened on an import line is absorbed: Scala's selective
-  /// import `import users.{ User, UserPreferences }` selects members, so the
-  /// braces are part of the statement. A parenthesized group such as Go's
-  /// `import ( ... )` is a clause users fold on its own — pinned by the Go
-  /// tests. Pair characters inside an absorbed block are absorbed too.
+  /// Only a brace opened on an import line after a qualifier is absorbed:
+  /// Scala's selective import `import users.{ User, UserPreferences }`
+  /// selects members, so the braces are part of the statement. JS/TS
+  /// `import { ... } from 'module'` has no qualifier — its braces are the
+  /// import list syntax and keep their own fold, pinned by the JS/TS tests.
+  /// A parenthesized group such as Go's `import ( ... )` is a clause users
+  /// fold on its own — pinned by the Go tests. Pair characters inside an
+  /// absorbed block are absorbed too.
   void _startPairOrBlock(int line, FoldableBlockType type) {
     final absorb =
-        inImportPairBlock || (foundImport && type == FoldableBlockType.braces);
+        inImportPairBlock ||
+        (foundImport &&
+            type == FoldableBlockType.braces &&
+            _foundImportQualifier);
 
     if (absorb) {
       enterImportPairBlock();
@@ -220,5 +246,21 @@ class HighlightFoldableBlockParser extends TextFoldableBlockParser {
     }
 
     endBlock(line, type);
+  }
+
+  @override
+  void clearLineFlags() {
+    super.clearLineFlags();
+    _foundImportQualifier = false;
+  }
+
+  @override
+  void onImportTerminatorLine() {
+    if (inImportPairBlock) {
+      // A keyword line inside the import's braces means the statement was
+      // abandoned — the file is malformed from here on. Stop absorbing
+      // pair characters so the rest of the file folds normally.
+      _importPairBlockDepth = 0;
+    }
   }
 }
