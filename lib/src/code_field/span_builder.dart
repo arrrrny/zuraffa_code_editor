@@ -43,12 +43,6 @@ class SpanBuilder {
   /// [build] — a fold set does not change while a tree is being walked.
   Set<int> _foldedKeptLines = const {};
 
-  /// Whether the last node with text of the tree ends with a newline.
-  ///
-  /// Only then is there a terminating newline to splice a marker in front of;
-  /// otherwise the marker closes the tree.
-  bool _treeEndsWithNewline = false;
-
   SpanBuilder({
     required this.code,
     required this.theme,
@@ -58,7 +52,6 @@ class SpanBuilder {
 
   TextSpan build() {
     _visibleLineIndex = 0;
-    _treeEndsWithNewline = false;
     _foldedKeptLines = _foldedKeptLineIndexes();
 
     final children = _buildList(
@@ -67,14 +60,12 @@ class SpanBuilder {
       ancestorStyle: rootStyle,
     );
 
-    if (!withFoldEllipsis || _treeEndsWithNewline) {
-      return TextSpan(style: rootStyle, children: children);
-    }
-
     // `_visibleLineIndex` counts the newlines walked so far, so with the tree
     // ending mid-line it is the last visible line itself — the one line with no
-    // terminating newline to splice a marker in front of.
-    if (!_foldedKeptLines.contains(_visibleLineIndex)) {
+    // terminating newline to splice a marker in front of. A tree ending with a
+    // newline has an empty visible line after it, which is never a fold's kept
+    // line, so the check below needs no companion test for it.
+    if (!withFoldEllipsis || !_foldedKeptLines.contains(_visibleLineIndex)) {
       return TextSpan(style: rootStyle, children: children);
     }
 
@@ -132,11 +123,6 @@ class SpanBuilder {
   }
 
   void _updateLineIndex(Node node) {
-    final value = node.value;
-    if (value != null && value.isNotEmpty) {
-      _treeEndsWithNewline = value.endsWith('\n');
-    }
-
     _visibleLineIndex += node.getValueNewlineCount();
 
     if (_visibleLineIndex >= code.lines.length) {

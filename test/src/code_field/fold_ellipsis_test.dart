@@ -54,6 +54,16 @@ const _twoBlocks =
     '  }\n'
     '}\n';
 
+/// A comment block, whose kept line ends *inside* a comment — a styled node
+/// sits next to the kept line, though the newline that terminates the line is
+/// a plain node of its own.
+const _commentBlock =
+    'class A {\n'
+    '  // first comment line\n'
+    '  // second comment line\n'
+    '  int a;\n'
+    '}\n';
+
 /// A fold whose kept line is the last line of the document, and the document
 /// has no trailing newline — the one shape that has no terminating newline to
 /// splice the marker in front of.
@@ -61,6 +71,31 @@ const _noTrailingNewline =
     'class A {\n'
     '  int a;\n'
     '  int b;\n'
+    '}';
+
+/// A fold inside a read-only section. The line's own text is painted palled
+/// there — the one shape where the terminating node's style differs from the
+/// base style, which is what makes the marker's own style observable.
+const _readOnlySection =
+    'class A {\n'
+    '  // [START locked]\n'
+    '  void a() {\n'
+    '    one();\n'
+    '  }\n'
+    '  // [END locked]\n'
+    '}\n';
+
+/// A document whose last foldable block runs to its end with no trailing
+/// newline, so the fold's kept line is the last visible line — the one marker
+/// that is appended to the tree rather than spliced. The match the search
+/// test looks for sits on the line *above* the fold, which is the only way to
+/// have a match at all without the search unfolding the block: a match that
+/// overlaps the fold reveals it (`SearchNavigationController`).
+const _lastLineFold =
+    'class A {}\n'
+    'class B {\n'
+    '  int b;\n'
+    '  int c;\n'
     '}';
 
 /// Every leaf `TextSpan` of [span] in the order the text is painted.
@@ -266,6 +301,41 @@ final config = ScraperConfig(
       expect(marker.text, ' …');
     });
 
+    test('A marker after a comment does not come out comment-coloured', () {
+      final controller = _controller(_commentBlock);
+
+      // `  // first comment line` / `  // second comment line` is one foldable
+      // block, and its kept line ends inside a comment: the comment node sits
+      // next to the line, so the marker must not borrow its colour.
+      controller.foldAt(1);
+
+      final span = _spanOf(controller);
+      expect(
+        _plainTextOf(span),
+        'class A {\n  // first comment line …\n  int a;\n}\n',
+      );
+      expect(_markerLeaf(span)!.style, _root);
+    });
+
+    test('A marker on a read-only line is not palled', () {
+      final controller = CodeController(
+        text: _readOnlySection,
+        language: java,
+        namedSectionParser: const BracketsStartEndNamedSectionParser(),
+        readOnlySectionNames: const {'locked'},
+      );
+      addTearDown(controller.dispose);
+
+      // The kept line is read-only, so every character of it is painted
+      // palled. The marker is decoration, not content: it keeps the base
+      // style rather than the terminating node's palled one.
+      controller.foldAt(2); // `  void a() {`
+
+      final marker = _markerLeaf(_spanOf(controller));
+      expect(marker, isNotNull);
+      expect(marker!.style, _root);
+    });
+
     test('With no base style the marker falls back to the line style', () {
       final controller = _controller(_config);
 
@@ -372,6 +442,53 @@ final config = ScraperConfig(
             .map((leaf) => leaf.text!)
             .join(),
         'two()',
+      );
+
+      controller.dismiss();
+      await wt.pumpAndSettle();
+    });
+
+    testWidgets('a match above the fold suppresses the final-line marker', (
+      wt,
+    ) async {
+      final controller = CodeController(text: _lastLineFold, language: java);
+      addTearDown(controller.dispose);
+
+      // `class B {` folds to `class B {}`, whose kept line is the *last*
+      // visible line — the one marker that is appended to the tree rather than
+      // spliced, so the search switch has to hold there too. The match is on
+      // the line above the fold, so it leaves the fold closed: a match
+      // overlapping it would unfold the block instead.
+      controller.foldAt(1);
+
+      await wt.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EditableText(
+              controller: controller,
+              focusNode: FocusNode(),
+              style: const TextStyle(),
+              cursorColor: Colors.black,
+              backgroundCursorColor: Colors.black,
+            ),
+          ),
+        ),
+      );
+
+      _searchFor(controller, 'A');
+      await wt.pumpAndSettle();
+
+      final span = controller.buildTextSpan(
+        context: wt.element(find.byType(EditableText)),
+      );
+
+      expect(_markerLeaf(span), isNull);
+      expect(
+        _leavesOf(span)
+            .where((leaf) => leaf.style?.backgroundColor != null)
+            .map((leaf) => leaf.text!)
+            .join(),
+        'A',
       );
 
       controller.dismiss();
