@@ -145,8 +145,22 @@ also what surfaced the centre-of-field discovery above.
 
 ## Coverage gate
 
-Run with the CI-identical procedure from `quickstart.md` §3, against the final
-committed tree. Recorded here after the run.
+CI-identical procedure from `quickstart.md` §3, run against the final committed
+tree on `spec/highlight-cursor-line-113` rebased onto `31ac3de` (the merge of
+#87, so the number is the tree the PR actually proposes):
+
+```text
+All tests passed!                                     (874)
+zuraffa_code_editor line coverage: 100.00% (3527/3527 lines over 109 files)
+excluded individual lines (see EXEMPT_LINES): 9
+Coverage gate: 100.00% >= 100.00% -- OK
+```
+
+**874** = the 16 new tests plus everything already on master. **No exemption was
+added and no line was exempted for this feature**: the 9 `EXEMPT_LINES` are
+pre-existing, and the count is unchanged from master's, so every line this branch
+adds is covered by a test rather than by an exemption. The `3527` total is
+master's `3518` plus the 9 lines of new logic in `line_background.dart`.
 
 ## Scope confirmation
 
