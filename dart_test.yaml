@@ -1,4 +1,0 @@
-# Fleet guard (arrrrny/forklift#176): one un-capped `flutter test` fan
-# starved the shared host (load 260). A bare `flutter test` / `dart test`
-# therefore defaults to 2 workers.
-concurrency: 2
