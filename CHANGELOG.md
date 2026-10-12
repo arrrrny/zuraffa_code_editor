@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+### Changed
+
+- **`CodeController.buildTextSpan` memoises its span**: a call whose inputs are
+  unchanged returns the object the previous call returned, instead of walking
+  and re-allocating the whole highlight tree
+  ([issue #114](https://github.com/arrrrny/zuraffa_code_editor/issues/114),
+  upstream `akvelon/flutter-code-editor#127`). `EditableText` calls
+  `buildTextSpan` on every rebuild — a selection move, a focus change, any parent
+  rebuild — and each call re-ran `SpanBuilder` over the parsed tree and then
+  flattened it again through `SearchResultHighlightedBuilder`. The cache is
+  keyed on everything the build reads: the `Code`, the style, the theme in scope,
+  the language, the search result and the search navigation state, compared by
+  the language's own structural equality. It holds one entry, it is replaced
+  rather than grown, and it is invisible: no new field, no new public API, no way
+  to turn it off or observe it. A hit returns the same *object* rather than a
+  copy because `RenderParagraph` only takes its `identical` fast path for the
+  object itself — a structurally equal copy still forces a relayout. The
+  composing range is deliberately outside the cache, so the composing-aware path
+  is never served a stale span.
+
 ### Added
 
 - **An ellipsis on a folded block's kept line**: a line whose content a fold
