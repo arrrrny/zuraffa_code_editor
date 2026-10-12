@@ -4,6 +4,22 @@
 
 ### Added
 
+- **The gutter error popup is replaceable**
+  ([issue #81](https://github.com/arrrrny/zuraffa_code_editor/issues/81),
+  upstream `akvelon/flutter-code-editor#216`). The ask named both a custom
+  glyph per `IssueType` (delivered earlier this cycle as
+  `GutterStyle.errorIcon`/`warningIcon`/`infoIcon`) and "provide my own
+  `GutterErrorWidget`" — the half that was still open. The gutter constructed
+  `GutterErrorWidget` itself with no injection point, so the popup's layout
+  and behaviour were frozen for every consumer. `GutterStyle` now accepts a
+  nullable `errorPopupBuilder`, a
+  `Widget Function(Issue, TextStyle, BoxDecoration?)?` that the gutter calls
+  per issue with the already-resolved popup text style and decoration;
+  leaving it null renders exactly the `GutterErrorWidget` the gutter has
+  always constructed. `test/src/gutter/gutter_error_widget_builder_test.dart`
+  pins both halves, the per-issue call, the null-text-style throw, and the
+  `copyWith` relay.
+
 - **The Insert key toggles insert/overtype mode**
   ([issue #83](https://github.com/arrrrny/zuraffa_code_editor/issues/83),
   upstream `akvelon/flutter-code-editor#200`, which points at the still-open
