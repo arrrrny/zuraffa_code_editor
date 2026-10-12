@@ -1,5 +1,34 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **An ellipsis on a folded block's kept line**: a line whose content a fold
+  hides now ends with ` …`, so `  parsers: [  ],` reads as folded rather than
+  merely short ([issue #115](https://github.com/arrrrny/zuraffa_code_editor/issues/115),
+  upstream `akvelon/flutter-code-editor#86`). The gutter already hung a chevron
+  on that row, but a row affordance says nothing to a reader looking at the
+  text — or to a host that hides the gutter. The marker is painted, never
+  typed: `Code.visibleText` is the editing buffer, so an ellipsis inside it
+  would shift the caret, every selection, the line numbering and the derived
+  search offsets, and become selectable and typeable-over. It is spliced into
+  the span tree `SpanBuilder` already builds — after a closer the fold glued to
+  the kept line, or after the opener when the closer took a row of its own —
+  and paints at the line's own baseline through the same `TextPainter`, at any
+  wrapping. It carries the field's base style rather than the style of the
+  token it follows, so an ellipsis after a string literal is not
+  string-coloured, and one on a read-only line is not palled with the text
+  around it. One marker per kept line: a block swallowed by an outer fold
+  contributes none, because its kept line is hidden. Nothing is configurable —
+  no glyph, colour or position — and no public API was added.
+  The marker is suppressed while the search panel is slicing matches out of the
+  tree, because match offsets are measured against the visible text and the
+  marker's two characters would move every following match off its own text; it
+  returns the moment the pattern is cleared. A caret parked on the folded line
+  renders to the right of the marker rather than to its left — cosmetic, and
+  the price of a marker that never enters the buffer.
+
 ## 0.2.0
 
 ### Added
