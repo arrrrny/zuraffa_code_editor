@@ -37,6 +37,10 @@ Widget _sentinel(Issue issue, TextStyle style, BoxDecoration? d) {
   return const SentinelPopup();
 }
 
+Widget _sentinel2(Issue issue, TextStyle style, BoxDecoration? d) {
+  return const SentinelPopup();
+}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(Code.empty);
@@ -209,6 +213,10 @@ void main() {
       expect(
         style.copyWith(errorPopupBuilder: _sentinel).errorPopupBuilder,
         _sentinel,
+      );
+      expect(
+        style.copyWith(errorPopupBuilder: _sentinel2).errorPopupBuilder,
+        _sentinel2,
       );
       expect(
         style.copyWith(errorPopupBuilder: null).errorPopupBuilder,
