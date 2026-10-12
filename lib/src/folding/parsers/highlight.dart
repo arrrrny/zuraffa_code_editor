@@ -11,23 +11,26 @@ import 'text.dart';
 
 /// A parser for foldable blocks from highlight's [Result].
 class HighlightFoldableBlockParser extends TextFoldableBlockParser {
-  /// > 0 while inside a pair-character block that opened on a line with
-  /// import semantics.
+  /// The pair-character blocks currently absorbed by a multi-line import
+  /// statement, innermost last.
   ///
   /// Such a block belongs to the import statement, not to the code, so the
   /// absorption decision and the closing line's semantics are handled here,
   /// in the parser that owns the pair characters. Unlike the per-line flags
   /// of [TextFoldableBlockParser] this state must outlive the lines it spans,
-  /// so it is not cleared between lines.
-  int _importPairBlockDepth = 0;
+  /// so it is not cleared between lines. What is open is kept, not just how
+  /// many: an abandoned import must be able to say *which* block it swallowed
+  /// so that block can be re-registered — see [onImportTerminatorLine].
+  final _absorbedOpens = <_AbsorbedPair>[];
 
-  void enterImportPairBlock() => _importPairBlockDepth++;
+  void enterImportPairBlock(int line, FoldableBlockType type) =>
+      _absorbedOpens.add(_AbsorbedPair(line: line, type: type));
 
-  void exitImportPairBlock() => _importPairBlockDepth--;
+  void exitImportPairBlock() => _absorbedOpens.removeLast();
 
   /// Whether the parser is inside a pair-character block absorbed by a
   /// multi-line import statement.
-  bool get inImportPairBlock => _importPairBlockDepth > 0;
+  bool get inImportPairBlock => _absorbedOpens.isNotEmpty;
 
   /// Whether non-whitespace content other than the import keyword was
   /// seen on the current line before the current pair character.
@@ -227,7 +230,7 @@ class HighlightFoldableBlockParser extends TextFoldableBlockParser {
             _foundImportQualifier);
 
     if (absorb) {
-      enterImportPairBlock();
+      enterImportPairBlock(line, type);
       return;
     }
 
@@ -256,11 +259,29 @@ class HighlightFoldableBlockParser extends TextFoldableBlockParser {
 
   @override
   void onImportTerminatorLine() {
-    if (inImportPairBlock) {
-      // A keyword line inside the import's braces means the statement was
-      // abandoned — the file is malformed from here on. Stop absorbing
-      // pair characters so the rest of the file folds normally.
-      _importPairBlockDepth = 0;
+    if (!inImportPairBlock) {
+      return;
     }
+
+    // A keyword line inside the import's braces means the statement was
+    // abandoned — the file is malformed from here on. Stop absorbing pair
+    // characters so the rest of the file folds normally, and re-register
+    // every still-open absorbed pair as a started block: finalize() then
+    // reports it invalid at its opening line, so the gutter points at the
+    // import that left it open exactly as it does without absorption.
+    for (final open in _absorbedOpens) {
+      startBlock(open.line, open.type);
+    }
+
+    _absorbedOpens.clear();
   }
+}
+
+/// An absorbed pair character that is still open, kept for re-registration
+/// when the absorption is abandoned.
+class _AbsorbedPair {
+  final int line;
+  final FoldableBlockType type;
+
+  const _AbsorbedPair({required this.line, required this.type});
 }
