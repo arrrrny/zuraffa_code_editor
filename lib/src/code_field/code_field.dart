@@ -21,6 +21,7 @@ import 'actions/tab.dart';
 import 'code_controller.dart';
 import 'default_styles.dart';
 import 'js_workarounds/js_workarounds.dart';
+import 'line_background.dart';
 
 final _shortcuts = <ShortcutActivator, Intent>{
   // Copy
@@ -288,6 +289,10 @@ class _CodeFieldState extends State<CodeField> {
   ScrollController? _numberScroll;
   ScrollController? _codeScroll;
   ScrollController? _horizontalCodeScroll;
+
+  /// Keeps the per-line background layer aligned with the text, the same way
+  /// `_numberScroll` keeps the gutter aligned.
+  ScrollController? _backgroundScroll;
   final _codeFieldKey = GlobalKey();
 
   OverlayEntry? _suggestionsPopup;
@@ -352,6 +357,7 @@ class _CodeFieldState extends State<CodeField> {
     _controllers = LinkedScrollControllerGroup();
     _numberScroll = _controllers?.addAndGet();
     _codeScroll = _controllers?.addAndGet();
+    _backgroundScroll = _controllers?.addAndGet();
 
     widget.controller.addListener(_onTextChanged);
     widget.controller.addListener(_updatePopupOffset);
@@ -398,6 +404,7 @@ class _CodeFieldState extends State<CodeField> {
     _searchPopup = null;
     _numberScroll?.dispose();
     _codeScroll?.dispose();
+    _backgroundScroll?.dispose();
     _horizontalCodeScroll?.dispose();
     super.dispose();
   }
@@ -611,35 +618,55 @@ class _CodeFieldState extends State<CodeField> {
           widget.contextMenuBuilder ?? _defaultContextMenuBuilder,
     );
 
+    final editingText = LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        // The gutter is laid out before the editor in the same build pass,
+        // so it can only see a width measured in an earlier frame. Keep the
+        // measured one and rebuild after this frame so the gutter's wrapped
+        // rows follow the field's real width.
+        final textWidth = constraints.maxWidth - widget.padding.right;
+        if (widget.wrap && textWidth > 0 && textWidth != _editorTextWidth) {
+          _editorTextWidth = textWidth;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && textWidth == _editorTextWidth) {
+              setState(() {});
+            }
+          });
+        }
+
+        // Control horizontal scrolling
+        return _wrapInScrollView(
+          codeField,
+          textStyle,
+          constraints.maxWidth,
+          constraints.maxHeight,
+        );
+      },
+    );
+
     final editingField = Theme(
       data: Theme.of(
         context,
       ).copyWith(textSelectionTheme: widget.textSelectionTheme),
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          // The gutter is laid out before the editor in the same build pass,
-          // so it can only see a width measured in an earlier frame. Keep the
-          // measured one and rebuild after this frame so the gutter's wrapped
-          // rows follow the field's real width.
-          final textWidth = constraints.maxWidth - widget.padding.right;
-          if (widget.wrap && textWidth > 0 && textWidth != _editorTextWidth) {
-            _editorTextWidth = textWidth;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted && textWidth == _editorTextWidth) {
-                setState(() {});
-              }
-            });
-          }
-
-          // Control horizontal scrolling
-          return _wrapInScrollView(
-            codeField,
-            textStyle,
-            constraints.maxWidth,
-            constraints.maxHeight,
-          );
-        },
-      ),
+      // The tint layer is only in the tree when a host asked for one, so a
+      // field with no lineBackgroundBuilder keeps its exact widget tree.
+      child: widget.controller.lineBackgroundBuilder == null
+          ? editingText
+          : Stack(
+              children: [
+                Positioned.fill(
+                  child: SingleChildScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    controller: _backgroundScroll,
+                    child: LineBackgroundLayer(
+                      controller: widget.controller,
+                      rowHeights: _visibleRowHeights(textStyle),
+                    ),
+                  ),
+                ),
+                editingText,
+              ],
+            ),
     );
 
     final actions = <Type, Action<Intent>>{
@@ -791,6 +818,26 @@ class _CodeFieldState extends State<CodeField> {
     _rowHeightsForText = text;
     _rowHeightsForWidth = textWidth;
     return _cachedRowHeights = best;
+  }
+
+  /// Height of each visible line's row for the per-line background layer.
+  ///
+  /// What the gutter is told: the wrapped rows when the editor wraps, one line
+  /// high for every row when it does not. The layer then lands a tint on the
+  /// same row the gutter labels with the same line number.
+  List<double> _visibleRowHeights(TextStyle codeTextStyle) {
+    final wrapped = _wrappedRowHeights(codeTextStyle);
+    if (wrapped != null) {
+      return wrapped;
+    }
+
+    final visibleLineCount =
+        widget.controller.code.hiddenLineRanges.visibleLineNumbers.length;
+
+    return List<double>.filled(
+      visibleLineCount,
+      _singleLineHeight(codeTextStyle),
+    );
   }
 
   /// The code scrollable's position, when exactly one is attached.

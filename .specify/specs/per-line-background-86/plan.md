@@ -8,16 +8,22 @@
 
 Add one nullable hook, `CodeController.lineBackgroundBuilder`
 (`Color? Function(int lineIndex)?`), that lets a host tint the background of
-individual code lines. The hook is consulted once per **rendered** line during
-`CodeController.buildTextSpan()` and the tint is drawn as a background layer
-behind the text, sized from the per-row heights the editor already measures for
-gutter alignment. The default (`null`) produces today's widget tree and today's
-span tree unchanged.
+individual code lines. The hook is consulted once per **rendered** line and the
+tint is drawn as a background layer behind the text, sized from the per-row
+heights the editor already measures for gutter alignment. The default (`null`)
+produces today's widget tree and today's span tree unchanged.
 
 The hard requirement, and the reason this is not a two-line change, is the tint's
 **extent**: `TextStyle.backgroundColor` covers only the glyph run (measured — see
 `research.md`), so a tint applied through styles alone stops at the last
 character of the line. The plan therefore paints rows, not styles.
+
+A useful consequence of the chosen mechanism: the layer reads
+`code.hiddenLineRanges.visibleLineNumbers` and does not touch the span tree at
+all, so it needs no change to `SpanBuilder`, and it works on the no-language path
+too. An earlier revision of this plan routed the line index through
+`SpanBuilder._visibleLineIndex`; that was dropped after `research.md`'s R2 found
+three separate ways that counter mis-attributes a line (see R2/R2b).
 
 ## Technical Context
 
@@ -95,9 +101,8 @@ Complexity Tracking.
 
 ```text
 lib/src/code_field/
-├── code_controller.dart     # + lineBackgroundBuilder field, plumbed into _createTextSpan
-├── span_builder.dart        # + lineIndex per rendered span (authoritative source)
-├── code_field.dart          # + background layer behind the TextField (rowHeights + linked scroll)
+├── code_controller.dart     # + lineBackgroundBuilder field (the only lib change to this file)
+├── code_field.dart          # + conditional Stack + background layer, + _visibleRowHeights
 └── line_background.dart     # NEW: the background-layer widget (private, not exported)
 
 test/src/code_field/
@@ -109,6 +114,8 @@ layout it already uses. The background layer is a private widget under
 `lib/src/code_field/` mirroring how `gutter.dart` is a private widget; because it
 is private it is not exported, but it still has to be imported by
 `test/coverage_helper_test.dart`'s generator to be visible to lcov.
+
+`lib/src/code_field/span_builder.dart` is **not** touched — see `research.md` R2.
 
 ## Complexity Tracking
 

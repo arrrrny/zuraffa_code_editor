@@ -43,28 +43,54 @@ background layer aligned for free. This is precisely the invariant
 
 ## R2 — Where is the per-line index computed authoritatively?
 
-**Decision**: `SpanBuilder`. It already tracks `_visibleLineIndex`
-(`span_builder.dart:71`) and owns the `Code` model, so it can map a visible line
-back to the full index with `code.hiddenLineRanges.recoverLineIndex(...)`.
+**Decision**: it is not computed at all — `HiddenLineRanges.visibleLineNumbers`
+already *is* the answer. The background layer iterates that list and hands the
+builder each entry directly.
 
-**Rationale**: two existing places look tempting and are not sufficient on their
-own:
+**Rationale**: the obvious place to derive an index is `SpanBuilder`, which
+tracks `_visibleLineIndex` (`span_builder.dart:71`). Two hazards rule that out as
+the *only* source:
 
-- `_visibleLineIndex` alone is **clamped** to `code.lines.length - 1` in
-  `_updateLineIndex`, and a highlight node can carry several newlines at once
-  (block comment, multi-line string), which would attribute every line the node
-  covers to its last line. Both are live hazards, not theoretical.
-- The gutter iterates `code.hiddenLineRanges.visibleLineNumbers` — the correct
-  *visible* set, but it knows nothing about the text spans.
+- `_updateLineIndex` **clamps** to `code.lines.length - 1`, so a trailing
+  newline reads back the last real line;
+- a highlight node can carry several newlines at once (a block comment, a
+  multi-line string), and `_buildNode` adds the whole count before building the
+  node, so every line a multi-line node covers is attributed to its last line.
 
-So: `SpanBuilder` produces the authoritative `fullLineIndex` for each rendered
-span, and the background layer consumes the visible-line list in the same
-iteration order the gutter uses. Both sides are then pinned by tests that put a
-fold or a multi-line node over the target line.
+Both are live symptoms, not theoretical. Mapping the visible index back through
+`code.hiddenLineRanges.recoverLineIndex(...)` fixes the coordinate space but not
+the clamping or the multi-line attribution, because those happen before the
+mapping.
 
-**Alternative considered**: deriving the index in `CodeField.build()` from
-`code.lines` directly — rejected, because the field does not know which spans a
-node produced, so it cannot resolve R2's clamping problem.
+`visibleLineNumbers` sidesteps all three: it is the list of full line indices the
+editor actually renders, in order, produced by the same constructor the gutter
+already trusts (`gutter.dart:190`). A layer that iterates it is correct by
+construction — one row per visible line, keyed by its true full index — and it
+needs no change to `SpanBuilder` at all. The multi-line-node hazard only exists
+for an approach that styles spans; a row-per-visible-line layer never has a
+"span that spans several lines".
+
+**Alternative considered**: fixing `SpanBuilder` to attribute per node start
+line (capturing the accumulator before `_updateLineIndex`) and driving the layer
+from it — rejected as strictly more code and more risk for the same result,
+while still needing the clamping fix.
+
+## R2b — What happens on the no-language path?
+
+**Decision**: nothing special is needed, and the layer works there too.
+
+**Rationale**: `_createTextSpan` (`code_controller.dart:1287`) returns a single
+`TextSpan(text: text, style: style)` when `_language == null`. That path cannot
+carry a per-line style, which is why R1 rejects style-based backgrounds anyway.
+A row layer does not read the span tree, so it is indifferent to the path — a
+host with no language configured gets the same tinted rows as one with a
+language. The plan's earlier "split the no-language span" task was therefore
+dropped: it would have changed the default span tree to solve a problem the
+chosen mechanism does not have.
+
+**Alternative considered**: documenting the no-language path as unsupported —
+rejected: hosts with no language are exactly the ones with no other way to mark
+a line.
 
 ## R3 — What happens on the no-language path?
 
