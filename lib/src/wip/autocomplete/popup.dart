@@ -33,6 +33,29 @@ class Popup extends StatefulWidget {
   final TextStyle style;
   final Color? backgroundColor;
 
+  /// Builds one row of the suggestion list.
+  ///
+  /// When null the popup renders its built-in row. When set, it is called once
+  /// per suggestion with the suggestion's text, whether that row is the
+  /// selected one, and a callback that commits it — the same tap behaviour the
+  /// built-in row has, including returning focus to the editor.
+  ///
+  /// The suggestion's text is passed because neither this widget nor
+  /// `PopupController` is exported from the package, so a builder running
+  /// outside it cannot read the list itself.
+  ///
+  /// A host reaches this through `CodeField.suggestionItemBuilder`, which
+  /// documents the row-height caveat: the popup measures each row as the
+  /// built-in single line, so a taller row can overflow the space the flip
+  /// reserved for the list.
+  final Widget Function(
+    BuildContext context,
+    String suggestion,
+    bool isSelected,
+    VoidCallback onSelect,
+  )?
+  suggestionItemBuilder;
+
   const Popup({
     super.key,
     required this.controller,
@@ -42,6 +65,7 @@ class Popup extends StatefulWidget {
     required this.parentFocusNode,
     required this.style,
     this.backgroundColor,
+    this.suggestionItemBuilder,
   });
 
   @override
@@ -173,20 +197,40 @@ class PopupState extends State<Popup> {
   }
 
   Widget _buildListItem(int index) {
+    final builder = widget.suggestionItemBuilder;
+    if (builder != null) {
+      // A `Material` ancestor, for two reasons. It is what the built-in row
+      // below gives a host for free, and dropping it silently breaks the most
+      // obvious builder there is: `ListTile` asserts it has a `Material`
+      // ancestor — `No Material widget found` — so the shape this feature
+      // advertises in its own doc example would crash a host in debug.
+      // Transparency keeps the host's own surface, or the popup's background,
+      // visible through it. It also makes the row render one level below a
+      // `Material` exactly as the built-in row does, which is the ambient
+      // `bodyMedium` `DefaultTextStyle` `_rowHeight` measures against — so a
+      // host row's own text still lays out at the height the flip was decided
+      // on.
+      return Material(
+        type: MaterialType.transparency,
+        child: builder(
+          context,
+          widget.controller.suggestions[index],
+          widget.controller.selectedIndex == index,
+          _commitAt(index),
+        ),
+      );
+    }
+
     return Material(
-      color: Colors.grey.withOpacity(0.1),
+      color: Colors.grey.withValues(alpha: 0.1),
       child: InkWell(
-        onTap: () {
-          widget.controller.selectedIndex = index;
-          widget.parentFocusNode.requestFocus();
-          widget.controller.onCompletionSelected();
-        },
-        hoverColor: Colors.grey.withOpacity(0.1),
+        onTap: _commitAt(index),
+        hoverColor: Colors.grey.withValues(alpha: 0.1),
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
         child: ColoredBox(
           color: widget.controller.selectedIndex == index
-              ? Colors.blueAccent.withOpacity(0.5)
+              ? Colors.blueAccent.withValues(alpha: 0.5)
               : Colors.transparent,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -200,6 +244,15 @@ class PopupState extends State<Popup> {
       ),
     );
   }
+
+  /// What tapping a row does: select it, hand focus back to the editor, and
+  /// insert it. Lifted out of the built-in row so a host builder's callback and
+  /// the built-in row's `onTap` are one implementation and cannot drift.
+  VoidCallback _commitAt(int index) => () {
+    widget.controller.selectedIndex = index;
+    widget.parentFocusNode.requestFocus();
+    widget.controller.onCompletionSelected();
+  };
 
   void rebuild() {
     setState(() {});
