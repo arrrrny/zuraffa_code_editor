@@ -104,8 +104,17 @@ EXEMPT_LINES: Dict[str, Dict[int, str]] = {
     # concatenate to the *visible* text; that text can never carry more newlines
     # than the full text `code.lines` was split from, so the index tops out at
     # `lines.length - 1` and the clamp never engages.
+    #
+    # Pinned by line number, so it moves when the file does — and the #115
+    # ellipsis work shifted it twice (75 → 143 → 129), the second time when the
+    # redundant `_treeEndsWithNewline` guard was deleted from `_updateLineIndex`.
+    # The gate prints "stale line exemption" when it goes out of date, which is
+    # how each drift was caught. The exempted line is the
+    # `_visibleLineIndex = code.lines.length - 1;` assignment inside the
+    # `if (_visibleLineIndex >= code.lines.length)` guard in
+    # `_updateLineIndex`.
     "lib/src/code_field/span_builder.dart": {
-        143: "the _visibleLineIndex clamp never engages",
+        129: "the _visibleLineIndex clamp never engages",
     },
     # The fold toggle of a block that is already folded is always overwritten by
     # the second loop below, which adds a toggle for every folded block — so the
