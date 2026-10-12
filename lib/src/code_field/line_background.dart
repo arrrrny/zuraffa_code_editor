@@ -38,10 +38,12 @@ class LineBackgroundLayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final builder = controller.lineBackgroundBuilder;
-    if (builder == null) {
+    final currentLineColor = controller.currentLineColor;
+    if (builder == null && currentLineColor == null) {
       return const SizedBox.shrink();
     }
 
+    final currentLineIndex = _caretLineIndex(controller);
     final visibleLines = controller.code.hiddenLineRanges.visibleLineNumbers
         .toList();
 
@@ -52,7 +54,10 @@ class LineBackgroundLayer extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: List.generate(visibleLines.length, (row) {
-          final color = builder(visibleLines[row]);
+          final line = visibleLines[row];
+          final color =
+              builder?.call(line) ??
+              (line == currentLineIndex ? currentLineColor : null);
 
           if (color == null) {
             return SizedBox(height: rowHeights[row]);
@@ -63,4 +68,27 @@ class LineBackgroundLayer extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The line the caret is on, as an index in the full, unfolded buffer, or -1
+/// when there is no caret in range to tint.
+///
+/// A `RangeError` thrown from a `build` method takes the whole editor with it,
+/// and `CodeLines.characterIndexToLineIndex` throws outside
+/// `[0, text.length]`. Three real caret states sit at or beyond that boundary:
+/// the `-1` offset an untouched `TextEditingValue` carries, a caret past the
+/// text while `Code` catches up with an edit, and — the one that must *not* be
+/// rejected — a caret at exactly `text.length`, which the helper documents as
+/// "the cursor at the end of the text" and which belongs to the last line.
+///
+/// -1 is used as the "none" sentinel because it can never equal a visible line
+/// number, so the comparison in [build] needs no extra branch.
+int _caretLineIndex(CodeController controller) {
+  final text = controller.code.text;
+  final offset = controller.selection.extentOffset;
+  if (offset < 0 || offset > text.length) {
+    return -1;
+  }
+
+  return controller.code.lines.characterIndexToLineIndex(offset);
 }
