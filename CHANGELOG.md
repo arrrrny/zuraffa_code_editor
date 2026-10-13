@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Changed
+
+- **`HiddenRanges` asserts its merged invariant**: the constructor now rejects a
+  list in which any range touches the one before it
+  (`ranges[i].start == ranges[i - 1].end`), not merely one that overlaps it
+  ([issue #118](https://github.com/arrrrny/zuraffa_code_editor/issues/118)).
+  `HiddenRangesBuilder` has always merged touching ranges, so the assert fires
+  only on a list constructed by hand — nothing in `lib/` builds one. With the
+  invariant holding, `recoverPosition` no longer walks runs of adjacent ranges
+  to honor the affinity: each collapse is a single range, and recovering it
+  returns that range's own start or end. The class is internal and its
+  observable behavior on lists that satisfy the invariant is unchanged.
+
 ### Added
 
 - **An ellipsis on a folded block's kept line**: a line whose content a fold
