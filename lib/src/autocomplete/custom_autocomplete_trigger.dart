@@ -18,7 +18,7 @@ import 'dart:async';
 /// ];
 /// ```
 class CustomAutocompleteTrigger {
-  const CustomAutocompleteTrigger({
+  CustomAutocompleteTrigger({
     required this.trigger,
     required this.getSuggestions,
   }) : assert(trigger.isNotEmpty, 'trigger must not be empty');
