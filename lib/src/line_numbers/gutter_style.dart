@@ -19,12 +19,25 @@ class GutterStyle {
 
   /// Style of the numbers.
   ///
-  /// [TextStyle.fontSize] and [TextStyle.fontFamily] are ignored
-  /// and taken from the widget style or [TextTheme.titleMedium] for consistency
-  /// with lines. Everything else applies.
+  /// Three properties are ignored and taken from `CodeField.textStyle`, because
+  /// they are the ones that set the height of a line box and the gutter's rows
+  /// have to sit exactly on the code's line grid to stay aligned:
   ///
-  /// Of omitted, the widget or theme value is used with the color of
-  /// half the opacity.
+  /// | property | forced from | why |
+  /// |---|---|---|
+  /// | `fontSize` | `CodeField.textStyle` | with `height`, it is the line box height |
+  /// | `fontFamily` | `CodeField.textStyle` | a different face has different metrics |
+  /// | `height` | `CodeField.textStyle` | the line-height multiplier itself |
+  ///
+  /// Everything else applies as given, so a host can still restyle the numbers
+  /// without moving them: `color`, `fontWeight`, `fontStyle`, `letterSpacing`,
+  /// `wordSpacing`, `fontFeatures`, `fontVariations`, `fontFamilyFallback`,
+  /// `background`, `decoration`/`decorationColor`/`decorationStyle`/
+  /// `decorationThickness`, `foreground`, `shadows`, `debugLabel`.
+  ///
+  /// When omitted, `CodeField.textStyle` is used with the color of half the
+  /// opacity — and when a `color` is given here it wins over that, since colour
+  /// is not a metric.
   final TextStyle? textStyle;
 
   /// Style of the error popup.

@@ -250,6 +250,46 @@ CodeField(
 ),
 ```
 
+### Which `GutterStyle.textStyle` properties you can set
+
+The line numbers must sit exactly on the code's line grid — one row per code
+line — or the two columns drift apart and the gutter labels the wrong lines. The
+properties that decide how tall a line box is therefore come from
+`CodeField.textStyle` and cannot be changed through `GutterStyle.textStyle`:
+
+| `GutterStyle.textStyle` property | forced from | why |
+|---|---|---|
+| `fontSize` | `CodeField.textStyle` | with `height`, it *is* the line box height |
+| `fontFamily` | `CodeField.textStyle` | another face has different metrics |
+| `height` | `CodeField.textStyle` | the line-height multiplier itself |
+
+Everything else applies as given, so the numbers can be restyled without being
+moved — `color`, `fontWeight`, `fontStyle`, `letterSpacing`, `wordSpacing`,
+`fontFeatures`, `fontVariations`, `fontFamilyFallback`, `background`,
+`decoration`, `foreground`, `shadows`. A differing `fontSize`, `fontFamily` or
+`height` is ignored rather than merged, so it cannot misalign the gutter:
+
+```dart
+CodeField(
+  textStyle: const TextStyle(fontSize: 13, height: 1.6),
+  gutterStyle: const GutterStyle(
+    textStyle: TextStyle(
+      // Ignored: these three come from CodeField.textStyle.
+      fontSize: 40,
+      fontFamily: 'Courier New',
+      height: 3.5,
+      // Applied: these change how the numbers look, not where they sit.
+      color: Colors.blueGrey,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 2,
+    ),
+  ),
+),
+```
+
+With no `GutterStyle.textStyle` at all, the numbers inherit
+`CodeField.textStyle` at half the opacity of its colour.
+
 ## Accessing the Text
 
 `CodeController` extends the Flutter's built-in `TextEditingController` and is immediately
