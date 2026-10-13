@@ -5,6 +5,8 @@ export 'src/analyzer/models/analysis_result.dart';
 export 'src/analyzer/models/issue.dart';
 export 'src/analyzer/models/issue_type.dart';
 
+export 'src/autocomplete/custom_autocomplete_trigger.dart';
+
 export 'src/code/code.dart';
 export 'src/code/code_line.dart';
 export 'src/code/string.dart';
