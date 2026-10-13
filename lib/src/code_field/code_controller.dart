@@ -513,14 +513,7 @@ class CodeController extends TextEditingController {
 
   /// Replaces the current [selection] by [str]
   void insertStr(String str) {
-    final sel = selection;
-    text = text.replaceRange(selection.start, selection.end, str);
-    final len = str.length;
-
-    selection = sel.copyWith(
-      baseOffset: sel.start + len,
-      extentOffset: sel.start + len,
-    );
+    _replaceRange(selection.start, selection.end, str);
   }
 
   /// Remove the char just before the cursor or the selection
@@ -529,21 +522,38 @@ class CodeController extends TextEditingController {
       return;
     }
 
-    final sel = selection;
-    text = text.replaceRange(selection.start - 1, selection.start, '');
-
-    selection = sel.copyWith(
-      baseOffset: sel.start - 1,
-      extentOffset: sel.start - 1,
-    );
+    _replaceRange(selection.start - 1, selection.start, '');
   }
 
   /// Remove the selected text
   void removeSelection() {
-    final sel = selection;
-    text = text.replaceRange(selection.start, selection.end, '');
+    _replaceRange(selection.start, selection.end, '');
+  }
 
-    selection = sel.copyWith(baseOffset: sel.start, extentOffset: sel.start);
+  /// Replaces `[start, end)` by [str] and moves the caret to the end of what
+  /// was written — but only when the text write was actually accepted.
+  ///
+  /// A read-only position refuses the text write, and a refused write must
+  /// leave the caret where it was. Writing the selection after a rejected text
+  /// write walks the caret one offset into the region the user may not edit
+  /// (#147), which is how a refused `Enter` used to drift the caret.
+  void _replaceRange(int start, int end, String str) {
+    final sel = selection;
+    final textBefore = text;
+    final newText = text.replaceRange(start, end, str);
+
+    text = newText;
+    if (text == textBefore) {
+      // The write was refused by the read-only gate in `set value`, so the
+      // caret must not move either.
+      return;
+    }
+
+    final len = str.length;
+    selection = sel.copyWith(
+      baseOffset: start + len,
+      extentOffset: start + len,
+    );
   }
 
   /// Remove the selection or last char if the selection is empty
