@@ -77,10 +77,11 @@ jobs:
       # Ratchet: the number only ever rises, and only in the PR that adds the
       # tests behind it — the step below refuses a PR that lowers it.
       # Measured on master with a fresh coverage run and the CI helper:
-      # 100.00% (3309/3309 lines, CI run 38081200818). Unreachable files are
+      # 100.00% (3562/3562 lines over 109 files, CI run 38323022665).
+      # Unreachable files are
       # exempted (see EXEMPT_FILES in tool/coverage_gate.py): the CI helper
       # imports every file under lib/, so dead/wip modules the package never
-      # references would otherwise drag the number down. 13 individual lines
+      # references would otherwise drag the number down. 9 individual lines
       # are exempted the same way (see EXEMPT_LINES): each is a provably
       # unreachable guard or dead branch, and every entry carries its proof in
       # the comment above it. The gate is pinned to the measured value: a new
