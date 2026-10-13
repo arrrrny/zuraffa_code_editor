@@ -74,8 +74,9 @@
   handing the rest to its flex ones — so a field narrower than the gutter got a
   gutter wider than the field, `A RenderFlex overflowed by N pixels`, and a
   `TextField` laid out out of sight beside numbers painted past the edge. The
-  gutter is `Flexible` with `FlexFit.loose` now: it takes `style.width` while
-  the row can give it and narrows with the code area when it cannot. Every
+  gutter is bounded to the row's width now — a `LayoutBuilder` wraps the `Row`
+  and a `ConstrainedBox(maxWidth:)` caps the gutter, so it takes `style.width`
+  while the row can give it and the row's whole width when it cannot. Every
   width the gutter derives still comes from `style.width`, so a field wide
   enough to hold the gutter keeps it at the width it asks for — the gutter is
   80 px by default and stays so from ~168 px of field width upward.
