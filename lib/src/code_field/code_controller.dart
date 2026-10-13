@@ -38,6 +38,31 @@ import 'actions/undo.dart';
 import 'search_result_highlighted_builder.dart';
 import 'span_builder.dart';
 
+/// Everything [CodeController.buildTextSpan] reads, in one value.
+///
+/// A record rather than a class so the comparison is the language's own
+/// structural `==`, which is exactly the semantics this key needs:
+/// [TextStyle], [SearchResult] and the navigation index implement value
+/// equality, and the three components that do not — [Code], [CodeThemeData]
+/// and [Mode] — compare by identity. Picking that per component by hand is how
+/// a cache key gets one of them wrong, and a key that is wrong is not a slower
+/// version of this feature: `RenderParagraph` trusts an identical span
+/// unconditionally (`rendering/paragraph.dart`,
+/// `case RenderComparison.identical: return;`), so a hit on an unchanged key
+/// paints a stale tree.
+///
+/// A component missing from here is a stale render; a component here that never
+/// changes is only a missed cache hit. So the list is every input the build
+/// reads, and the tests assert each one is load-bearing.
+typedef _SpanCacheKey = ({
+  Code code,
+  TextStyle? style,
+  CodeThemeData? theme,
+  Mode? language,
+  SearchResult searchResult,
+  int? currentMatchIndex,
+});
+
 class CodeController extends TextEditingController {
   Mode? _language;
 
@@ -167,8 +192,19 @@ class CodeController extends TextEditingController {
   ///
   /// This can be used in tests to make sure that the updated text  was actually
   /// requested by the widget and thus notifications are done right.
+  ///
+  /// Note that with the span cache in [buildTextSpan], a non-changing call does
+  /// not request the text at all — it returns the cached span. So this field
+  /// says which span was last *served*, not which was last *built*.
   @visibleForTesting
   TextSpan? lastTextSpan;
+
+  /// What [_cachedTextSpan] was built from, and the span itself.
+  ///
+  /// One entry, replaced on the first call whose inputs differ. See
+  /// [_SpanCacheKey].
+  _SpanCacheKey? _spanCacheKey;
+  TextSpan? _cachedTextSpan;
 
   /// Tints the background of individual lines.
   ///
@@ -1350,26 +1386,50 @@ class CodeController extends TextEditingController {
       fullSearchResult,
     );
 
-    // Match offsets are cut against `Code.visibleText`, which carries no fold
-    // marker, so the tree must not carry one either while they are being
-    // sliced out of it: every marker would shift each match that follows it
-    // off its own text. The panel is transient, and the marker returns the
-    // moment the pattern is cleared.
-    final spanBeforeSearch = _createTextSpan(
-      context: context,
+    // The theme is keyed as `CodeTheme.of(context)`, not as `_getTheme(context)`.
+    // The latter fabricates a fresh `CodeThemeData` when no `CodeTheme` is in
+    // scope, and that class implements no `==`, so keying on the fabricated
+    // object would make every such call a miss — and a cache that never hits is
+    // indistinguishable from no cache by anything observable.
+    //
+    // Navigation is keyed by `currentMatchIndex` rather than by the
+    // `SearchNavigationState` object: the state implements no `==`, while the
+    // controller hands out a new instance on every search-result change and on
+    // every move, so identity would invalidate on things the tree never shows —
+    // the total match count, the index of a match that is not current — and the
+    // highlight builder reads nothing but the current index.
+    final spanCacheKey = (
+      code: _code,
       style: style,
-      withFoldEllipsis: visibleSearchResult.matches.isEmpty,
+      theme: CodeTheme.of(context),
+      language: _language,
+      searchResult: visibleSearchResult,
+      currentMatchIndex: _searchNavigationController.value.currentMatchIndex,
     );
 
-    // TODO(alexeyinkin): Return cached if the value did not change, https://github.com/akvelon/flutter-code-editor/issues/127
-    lastTextSpan = SearchResultHighlightedBuilder(
+    if (spanCacheKey == _spanCacheKey) {
+      return lastTextSpan = _cachedTextSpan!;
+    }
+
+    final span = SearchResultHighlightedBuilder(
       searchResult: visibleSearchResult,
       rootStyle: style,
-      textSpan: spanBeforeSearch,
+      // Match offsets are cut against `Code.visibleText`, which carries no fold
+      // marker, so the tree must not carry one either while they are being
+      // sliced out of it: every marker would shift each match that follows it
+      // off its own text. The panel is transient, and the marker returns the
+      // moment the pattern is cleared.
+      textSpan: _createTextSpan(
+        context: context,
+        style: style,
+        withFoldEllipsis: visibleSearchResult.matches.isEmpty,
+      ),
       searchNavigationState: _searchNavigationController.value,
     ).build();
 
-    return lastTextSpan!;
+    _spanCacheKey = spanCacheKey;
+    _cachedTextSpan = span;
+    return lastTextSpan = span;
   }
 
   TextSpan _createTextSpan({
