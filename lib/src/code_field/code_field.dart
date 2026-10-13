@@ -198,6 +198,20 @@ class CodeField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.onChanged}
   final void Function(String)? onChanged;
 
+  /// Called when the user taps the editor, after the field has handled the tap.
+  ///
+  /// This is the hook for "the user touched the code" — focus the field, hide an
+  /// overlay, log an analytics event. Wrapping the editor in a
+  /// [GestureDetector] instead does **not** work and is not a substitute: the
+  /// detector competes with `TextField`'s own tap recognizers, which are
+  /// further down the tree, and those win the arena. The wrapper is then handed
+  /// nothing at all — no error, no callback, nothing to debug.
+  ///
+  /// Forwarded to the field as is, so the gesture that fires this is the same
+  /// one that places the caret: a tap both notifies the host and leaves the
+  /// caret where it belongs. Leave it null for the default behaviour.
+  final VoidCallback? onTap;
+
   /// {@macro flutter.widgets.editableText.readOnly}
   ///
   /// This is just passed as a parameter to a [TextField].
@@ -274,6 +288,7 @@ class CodeField extends StatefulWidget {
     this.contextMenuBuilder,
     this.focusNode,
     this.onChanged,
+    this.onTap,
     this.textDirection,
     @Deprecated('Use gutterStyle instead') this.lineNumbers,
     @Deprecated('Use gutterStyle instead')
@@ -635,6 +650,7 @@ class _CodeFieldState extends State<CodeField> {
       enableSuggestions: false,
       enabled: widget.enabled,
       onChanged: widget.onChanged,
+      onTap: widget.onTap,
       readOnly: widget.readOnly,
       // Never forward a *null* builder here. `TextField` gives
       // `contextMenuBuilder` the private `_defaultContextMenuBuilder`, and
