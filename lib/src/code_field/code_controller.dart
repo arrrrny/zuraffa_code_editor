@@ -174,6 +174,27 @@ class CodeController extends TextEditingController {
   /// reaching into this controller.
   late PopupController popupController;
   final autocompleter = Autocompleter();
+
+  /// Autocomplete triggers a host registers to be asked for suggestions when
+  /// their [CustomAutocompleteTrigger.trigger] is typed on the caret's own line
+  /// (#88).
+  ///
+  /// An armed trigger replaces the keyword completer for that evaluation. The
+  /// list is read on every evaluation, so replacing it — or mutating it in
+  /// place — takes effect on the next keystroke. Empty by default, which leaves
+  /// the keyword completer's behaviour untouched.
+  List<CustomAutocompleteTrigger> customAutocompleteTriggers = const [];
+
+  /// Set when a suggestion from a custom trigger is committed, and consumed by
+  /// the [generateSuggestions] call that commit's own write makes.
+  ///
+  /// The set and the consume happen in one call stack — [insertSelectedWord]
+  /// sets it immediately before its value write, and `set value` calls
+  /// `generateSuggestions` synchronously up to its first `await`, which is past
+  /// both the read and the clear. So the flag is never still set once control
+  /// returns: a host that moves the caret and types again re-arms as normal, and
+  /// no second clearing site is needed.
+  bool _acceptedFromCustomTrigger = false;
   late final historyController = CodeHistoryController(codeController: this);
 
   @internal
@@ -655,8 +676,11 @@ class CodeController extends TextEditingController {
   void insertSelectedWord() {
     final previousSelection = selection;
     final selectedWord = popupController.getSelectedWord();
-    final startPosition = value.wordAtCursorStart;
-    final currentWord = value.wordAtCursor;
+    final armedTrigger = _armedCustomTrigger();
+    final startPosition = armedTrigger?.prefixStart ?? value.wordAtCursorStart;
+    final currentWord = armedTrigger == null
+        ? value.wordAtCursor
+        : text.substring(armedTrigger.prefixStart, selection.start);
 
     if (startPosition == null || currentWord == null) {
       popupController.hide();
@@ -690,6 +714,15 @@ class CodeController extends TextEditingController {
       baseOffset: endSelectionPosition + offsetIfEndsWithSpace,
       extentOffset: endSelectionPosition + offsetIfEndsWithSpace,
     );
+
+    // The write below puts the chosen word into the prefix the trigger matched
+    // and leaves the trigger itself in the text, so this commit's own value
+    // change would re-arm that trigger and put the popup straight back up. The
+    // one-shot is set *before* the write so that the commit's own
+    // `generateSuggestions` call is the one that consumes it.
+    if (armedTrigger != null) {
+      _acceptedFromCustomTrigger = true;
+    }
 
     value = TextEditingValue(text: replacedText, selection: adjustedSelection);
 
@@ -1235,22 +1268,88 @@ class CodeController extends TextEditingController {
     return text;
   }
 
+  /// Shows or hides the suggestion popup for the text under the caret.
+  ///
+  /// A registered [customAutocompleteTriggers] entry whose [trigger] appears on
+  /// the caret's own line takes precedence over the keyword completer: its
+  /// callback owns the list, and the blacklist is not applied to it — the
+  /// blacklist is the keyword path's `wordAtCursor` concern. With no trigger
+  /// armed, the keyword completer runs exactly as it did before triggers
+  /// existed, including hiding the popup on an empty result.
   Future<void> generateSuggestions() async {
+    final armedTrigger = _acceptedFromCustomTrigger
+        ? null
+        : _armedCustomTrigger();
+    _acceptedFromCustomTrigger = false;
+
+    if (armedTrigger != null) {
+      final suggestions = <String>[];
+      try {
+        suggestions.addAll(
+          await armedTrigger.trigger.getSuggestions(
+            text.substring(armedTrigger.prefixStart, selection.start),
+          ),
+        );
+      } catch (_) {
+        // A misbehaving host callback must not crash the editor.
+      }
+      _showSuggestionsOrHide(suggestions);
+      return;
+    }
+
     final prefix = value.wordToCursor;
     if (prefix == null) {
       popupController.hide();
       return;
     }
 
-    final suggestions = (await autocompleter.getSuggestions(
-      prefix,
-    )).toList(growable: false);
+    _showSuggestionsOrHide(
+      (await autocompleter.getSuggestions(prefix)).toList(growable: false),
+    );
+  }
 
+  void _showSuggestionsOrHide(List<String> suggestions) {
     if (suggestions.isNotEmpty) {
       popupController.show(suggestions);
     } else {
       popupController.hide();
     }
+  }
+
+  /// The custom trigger armed at the caret, and where the prefix it was handed
+  /// starts in [text].
+  ///
+  /// The scan covers the caret's own line only, and takes the **last**
+  /// occurrence of [CustomAutocompleteTrigger.trigger] in it. Both halves matter:
+  /// the last occurrence is what makes the prefix mean "the text typed after the
+  /// trigger" rather than "everything since it was first typed", and the line
+  /// bound is what keeps a prefix from swallowing the lines below a trigger typed
+  /// long ago. First registered trigger wins.
+  ({CustomAutocompleteTrigger trigger, int prefixStart})?
+  _armedCustomTrigger() {
+    final caret = selection.start;
+    if (caret < 0) {
+      // The field's first value round-trip carries a caret of -1.
+      return null;
+    }
+
+    // `caret - 1` is -1 at the start of the document, and `lastIndexOf`
+    // refuses that, so the line start is 0 rather than a scan back from it.
+    final lineStart = caret == 0 ? 0 : text.lastIndexOf('\n', caret - 1) + 1;
+    final lineBeforeCaret = text.substring(lineStart, caret);
+    for (final trigger in customAutocompleteTriggers) {
+      final prefixStart = lineBeforeCaret.lastIndexOf(trigger.trigger);
+      if (prefixStart < 0) {
+        continue;
+      }
+
+      return (
+        trigger: trigger,
+        prefixStart: lineStart + prefixStart + trigger.trigger.length,
+      );
+    }
+
+    return null;
   }
 
   void foldAt(int line) {

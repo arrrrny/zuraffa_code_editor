@@ -474,6 +474,41 @@ To disable autocompletion:
 controller.popupController.enabled = false;
 ```
 
+### Completion on a custom trigger
+
+The default rule is "suggest the words that match the word under the caret", which
+means a trigger made of spaces and punctuation can never fire: there is no word
+at the caret after ` >> `.
+
+Register a `CustomAutocompleteTrigger` to be asked instead. When its `trigger`
+appears on the caret's own line, the editor hands your callback the text typed
+after it and shows whatever you return — the keyword dictionary is bypassed for
+that evaluation.
+
+```dart
+controller.customAutocompleteTriggers = [
+  CustomAutocompleteTrigger(
+    trigger: ' >> ',
+    getSuggestions: (prefix) => templates
+        .where((template) => template.name.startsWith(prefix))
+        .map((template) => template.name),
+  ),
+];
+```
+
+The callback may be asynchronous and is called on every keystroke, so you narrow
+your own list by filtering on the prefix you are handed. Returning an empty list
+hides the popup. The trigger may be anything — `' >> '`, `'@'`, `'::'` — and more
+than one can be registered at once; the first registered trigger whose text
+matches is the one that fires.
+
+Accepting a suggestion replaces the text typed after the trigger, so a caret
+sitting right on ` >> ` commits the whole word. The commit does not re-arm the
+trigger that produced it.
+
+With no trigger registered — the default — the keyword completer behaves exactly
+as it did before.
+
 
 ## Shortcuts
 
