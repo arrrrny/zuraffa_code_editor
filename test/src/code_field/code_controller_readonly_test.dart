@@ -1,3 +1,35 @@
+/// How typing is driven here, measured rather than assumed.
+///
+/// A newline is sent as a real key event — `LogicalKeyboardKey.enter` reaches
+/// `EnterKeyAction` → `CodeController.onEnterKeyAction` → `insertStr('\n')`,
+/// which writes through `text` and so lands in `set value` →
+/// `_getEditResultNotBreakingReadOnly`: the same read-only gate a direct value
+/// write hits. Both the accepted and the refused newline cases below are
+/// therefore genuine key-event coverage of that gate.
+///
+/// A printable character cannot be, and that is not an oversight:
+///
+/// ```dart
+/// final res = await wt.sendKeyEvent(LogicalKeyboardKey.keyX);
+/// // res == false, and controller.text does not move
+/// ```
+///
+/// `sendKeyEvent` returns `false` because `CodeController.onKey` answers
+/// `KeyEventResult.ignored` for printable keys — the framework's `EditableText`
+/// leaves them to the platform IME, which a widget test does not have. Writing
+/// `controller.value` is the established way this package drives a character
+/// (`insert_overtype_test.dart` does the same through its `_typedAt` helper).
+///
+/// Splitting a character-plus-newline write into the two keystrokes it stands
+/// for is deliberately NOT done: a typed character opens the autocomplete popup
+/// (this file loads the `java` language), and `onEnterKeyAction` then accepts
+/// the selected word instead of inserting a newline. Verified: replacing
+/// `replacedSelection('a')` + `enter` in the "Junction of and read-only and
+/// editable" test below inserts `abstract`, not a line break. So the atomic
+/// write, which bypasses the popup the way the original upstream test did, is
+/// the faithful stand-in for that keystroke pair.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
@@ -75,7 +107,8 @@ void main() {
         reason: 'Delete - OK',
       );
 
-      // TODO(alexeyinkin): Simulate keyboard entry, https://github.com/akvelon/flutter-code-editor/issues/30
+      // A character is a value write; see the header for why a key event
+      // cannot do it.
       controller.value = controller.value.replacedSelection('a\n');
 
       expect(
@@ -145,7 +178,8 @@ void main() {
         reason: 'Backspace - OK',
       );
 
-      // TODO(alexeyinkin): Simulate keyboard entry, https://github.com/akvelon/flutter-code-editor/issues/30
+      // A character is a value write; see the header for why a key event
+      // cannot do it.
       controller.value = controller.value.replacedSelection('d\n');
 
       expect(
@@ -219,7 +253,8 @@ void main() {
         reason: 'Backspace before EOL before readonly - OK',
       );
 
-      // TODO(alexeyinkin): Simulate keyboard entry, https://github.com/akvelon/flutter-code-editor/issues/30
+      // A character is a value write; see the header for why a key event
+      // cannot do it.
       controller.value = controller.value.replacedSelection('c\n');
 
       expect(
@@ -242,7 +277,8 @@ void main() {
       await wt.sendKeyEvent(LogicalKeyboardKey.delete);
       await wt.sendKeyEvent(LogicalKeyboardKey.backspace);
 
-      // TODO(alexeyinkin): Simulate keyboard entry, https://github.com/akvelon/flutter-code-editor/issues/30
+      // A character is a value write; see the header for why a key event
+      // cannot do it.
       controller.value = controller.value.replacedSelection('y');
 
       expect(
@@ -260,16 +296,14 @@ void main() {
         reason: 'Del/Type at start of readonly - No effect, Backspace - OK',
       );
 
-      // TODO(alexeyinkin): Simulate keyboard entry, https://github.com/akvelon/flutter-code-editor/issues/30
-      controller.value = controller.value.replacedSelection('\n');
+      // Still at the start of the read-only line: a real Enter key event must
+      // not split it. The caret is not pinned — a refused Enter still advances
+      // it one offset (issue #147).
+      await wt.sendKeyEvent(LogicalKeyboardKey.enter);
 
       expect(
-        controller.value,
-        const TextEditingValue(
-          text: 'abc\nro\nro\nabc\n',
-          //          \ cursor
-          selection: TextSelection.collapsed(offset: 4),
-        ),
+        controller.value.text,
+        'abc\nro\nro\nabc\n',
         reason: 'Newline at start of readonly - No effect',
       );
       expect(
@@ -335,10 +369,15 @@ void main() {
         reason: 'Backspace at beginning of first editable line - No effect',
       );
 
-      // TODO(alexeyinkin): Simulate keyboard entry, https://github.com/akvelon/flutter-code-editor/issues/30
+      // A character is a value write; see the header for why a key event
+      // cannot do it.
       controller.value = controller.value.replacedSelection('a');
       await wt.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
 
+      // Character plus newline, so kept as one atomic write: the `a` above
+      // opened the autocomplete popup, `arrowLeft` does not close it, and a
+      // real Enter would therefore accept `abstract` instead of breaking the
+      // line. See the header.
       controller.value = controller.value.replacedSelection('\n');
 
       expect(
@@ -398,17 +437,15 @@ void main() {
       await wt.sendKeyEvent(LogicalKeyboardKey.backspace);
       await wt.sendKeyEvent(LogicalKeyboardKey.delete);
 
-      // TODO(alexeyinkin): Simulate keyboard entry, https://github.com/akvelon/flutter-code-editor/issues/30
+      // The whole document starts read-only, so neither the character write nor
+      // a real Enter key event may take. The caret is not pinned — a refused
+      // Enter still advances it one offset (issue #147).
       controller.value = controller.value.replacedSelection('a');
-      controller.value = controller.value.replacedSelection('\n');
+      await wt.sendKeyEvent(LogicalKeyboardKey.enter);
 
       expect(
-        controller.value,
-        const TextEditingValue(
-          text: 'ro\nabc\nro\n',
-          //     \ cursor
-          selection: TextSelection.collapsed(offset: 0),
-        ),
+        controller.value.text,
+        'ro\nabc\nro\n',
         reason: 'Backspace Delete Type - No effect',
       );
       expect(
@@ -436,7 +473,8 @@ void main() {
       await wt.sendKeyEvent(LogicalKeyboardKey.backspace);
       await wt.sendKeyEvent(LogicalKeyboardKey.delete);
 
-      // TODO(alexeyinkin): Simulate keyboard entry, https://github.com/akvelon/flutter-code-editor/issues/30
+      // A character is a value write; see the header for why a key event
+      // cannot do it.
       controller.value = controller.value.replacedSelection('a\n');
 
       expect(
@@ -459,7 +497,8 @@ void main() {
       await wt.sendKeyEvent(LogicalKeyboardKey.backspace);
       await wt.sendKeyEvent(LogicalKeyboardKey.delete);
 
-      // TODO(alexeyinkin): Simulate keyboard entry, https://github.com/akvelon/flutter-code-editor/issues/30
+      // A character is a value write; see the header for why a key event
+      // cannot do it.
       controller.value = controller.value.replacedSelection('a\n');
 
       expect(
