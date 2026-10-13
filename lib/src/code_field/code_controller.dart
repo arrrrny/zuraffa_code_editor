@@ -1283,11 +1283,17 @@ class CodeController extends TextEditingController {
     _acceptedFromCustomTrigger = false;
 
     if (armedTrigger != null) {
-      _showSuggestionsOrHide(
-        (await armedTrigger.trigger.getSuggestions(
-          text.substring(armedTrigger.prefixStart, selection.start),
-        )).toList(growable: false),
-      );
+      final suggestions = <String>[];
+      try {
+        suggestions.addAll(
+          await armedTrigger.trigger.getSuggestions(
+            text.substring(armedTrigger.prefixStart, selection.start),
+          ),
+        );
+      } catch (_) {
+        // A misbehaving host callback must not crash the editor.
+      }
+      _showSuggestionsOrHide(suggestions);
       return;
     }
 

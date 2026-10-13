@@ -21,7 +21,7 @@ class CustomAutocompleteTrigger {
   const CustomAutocompleteTrigger({
     required this.trigger,
     required this.getSuggestions,
-  });
+  }) : assert(trigger.isNotEmpty, 'trigger must not be empty');
 
   /// The string that arms this trigger, e.g. `' >> '` or `'@'`.
   ///
