@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
@@ -394,6 +396,14 @@ class _CodeFieldState extends State<CodeField> {
   double? _rowHeightsForWidth;
   List<double>? _cachedRowHeights;
 
+  /// The controller value [_onTextChanged] last saw.
+  ///
+  /// The controller notifies for more than a value change — an analysis result,
+  /// a search result, the suggestion popup — and only a value change can move
+  /// the caret somewhere the viewport does not show, so the reveal below is
+  /// driven off the comparison rather than off every notification.
+  TextEditingValue _lastValue = const TextEditingValue();
+
   @override
   void initState() {
     super.initState();
@@ -493,6 +503,10 @@ class _CodeFieldState extends State<CodeField> {
   }
 
   void _onTextChanged() {
+    final value = widget.controller.value;
+    final valueChanged = value != _lastValue;
+    _lastValue = value;
+
     // Rebuild line number
     final str = widget.controller.text.split('\n');
     final buf = <String>[];
@@ -525,6 +539,170 @@ class _CodeFieldState extends State<CodeField> {
       // offset read above and setState below would throw.
       rebuild();
     }
+
+    if (valueChanged) {
+      _revealCaretOnScreen();
+    }
+  }
+
+  /// Reveals the caret after a value change the framework would reveal for the
+  /// platform's input but not for the controller's (#149).
+  ///
+  /// `EditableText` runs its own reveal — `_scheduleShowCaretOnScreen` — from
+  /// `userUpdateTextEditingValue`, the method every keystroke and every IME
+  /// update arrives through, but deliberately not from
+  /// `_didChangeTextEditingValue`, the listener a `TextEditingController`
+  /// write notifies. So the same edit made by typing scrolls the caret into
+  /// view and made through `CodeController.text` / `.selection` does not: the
+  /// caret walks off the bottom of the viewport and the user has to find it by
+  /// hand. This is that reveal, run on the controller's path.
+  ///
+  /// It is the framework's own reveal, not a re-measurement: the caret rect
+  /// comes from the laid-out `RenderEditable` and the offset is the one
+  /// `EditableText._getOffsetToRevealCaret` derives from it. Laying the text
+  /// out here instead would need the field's line heights, and a second
+  /// measure drifting from the render object is exactly the
+  /// fighting-the-gutter problem the wrap calibration already has.
+  ///
+  /// Focus gates it, the same condition `EditableText._handleFocusChanged`
+  /// puts on its own reveal: a host that loads a document the user has not
+  /// opened yet must not have the viewport yanked to wherever the caret
+  /// landed, and the reveal happens on the focus change that follows anyway.
+  ///
+  /// The reveal is scheduled for after the frame the new value rebuilds,
+  /// because a caret rect read from the previous layout is the old caret's —
+  /// and for after a microtask, because of who else reveals. The framework
+  /// writes the value through `_formatAndSetValue`, which is what notifies the
+  /// listener above, and only then calls `_scheduleShowCaretOnScreen`
+  /// (`editable_text.dart:3726`, with a comment saying outright that
+  /// programmatic changes get no reveal while user changes do). So a reveal
+  /// registered from this listener is ordered *ahead* of the framework's on
+  /// every keystroke, and jumping the offset it is still about to animate to
+  /// would turn the typing path's animated reveal into an instant one. A
+  /// microtask runs once the whole keystroke is done, which puts this reveal
+  /// behind the framework's own and lets that one lead, as it does today.
+  void _revealCaretOnScreen() {
+    if (_focusNode!.hasFocus != true) {
+      return;
+    }
+
+    scheduleMicrotask(() {
+      if (!mounted) {
+        return;
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        _revealCaret();
+      });
+    });
+  }
+
+  /// Moves the field's offset to the caret, and only ever to it.
+  ///
+  /// Everything here is a condition under which moving the offset would be
+  /// wrong, and each is reachable from a host: no laid-out field, a host that
+  /// made the field unscrollable, an offset already on its way somewhere, and
+  /// a caret that is already in view.
+  void _revealCaret() {
+    final selection = widget.controller.value.selection;
+    if (!selection.isValid) {
+      return;
+    }
+
+    final renderEditable = _renderEditable;
+    final position = _codePosition;
+    if (renderEditable == null || position == null) {
+      return;
+    }
+
+    // The same flag `RenderObject.showOnScreen` checks before it scrolls:
+    // false while a drag or a fling owns the field, or while a host has made
+    // it unscrollable, and a reveal must not take the field off the user.
+    if (!position.allowImplicitScrolling) {
+      return;
+    }
+
+    // An offset already on its way somewhere — the framework's reveal
+    // animating the caret into view on the path that carried a keystroke, or a
+    // drag the user has not let go of — is not this reveal's to move. Taking
+    // it over cancels whatever was driving it, and an instant jump where the
+    // framework animated one is a visible difference on the typing path.
+    // `isScrollingNotifier` is the public read the framework documents for
+    // "is this position running an activity", rather than the `activity` it
+    // backs.
+    if (position.isScrollingNotifier.value) {
+      return;
+    }
+
+    final caretRect = renderEditable.getLocalRectForCaret(selection.extent);
+    final target = _offsetToRevealCaret(caretRect, position);
+
+    // A caret already in the band is the ordinary case on the framework's
+    // paths, and `jumpTo` would disturb the position even to move it nowhere.
+    if (target == position.pixels) {
+      return;
+    }
+
+    // The field is its own vertical viewport, so the offset is driven directly
+    // and `showOnScreen` is what reveals the caret sideways and on any
+    // scrollable the host wrapped the field in — the two halves of the
+    // framework's own reveal, in the order it makes them.
+    position.jumpTo(target);
+    renderEditable.showOnScreen(rect: widget.padding.inflateRect(caretRect));
+  }
+
+  /// The scroll offset that brings the caret at [caretRect] into view.
+  ///
+  /// Both edges of the rect are read against the visible band rather than the
+  /// document: `RenderEditable.getLocalRectForCaret` hands back a rect already
+  /// shifted by the current paint offset. So the caret is in view exactly when
+  /// it lies inside `[0, viewportDimension]`, and revealing it is the smallest
+  /// move that puts it there — down by however far its bottom edge has fallen
+  /// past the band's bottom, up by however far its top has drifted past the
+  /// band's top. A caret already inside moves nothing.
+  ///
+  /// This is `EditableText._getOffsetToRevealCaret`, which the framework runs
+  /// for a keystroke and not for a controller write (#149).
+  double _offsetToRevealCaret(Rect caretRect, ScrollPosition position) {
+    final double delta;
+    if (caretRect.bottom > position.viewportDimension) {
+      delta = caretRect.bottom - position.viewportDimension;
+    } else if (caretRect.top < 0) {
+      delta = caretRect.top;
+    } else {
+      return position.pixels;
+    }
+
+    final target = position.pixels + delta;
+    return min(max(target, position.minScrollExtent), position.maxScrollExtent);
+  }
+
+  /// The [RenderEditable] the field's text is painted by, or null while the
+  /// field is not laid out.
+  ///
+  /// No key in this package reaches it. `EditableText` builds its render object
+  /// several proxies below the editor box — the field's own `Scrollable`, the
+  /// semantics and mouse regions around the text — and none of those proxies
+  /// is a widget this package supplies, so the editor box is searched for it
+  /// instead. The search is bounded by the field's subtree and the field holds
+  /// exactly one `TextField`, so the first match is the field's own.
+  RenderEditable? get _renderEditable {
+    final root = _editorKey.currentContext?.findRenderObject();
+    return root == null ? null : _findRenderEditable(root);
+  }
+
+  static RenderEditable? _findRenderEditable(RenderObject root) {
+    RenderEditable? found;
+    root.visitChildren((child) {
+      if (child is RenderEditable) {
+        found ??= child;
+      } else {
+        found ??= _findRenderEditable(child);
+      }
+    });
+    return found;
   }
 
   // Wrap the codeField in a horizontal scrollView
