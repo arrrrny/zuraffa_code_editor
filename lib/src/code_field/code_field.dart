@@ -945,12 +945,36 @@ class _CodeFieldState extends State<CodeField> {
         color: _backgroundCol,
         key: _codeFieldKey,
         padding: const EdgeInsets.only(left: 8),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (widget.gutterStyle.showGutter) _buildGutter(),
-            Expanded(key: _editorKey, child: editingField),
-          ],
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // The gutter and the code area share the row, and each needs
+                // the other to keep its width: the code area is `Expanded`, so
+                // it takes exactly the width the gutter leaves. The gutter is
+                // therefore bounded rather than given a flex share — a flex
+                // allocation is never handed back when a child takes less than
+                // it, so `Flexible` here would shrink the code area by the
+                // gutter's slack at every field width.
+                //
+                // Unbounded, a `Row` lays a non-flex child out at its own
+                // requested size, so a field narrower than the gutter got a
+                // gutter wider than the field: `A RenderFlex overflowed by N
+                // pixels`, numbers painted past the widget's edge, and a
+                // `TextField` laid out out of sight beside them (#259). The
+                // gutter is the party that gives way, because it is the one
+                // whose advertised width is a preference. An unbounded row —
+                // the field inside a scroll view — bounds nothing.
+                if (widget.gutterStyle.showGutter)
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+                    child: _buildGutter(),
+                  ),
+                Expanded(key: _editorKey, child: editingField),
+              ],
+            );
+          },
         ),
       ),
     );
