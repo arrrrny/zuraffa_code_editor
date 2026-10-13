@@ -45,6 +45,16 @@ What it cannot reproduce, and prints on startup instead of guessing:
 
 Canonical copy: `arrrrny/forklift` → `scripts/local_ci.sh` (reference:
 `docs/forklift-scripts.md`).
+
+**This fork is PUBLIC, so Actions is NOT billing-blocked here.** Unlike the
+private fleet repos, a `ci` run on `ubuntu-latest` really executes every step
+(take a `build` run: `flutter pub get` → `dart analyze --fatal-infos` →
+`dart format --set-exit-if-changed` → the generated coverage helper →
+`flutter test --concurrency=2 --coverage` → `tool/coverage_gate.py --min 100`
+→ lcov artifact + Codecov), and the check on a PR is a real verdict rather
+than noise. `local_ci.sh` remains the fast local mirror of the same workflow,
+and the two must never disagree — the gate it parses is this file.
+
 <!-- local-ci:end -->
 
 
