@@ -577,11 +577,46 @@ class _CodeFieldState extends State<CodeField> {
       ),
     );
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.only(right: widget.padding.right),
-      scrollDirection: Axis.horizontal,
+    // A thumb with `thumbVisibility: true` paints even when there is nothing to
+    // scroll, so the thumb is only asked for when the code area actually has
+    // horizontal reach: a full-width bar on a short file is a lie about what it
+    // can do, and it squats on the bottom edge of every narrow document.
+    //
+    // The bar itself is never mounted conditionally. Inserting a widget above
+    // the scroll view rebuilds the `SingleChildScrollView` at a different depth,
+    // which unmounts its `Scrollable` and takes the scroll offset with it — that
+    // reset lands on the caret reveal that Flutter's `EditableText` schedules
+    // while typing, and the code jumps back to the left edge after every width
+    // change. A stable tree with a hidden thumb has no such fault.
+    //
+    // The reach is measured rather than asked of the scroll position, and the
+    // measurement is the one the IntrinsicWidth column below already performs —
+    // its width is `Text(longestLine)` plus the 16px padding the trick adds,
+    // clamped from below by the viewport width — so the two cannot disagree.
+    // Listening for the answer would not help: a controller announces offset
+    // changes, and a ScrollMetricsNotification forces this field through a
+    // second build pass, which per-line background builders are sensitive to.
+    final linePainter = TextPainter(
+      text: TextSpan(text: longestLine, style: textStyle),
+      textDirection: _textDirection,
+    )..layout();
+    final contentWidth = linePainter.width + 16;
+    linePainter.dispose();
+
+    return Scrollbar(
       controller: _horizontalCodeScroll,
-      child: intrinsic,
+      thumbVisibility: contentWidth > minWidth - widget.padding.right,
+      // Interactive regardless of platform: on the touch platforms Flutter
+      // defaults `interactive` to false, which would leave the thumb a
+      // decoration that cannot be dragged. With no thumb painted the
+      // recognizers find no thumb to grab, so a hidden bar stays inert.
+      interactive: true,
+      child: SingleChildScrollView(
+        padding: EdgeInsets.only(right: widget.padding.right),
+        scrollDirection: Axis.horizontal,
+        controller: _horizontalCodeScroll,
+        child: intrinsic,
+      ),
     );
   }
 
