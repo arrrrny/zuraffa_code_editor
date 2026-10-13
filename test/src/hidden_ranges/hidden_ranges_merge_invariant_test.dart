@@ -183,6 +183,13 @@ void main() {
       );
     });
 
+    test('differs when the ranges differ', () {
+      final left = HiddenRanges(ranges: _gappedRanges, textLength: 140);
+
+      expect(left.hashCode, isNot(HiddenRanges.empty.hashCode));
+      expect(left, isNot(HiddenRanges.empty));
+    });
+
     test('the shared fixture is stable across list instances', () {
       expect(
         hiddenRanges.hashCode,
