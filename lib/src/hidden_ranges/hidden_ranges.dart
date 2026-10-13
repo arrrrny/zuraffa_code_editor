@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:highlight/highlight_core.dart';
 
-import '../code/text_range.dart';
 import '../search/match.dart';
 import '../search/result.dart';
 import 'hidden_range.dart';
@@ -21,8 +20,11 @@ class HiddenRanges {
 
   HiddenRanges({required this.ranges, required this.textLength})
     : assert(
-        _areSortedAndNotOverlapping(ranges),
-        'Texts must be sorted and not overlap',
+        _areSortedMergedAndNonAdjacent(ranges),
+        'Ranges must be sorted, non-overlapping and non-adjacent. '
+        '`HiddenRangesBuilder` merges touching ranges, so a list that '
+        'reaches here with `ranges[i].start == ranges[i - 1].end` was '
+        'not built by it.',
       ),
       hiddenCharactersBeforeRanges = _getHiddenCharactersBeforeRanges(ranges);
 
@@ -38,9 +40,15 @@ class HiddenRanges {
     textLength: 0,
   );
 
-  static bool _areSortedAndNotOverlapping(List<HiddenRange> ranges) {
+  /// The invariant `HiddenRangesBuilder._merge` produces: sorted, and a gap of
+  /// at least one character between every pair.
+  ///
+  /// The algorithms below rely on the gap — a run of touching ranges would
+  /// collapse them onto one visible position and make `recoverPosition`'s
+  /// affinity choice ambiguous.
+  static bool _areSortedMergedAndNonAdjacent(List<HiddenRange> ranges) {
     for (int i = ranges.length; --i >= 1;) {
-      if (!ranges[i].isAfter(ranges[i - 1])) {
+      if (ranges[i].start <= ranges[i - 1].end) {
         return false;
       }
     }
@@ -269,19 +277,9 @@ class HiddenRanges {
         case 0: // position is at the range collapse.
           switch (placeHiddenRanges) {
             case TextAffinity.downstream:
-              // Find the first range collapsed at this point.
-              while (rangeIndex > 0 &&
-                  ranges[rangeIndex - 1].end == ranges[rangeIndex].start) {
-                rangeIndex--;
-              }
-              return ranges[rangeIndex].start;
+              return range.start;
             case TextAffinity.upstream:
-              // Find the last range collapsed at this point.
-              while (rangeIndex < ranges.length - 1 &&
-                  ranges[rangeIndex].end == ranges[rangeIndex + 1].start) {
-                rangeIndex++;
-              }
-              return ranges[rangeIndex].end;
+              return range.end;
           }
 
         case -1: // position is after the range collapse
