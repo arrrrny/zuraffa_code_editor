@@ -2,6 +2,10 @@
 
 [![Pub Version](https://img.shields.io/pub/v/zuraffa_code_editor)](https://pub.dev/packages/zuraffa_code_editor)
 
+```sh
+flutter pub add zuraffa_code_editor
+```
+
 A maintained fork of
 [`flutter_code_editor`](https://pub.dev/packages/flutter_code_editor) 0.3.5 for
 the [Zuraffa](https://pub.dev/packages/zuraffa) ecosystem.
@@ -84,7 +88,7 @@ See the full runnable example [here](https://github.com/arrrrny/zuraffa_code_edi
 
 ### Syntax Highlighting
 
-Flutter Code Editor supports
+Zuraffa Code Editor supports
 [over a hundred languages](https://github.com/git-touch/highlight.dart/tree/master/highlight/lib/languages),
 relying on the [highlight](https://pub.dev/packages/highlight) package for parsing code.
 
@@ -150,7 +154,7 @@ you gave it.
 
 ### Code Blocks Folding 
 
-Flutter Code Editor can detect and fold code blocks. Code blocks folding is supported for the following languages:
+Zuraffa Code Editor can detect and fold code blocks. Code blocks folding is supported for the following languages:
 - Dart
 - Go
 - Java
@@ -196,7 +200,7 @@ If you only use the analyzers we ship, then this will not affect you.
 
 ### Pre-defined Themes
 
-Flutter Code Editor supports themes from the [highlight](https://pub.dev/packages/flutter_highlight) package —
+Zuraffa Code Editor supports themes from the [highlight](https://pub.dev/packages/flutter_highlight) package —
 see the full list of the pre-defined themes
 [here](https://github.com/git-touch/highlight.dart/tree/master/flutter_highlight/lib/themes).
 
@@ -304,8 +308,8 @@ usable as one. However, code folding and other features have impact on built-in 
 
 ## Named Sections
 
-To manipulate parts of the source code, Flutter Code Editor supports *named sections*.
-They are defined in the code by adding tags that Flutter Code Editor recognizes.
+To manipulate parts of the source code, Zuraffa Code Editor supports *named sections*.
+They are defined in the code by adding tags that Zuraffa Code Editor recognizes.
 
 To define a named section in your source code, add comments to tag the start and the end of the section:
 1. Add comment `[START section_name]` to tag the beginning of the section.
@@ -324,7 +328,7 @@ class MyClass {
 ''';
 ```
 
-To process named sections in the Flutter Code Editor,
+To process named sections in the Zuraffa Code Editor,
 pass the named section parser to the controller:
 
 ```dart
@@ -347,7 +351,7 @@ To customize section parsing using any other syntax, subclass `AbstractNamedSect
 
 ## Read-Only Code Blocks
 
-Flutter Code Editor allows you to define read-only code blocks.
+Zuraffa Code Editor allows you to define read-only code blocks.
 This may be useful for learning use cases when users are guided to modify certain code blocks
 while other code is meant to be protected from changes. 
 
@@ -357,7 +361,7 @@ To make a named section read-only, pass a set of named sections to the `controll
 controller.readOnlySectionNames = {'section1'};
 ```
 
-This locks the given sections from modifications in the Flutter Code Editor.
+This locks the given sections from modifications in the Zuraffa Code Editor.
 Any non-existent section names in this set are ignored.
 To make the code editable again, pass an updated set to `controller.readOnlySectionNames`.
 
@@ -438,7 +442,7 @@ controller.visibleSectionNames = {'section1'};
 ![visibleSectionNames](https://raw.githubusercontent.com/arrrrny/zuraffa_code_editor/master/example/images/visible-section-names.png)
 
 When hiding text, the full text is still preserved
-and available via `fullText` property in the Flutter Code Editor.
+and available via `fullText` property in the Zuraffa Code Editor.
 
 Hiding text preserves line numbering, which is not possible by just showing a cropped snippet.
 Preserving hidden text is also useful if you later need to send
