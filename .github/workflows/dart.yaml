@@ -77,7 +77,7 @@ jobs:
       # Ratchet: the number only ever rises, and only in the PR that adds the
       # tests behind it — the step below refuses a PR that lowers it.
       # Measured on master with a fresh coverage run and the CI helper:
-      # 100.00% (3562/3562 lines over 109 files, CI run 38323022665).
+      # 100.00% (3633/3633 lines over 110 files, CI run 38688887806).
       # Unreachable files are
       # exempted (see EXEMPT_FILES in tool/coverage_gate.py): the CI helper
       # imports every file under lib/, so dead/wip modules the package never
