@@ -623,16 +623,6 @@ class Code {
         foldableBlocks.firstWhereOrNull((block) => block.firstLine == line);
   }
 
-  /// Whether the last line of a foldable block is a *closing* line — `)`,
-  /// `]`, `}`, `);`, `},` … — rather than a line of the block's content.
-  ///
-  /// Folding must leave a closing line on screen (see
-  /// [foldableBlockToHiddenRange]), but it must hide content lines whole.
-  static bool _isClosingLine(CodeLine line) {
-    final text = line.text.trimLeft();
-    return text.startsWith(')') || text.startsWith(']') || text.startsWith('}');
-  }
-
   HiddenRange foldableBlockToHiddenRange(FoldableBlock block) {
     final firstLine = lines.lines[block.firstLine + 1]; //Keep 1st line visible.
     final lastLine = lines.lines[block.lastLine];
@@ -652,7 +642,7 @@ class Code {
     // must be hidden whole, as upstream does. Stopping at its start would
     // delete only the preceding newline and glue it onto the line above:
     // `// first// second`.
-    var endOfRange = _isClosingLine(lastLine)
+    var endOfRange = lastLine.isClosingLine
         ? lastLine.textRange.start
         : _upstreamEndOfRange(lastLine);
 

@@ -522,6 +522,37 @@ int n;
       });
     });
 
+    group('Deleting a newline after a folded block', () {
+      testWidgets('The fold survives and the hidden content stays hidden', (
+        wt,
+      ) async {
+        const example = 'a {\n  body();\n}\n\n\n\nb {\n  y();\n}\n';
+        final controller = await pumpController(wt, example);
+        controller.foldAt(0);
+        // visible = `a {}\n\n\n\nb {\n  y();\n}\n`, so 4..5 is the newline
+        // that ends the folded block's closer row.
+        await wt.selectFromHome(4, offset: 1);
+
+        controller.value = controller.value.replacedSelection('');
+
+        expect(controller.value.text, 'a {}\n\n\nb {\n  y();\n}\n');
+        expect(
+          controller.code.foldedBlocks,
+          hasLength(1),
+          reason: 'The fold hides `  body();`, which this edit did not touch',
+        );
+        expect(controller.code.hiddenRanges.ranges, hasLength(1));
+
+        controller.unfoldAt(0);
+
+        expect(
+          controller.value.text,
+          'a {\n  body();\n}\n\n\nb {\n  y();\n}\n',
+          reason: 'Unfolding reveals the content that survived the edit',
+        );
+      });
+    });
+
     group('Deleting folded blocks.', () {
       testWidgets('First block of the same length', (WidgetTester wt) async {
         final controller = await pumpController(wt, TwoMethodsSnippet.full);
