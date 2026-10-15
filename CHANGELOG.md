@@ -81,6 +81,36 @@
   enough to hold the gutter keeps it at the width it asks for — the gutter is
   80 px by default and stays so from ~168 px of field width upward.
 
+- **A fold survives an edit to the newline that follows it**
+  ([issue #160](https://github.com/arrrrny/zuraffa_code_editor/issues/160),
+  upstream `akvelon/flutter-code-editor#175`, reported as "hidden ranges of
+  folded foldable block gets removed when you delete one of the consecutive new
+  line chars after the block"). Deleting one of the blank lines under a folded
+  block unfolded it: the fold marker went away and the hidden content rendered
+  back in, which is the one outcome the reporter folded to avoid.
+  `FoldableBlockMatcher._editTouchedHiddenContent` had both bounds of the
+  hidden-line span backwards — it exempted the block's own first line
+  (`firstLine + 1`) and counted its closing row as hidden (`.. lastLine`).
+  `Code.foldableBlockToHiddenRange` starts the hidden range at the newline
+  *ending* the first line and ends it at the *start* of the closing row so the
+  closer stays on screen, so the span is `firstLine .. (closing ? lastLine - 1
+  : lastLine)`. An edit that replaces neither the first line's trailing newline
+  nor any hidden line — one that removes the newline after the closer, or one
+  of the blank lines under it — hides nothing this fold does, and the block
+  keeps matching.
+  The literal Backspace path never reproduced: the guard upstream added for
+  `#222` refuses a collapsed single-character deletion that would remove a
+  folded block, and it is keyed on `oldSelection.isCollapsed` — which is
+  exactly why `#175` still reproduces through a *selection* edit, the shape the
+  fix addresses. `CodeLine.isClosingLine` now carries the closing-row test that
+  `Code` used to hold inline, so the one definition serves both the hidden-range
+  builder and the re-match.
+  Pinned by `test/src/folding/fold_survives_newline_after_fold_test.dart`
+  (4 tests), a `testWidgets` selection-delete case in
+  `test/src/code_field/code_controller_folding_editing_test.dart`, and three
+  `CodeLine.isClosingLine` unit tests; the #108 identical-block and #222
+  backspace contracts stay green unchanged.
+
 ## 0.2.0
 
 ### Added

@@ -80,18 +80,29 @@ class FoldableBlockMatcher {
 
   /// Whether the lines the fold hides are lines this edit replaced.
   ///
-  /// The block's own first line is exempt: it stays visible while the block is
-  /// folded, so an edit that only touches it leaves the hidden content intact —
-  /// which is the one case the content comparison below is written to allow.
+  /// The lines a block's fold hides are the lines its hidden character range
+  /// touches: that range starts at the newline ending the block's own first
+  /// line — so the first line counts, both as the block's only surviving
+  /// anchor and, for a block whose closer sits on the very next row, as the
+  /// row whose trailing newline is the whole hidden content — and ends at the
+  /// start of the block's last line when that line is a closing row, which
+  /// [Code.foldableBlockToHiddenRange] leaves on screen. A closing row and the
+  /// newline ending it are that row's own, so an edit that replaces neither —
+  /// one that removes the newline after the closer, or one of the blank lines
+  /// under it — hides nothing this block does, and the block keeps matching
+  /// (akvelon/flutter-code-editor#175).
   bool _editTouchedHiddenContent(FoldableBlock oldFoldedBlock) {
     final changed = changedOldLines;
     if (changed == null) {
       return false;
     }
 
-    final firstHiddenLine = oldFoldedBlock.firstLine + 1;
-    return firstHiddenLine < changed.end &&
-        oldFoldedBlock.lastLine >= changed.start;
+    final firstHiddenLine = oldFoldedBlock.firstLine;
+    final lastHiddenLine = oldLines[oldFoldedBlock.lastLine].isClosingLine
+        ? oldFoldedBlock.lastLine - 1
+        : oldFoldedBlock.lastLine;
+
+    return firstHiddenLine < changed.end && lastHiddenLine >= changed.start;
   }
 
   /// Adds the folded block to newFoldedBlocks

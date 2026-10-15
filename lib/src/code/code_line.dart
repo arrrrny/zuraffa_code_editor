@@ -40,6 +40,17 @@ class CodeLine {
         indent: text == null ? indent : _calculateIndent(text),
       );
 
+  /// Whether this line is a *closing* line — `)`, `]`, `}`, `);`, `},`, … —
+  /// rather than a line of the surrounding block's content.
+  ///
+  /// Folding leaves a closing line on screen, but hides content lines whole,
+  /// so the two kinds behave differently and have to be told apart.
+  bool get isClosingLine {
+    final text = this.text.trimLeft();
+
+    return text.startsWith(')') || text.startsWith(']') || text.startsWith('}');
+  }
+
   @override
   bool operator ==(Object other) {
     return other is CodeLine &&

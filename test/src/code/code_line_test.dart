@@ -77,6 +77,29 @@ void main() {
     });
   });
 
+  group('CodeLine.isClosingLine', () {
+    test('recognizes every closing bracket, however the row is shaped', () {
+      expect(_line('}').isClosingLine, isTrue);
+      expect(_line(']').isClosingLine, isTrue);
+      expect(_line(')').isClosingLine, isTrue);
+      expect(_line('},').isClosingLine, isTrue);
+      expect(_line(');').isClosingLine, isTrue);
+      expect(_line('});').isClosingLine, isTrue);
+    });
+
+    test('ignores the indentation before the closer', () {
+      expect(_line('      }').isClosingLine, isTrue);
+      expect(_line('\t)').isClosingLine, isTrue);
+    });
+
+    test('rejects a content row, even one that ends with a closer', () {
+      expect(_line('body();').isClosingLine, isFalse);
+      expect(_line('  x = f();').isClosingLine, isFalse);
+      expect(_line('// a comment').isClosingLine, isFalse);
+      expect(_line('').isClosingLine, isFalse);
+    });
+  });
+
   group('CodeLine equality', () {
     test('equal lines compare equal and hash equal', () {
       final a = _line('  ab', start: 2);
