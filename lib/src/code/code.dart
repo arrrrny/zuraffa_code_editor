@@ -673,7 +673,7 @@ class Code {
     // (`if (a &&` / `b &&` / `c) {`) the shared line is `c) {`, which closes
     // the parentheses block and opens the braces block. The helper below is
     // already narrow enough on its own, so it is the whole test — gating it on
-    // `_isClosingLine` missed that shape.
+    // `isClosingLine` missed that shape.
     if (_startsAnotherFoldableBlock(block)) {
       final closerOnItsOwnRow = lastLine.textRange.start - 1;
       if (closerOnItsOwnRow > startOfRange) {
@@ -687,7 +687,7 @@ class Code {
         // (akvelon/flutter-code-editor#213). Ending at the line's start
         // instead hides only the newline that ends the opener, which glues
         // the shared line onto the opener's row: the same shape
-        // `_isClosingLine` already produces for a leading closer, and the
+        // `isClosingLine` already produces for a leading closer, and the
         // most a two-line fold can offer, since a [HiddenRange] cannot be
         // empty. The equality is what keeps this narrow — a block whose last
         // line is a later line has `closerOnItsOwnRow > startOfRange`, and the

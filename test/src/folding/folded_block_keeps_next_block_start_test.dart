@@ -144,7 +144,7 @@ int factorial(int n){
     //  6    }
     //  7  }
     //
-    // `_isClosingLine` accepted only a line that *starts* with the closer, so
+    // `isClosingLine` accepted only a line that *starts* with the closer, so
     // the guard missed this shape and folding the condition hid `c) {` whole —
     // the issue #25 failure mode with a non-leading closer.
     const source =
@@ -335,7 +335,7 @@ void f() {
       // 2    int num = 5;
       // 3  }
       //
-      // The shared line starts with the closer, so `_isClosingLine` already
+      // The shared line starts with the closer, so `isClosingLine` already
       // ends the range at its start and the fold glues the two rows. This pins
       // that the new path produces the same shape rather than a different one.
       const leadingCloser =
