@@ -409,11 +409,6 @@ class _CodeFieldState extends State<CodeField> {
   /// changed (no text change).
   String _lastText = '';
 
-  /// The hidden-line ranges [_onTextChanged] last saw. Folding toggles notify
-  /// with unchanged text, so this is what tells a rebuild apart from a pure
-  /// analysis-result notification.
-  String _lastHiddenRanges = '';
-
   /// Last text/selection seen by [_updatePopupOffset], to skip the whole-text
   /// TextPainter relayout when neither moved.
   String _lastPopupText = '';
@@ -522,12 +517,8 @@ class _CodeFieldState extends State<CodeField> {
     final value = widget.controller.value;
     final valueChanged = value != _lastValue;
     final textChanged = value.text != _lastText;
-    final selectionChanged = value.selection != _lastValue.selection;
-    final hiddenRanges = widget.controller.code.hiddenLineRanges.toString();
-    final foldsChanged = hiddenRanges != _lastHiddenRanges;
     _lastValue = value;
     _lastText = value.text;
-    _lastHiddenRanges = hiddenRanges;
 
     // Rebuild longest line only when the document text actually changed.
     // Analysis-result and search-result notifications carry the same text and
@@ -1228,15 +1219,15 @@ class _CodeFieldState extends State<CodeField> {
         _textDirection == _lastPopupDirection) {
       return;
     }
-    _lastPopupText = value.text;
-    _lastPopupSelection = value.selection;
-    _lastPopupDirection = _textDirection;
-
     if (!_isEditorBoxLaidOut) {
       // Same mid-frame window as in _onTextChanged: without a laid-out editor
       // box the offsets cannot be positioned and setState would throw.
       return;
     }
+
+    _lastPopupText = value.text;
+    _lastPopupSelection = value.selection;
+    _lastPopupDirection = _textDirection;
 
     final textPainter = _getTextPainter(widget.controller.text);
     final caretHeight = _getCaretHeight(textPainter);

@@ -127,7 +127,7 @@ class Autocompleter {
   Set<String> _splitWords(String text) {
     return text
         // https://github.com/akvelon/flutter-code-editor/issues/61
-        .split(RegExps.wordSplit)
+        .split(RegExp(RegExps.wordSplit.pattern))
         .where((t) => t.isNotEmpty)
         .toSet();
   }
