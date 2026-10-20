@@ -404,6 +404,17 @@ class _CodeFieldState extends State<CodeField> {
   /// driven off the comparison rather than off every notification.
   TextEditingValue _lastValue = const TextEditingValue();
 
+  /// The text [_onTextChanged] last saw, used to skip the O(n) whole-document
+  /// split and longest-line scan when only the analysis result or selection
+  /// changed (no text change).
+  String _lastText = '';
+
+  /// Last text/selection seen by [_updatePopupOffset], to skip the whole-text
+  /// TextPainter relayout when neither moved.
+  String _lastPopupText = '';
+  TextSelection _lastPopupSelection = const TextSelection.collapsed(offset: -1);
+  TextDirection _lastPopupDirection = TextDirection.ltr;
+
   @override
   void initState() {
     super.initState();
@@ -505,26 +516,23 @@ class _CodeFieldState extends State<CodeField> {
   void _onTextChanged() {
     final value = widget.controller.value;
     final valueChanged = value != _lastValue;
+    final textChanged = value.text != _lastText;
     _lastValue = value;
+    _lastText = value.text;
 
-    // Rebuild line number
-    final str = widget.controller.text.split('\n');
-    final buf = <String>[];
-
-    for (var k = 0; k < str.length; k++) {
-      buf.add((k + 1).toString());
-    }
-
-    // Find longest line. Only the unwrapped path sizes the field to it, so
-    // skip the scan — a split of the whole document on every keystroke — when
-    // wrapping, where `_wrapInScrollView` never reads it.
-    if (!widget.wrap) {
+    // Rebuild longest line only when the document text actually changed.
+    // Analysis-result and search-result notifications carry the same text and
+    // must not trigger an O(n) whole-document split on every notification.
+    if (textChanged && !widget.wrap) {
       longestLine = '';
-      widget.controller.text.split('\n').forEach((line) {
+      for (final line in value.text.split('\n')) {
         if (line.length > longestLine.length) longestLine = line;
-      });
+      }
     }
 
+    // The offset read is cheap; keep it on every notification so popup
+    // positioning and text-direction tests stay correct. Only the O(n)
+    // longest-line scan above is gated on a real text change.
     if (_isEditorBoxLaidOut) {
       final box = _editorKey.currentContext!.findRenderObject() as RenderBox;
       _editorOffset = box.localToGlobal(Offset.zero);
@@ -1201,11 +1209,25 @@ class _CodeFieldState extends State<CodeField> {
   }
 
   void _updatePopupOffset() {
+    // Skip the whole-text TextPainter relayout when neither the text nor the
+    // selection moved — e.g. an analysis result or search result notification.
+    // Those carry the same caret and document, so recomputing the popup offset
+    // is pure waste on large documents.
+    final value = widget.controller.value;
+    if (value.text == _lastPopupText &&
+        value.selection == _lastPopupSelection &&
+        _textDirection == _lastPopupDirection) {
+      return;
+    }
     if (!_isEditorBoxLaidOut) {
       // Same mid-frame window as in _onTextChanged: without a laid-out editor
       // box the offsets cannot be positioned and setState would throw.
       return;
     }
+
+    _lastPopupText = value.text;
+    _lastPopupSelection = value.selection;
+    _lastPopupDirection = _textDirection;
 
     final textPainter = _getTextPainter(widget.controller.text);
     final caretHeight = _getCaretHeight(textPainter);
