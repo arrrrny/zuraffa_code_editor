@@ -33,7 +33,10 @@ void main() {
           height: 200,
           child: ScrollConfiguration(
             behavior: behavior ?? const MaterialScrollBehavior(),
-            child: CodeField(controller: controller),
+            child: CodeField(
+              renderer: CodeFieldRenderer.textField,
+              controller: controller,
+            ),
           ),
         ),
       ),
@@ -228,7 +231,10 @@ void main() {
             height: 200,
             child: ScrollConfiguration(
               behavior: const _NeverScrollableScrollBehavior(),
-              child: CodeField(controller: controller),
+              child: CodeField(
+                renderer: CodeFieldRenderer.textField,
+                controller: controller,
+              ),
             ),
           ),
         ),

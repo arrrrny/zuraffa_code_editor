@@ -23,6 +23,7 @@ void main() {
   group('Sub-language embedding (#62)', () {
     test('markdown highlights the HTML it embeds', () {
       final controller = CodeController(
+        highlightEnabled: true,
         text: 'Some <b>html</b> here.',
         language: markdown,
       );
@@ -40,6 +41,7 @@ void main() {
 
     test('dart highlights a doc comment as markdown', () {
       final controller = CodeController(
+        highlightEnabled: true,
         text: '/// Doc with *emphasis* and `code`\nvoid main() {}\n',
         language: dart,
       );
@@ -62,6 +64,7 @@ void main() {
       // The `starts` branch of the walk: dockerfile's `RUN` switches to a
       // sub-language through a terminal mode rather than `contains`.
       final controller = CodeController(
+        highlightEnabled: true,
         text: 'RUN echo "hi" && ls\n',
         language: dockerfile,
       );
@@ -85,6 +88,7 @@ void main() {
         // itself (`<?php`), so a walk that stops after the top language leaves
         // the PHP fragment plain.
         final controller = CodeController(
+          highlightEnabled: true,
           text: 'Some <?php echo "hi"; ?> here.',
           language: markdown,
         );
@@ -112,6 +116,7 @@ void main() {
       );
 
       final controller = CodeController(
+        highlightEnabled: true,
         text: 'a <b>x</b> b',
         language: embedder,
       );
@@ -122,6 +127,7 @@ void main() {
 
     test('registering the embedded languages is reversible per language', () {
       final controller = CodeController(
+        highlightEnabled: true,
         text: 'Some <b>html</b> here.',
         language: markdown,
       );
@@ -137,16 +143,25 @@ void main() {
     });
 
     test('languageId keeps reporting the language hashCode', () {
-      final controller = CodeController(text: 'int a;', language: markdown);
+      final controller = CodeController(
+        highlightEnabled: true,
+        text: 'int a;',
+        language: markdown,
+      );
       addTearDown(controller.dispose);
 
       expect(controller.languageId, markdown.hashCode.toString());
     });
 
     test('the embedded languages really are in the highlight registry', () {
-      final dartController = CodeController(text: '/// doc\n', language: dart);
+      final dartController = CodeController(
+        highlightEnabled: true,
+        text: '/// doc\n',
+        language: dart,
+      );
       addTearDown(dartController.dispose);
       final markdownController = CodeController(
+        highlightEnabled: true,
         text: '<b>x</b>',
         language: markdown,
       );

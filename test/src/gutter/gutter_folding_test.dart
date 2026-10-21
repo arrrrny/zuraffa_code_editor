@@ -56,6 +56,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: CodeField(
+            renderer: CodeFieldRenderer.textField,
             controller: controller,
             gutterStyle: GutterStyle(
               showErrors: true,
@@ -98,6 +99,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: CodeField(
+            renderer: CodeFieldRenderer.textField,
             controller: controller,
             gutterStyle: GutterStyle(
               showErrors: true,
@@ -158,6 +160,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: CodeField(
+            renderer: CodeFieldRenderer.textField,
             controller: controller,
             gutterStyle: GutterStyle(
               showLineNumbers: false,

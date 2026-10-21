@@ -18,6 +18,7 @@ void main() {
             width: 120,
             height: 300,
             child: CodeField(
+              renderer: CodeFieldRenderer.textField,
               controller: controller,
               wrap: true,
               textStyle: const TextStyle(fontSize: 14),

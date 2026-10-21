@@ -42,6 +42,7 @@ Future<CodeController> pumpEditorWithDirection(
         textDirection: ambient,
         child: Scaffold(
           body: CodeField(
+            renderer: CodeFieldRenderer.textField,
             controller: controller,
             focusNode: node,
             textDirection: textDirection,

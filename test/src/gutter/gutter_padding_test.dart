@@ -51,6 +51,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: CodeField(
+              renderer: CodeFieldRenderer.textField,
               controller: controller,
               gutterStyle: GutterStyle(padding: padding),
             ),

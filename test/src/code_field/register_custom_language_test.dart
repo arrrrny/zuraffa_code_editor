@@ -40,7 +40,10 @@ void main() {
     });
 
     testWidgets('its rules reach the rendered span', (wt) async {
-      final controller = CodeController(text: 'world "a string"');
+      final controller = CodeController(
+        text: 'world "a string"',
+        highlightEnabled: true,
+      );
       addTearDown(controller.dispose);
 
       // setLanguage notifies listeners; assign before the build phase so the

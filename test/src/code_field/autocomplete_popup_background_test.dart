@@ -45,6 +45,7 @@ Future<CodeController> _pumpFieldWithPopup(
         body: CodeTheme(
           data: codeTheme,
           child: CodeField(
+            renderer: CodeFieldRenderer.textField,
             controller: controller,
             focusNode: focusNode,
             decoration: decoration,

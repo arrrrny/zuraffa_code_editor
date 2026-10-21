@@ -56,7 +56,11 @@ void main() {
           body: SizedBox(
             height: 528,
             width: 400,
-            child: CodeField(controller: controller, gutterStyle: gutterStyle),
+            child: CodeField(
+              renderer: CodeFieldRenderer.textField,
+              controller: controller,
+              gutterStyle: gutterStyle,
+            ),
           ),
         ),
       ),

@@ -91,7 +91,10 @@ void main() {
         home: Scaffold(
           body: Offstage(
             offstage: true,
-            child: CodeField(controller: controller),
+            child: CodeField(
+              renderer: CodeFieldRenderer.textField,
+              controller: controller,
+            ),
           ),
         ),
       ),
@@ -111,7 +114,12 @@ void main() {
 
     await wt.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: CodeField(controller: controller)),
+        home: Scaffold(
+          body: CodeField(
+            renderer: CodeFieldRenderer.textField,
+            controller: controller,
+          ),
+        ),
       ),
     );
     await wt.pump(const Duration(milliseconds: 600));

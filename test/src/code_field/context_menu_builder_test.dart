@@ -25,6 +25,7 @@ void main() {
     return MaterialApp(
       home: Scaffold(
         body: CodeField(
+          renderer: CodeFieldRenderer.textField,
           controller: controller,
           contextMenuBuilder: contextMenuBuilder,
         ),

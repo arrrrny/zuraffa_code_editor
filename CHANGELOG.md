@@ -1,5 +1,94 @@
 # Changelog
 
+## 0.4.0
+
+### Changed
+
+- **The code is drawn by `re_editor` now, not by Flutter's text field.** This is
+  a breaking change: the rendering core moved from `TextField`/`EditableText` —
+  which lays the whole document out as one paragraph on every frame — to
+  `re_editor`, which lays out only the lines that are on screen. A document of
+  any length now costs the same to draw as a document of one screen.
+  `CodeField` gained a `renderer` parameter, `CodeFieldRenderer`, and the
+  re_editor renderer is the default; the text field renderer is still there
+  and is asked for with `renderer: CodeFieldRenderer.textField`. Everything
+  the package is for — the folding with its visible closing line, the named
+  sections, the hidden ranges, the autocomplete, the search, the themes, the
+  gutter — is unchanged, and the fold model, the history and the document all
+  stay in `CodeController`: the re_editor side only ever sees the *visible*
+  text, and the edits it reports are mapped back onto the full text.
+  The migration plan is in `doc/migrating/re_editor_migration_plan.md`.
+- **The package's own keyboard semantics are the ones that run.** The
+  re_editor renderer overrides the *actions* of the intents re_editor raises —
+  the tab key, the enter key, the undo keys, the comment key and the find key
+  — with the package's own, so the folds, the history and the modifiers stay
+  in the controller's hands while the key bindings stay re_editor's. On
+  Android and iOS re_editor handles the enter key itself, in the editor's own
+  focus node, before any shortcut of the package's can: the enter key breaks
+  the line there, instead of committing the suggestion or moving to the next
+  search match.
+- **The package's own syntax highlight is off by default.**
+  `CodeController` gained `highlightEnabled`, and the parse it guards is
+  quadratic in the document's length: `package:highlight` 0.7.0 merges the text
+  of a whole unmatched stretch into one node and copies the string merged so
+  far on every merge, so a document whose top-level terminator matches rarely
+  — which is what real code looks like — costs O(n²) to parse. It was parsed on
+  every text change, and nothing needed it: the re_editor renderer highlights
+  the code itself, with `re_highlight`, in an isolate. Measured on a fifty
+  thousand line document: the controller's construction went from 47 000 ms to
+  743 ms, and a one-character edit from 58 725 ms to 1 223 ms. The text field
+  renderer turns the flag on while it is mounted, because it draws the code
+  with the highlighted spans, and the folding and the service comments are
+  found in the raw text when there is no highlight to read them from.
+
+### Added
+
+- **`CodeFieldRenderer`**: the renderer a code field draws the code with —
+  `CodeFieldRenderer.reEditor` (the default) or `CodeFieldRenderer.textField`.
+- **`CodeField.autofocus`**: whether the field takes the focus when it is
+  mounted. Off by default, like before: only the re_editor renderer can honour
+  it, and the text field renderer never focuses itself.
+- **`CodeController.isDisposed`**: whether `dispose` has already run. A widget
+  that changes the controller's settings after the frame it scheduled them in
+  must check it: the controller may have been disposed in between.
+- **`CodeController.setHighlightEnabledSilently`**: turns the package's own
+  highlight on or off without notifying the listeners. A field that changes the
+  flag while the framework is building uses this — the build that follows
+  reads the new code, so there is nothing to notify, and a notification would
+  arrive while the framework is building, which it refuses.
+- **`CodeController.copySelection()` and `CodeController.cutSelection()`**:
+  copy the selection to the clipboard, and cut it, the way the package's own
+  copy shortcut does: the lines a fold hides are copied with the selection,
+  because the selection is recovered over the hidden ranges first. What lands
+  on the clipboard is what the document holds, not what is on the screen.
+
+### Fixed
+
+- **The autocomplete popup is positioned again after the controller is
+  swapped.** The field listened to the popup controller of the controller it
+  was given, and a host that hands the field a new one — a new document, a new
+  language — left the listener on the old controller. The popup was then
+  placed at an offset that was never computed.
+- **The copy and the cut take the hidden lines with them.** On the desktop
+  platforms `re_editor` binds the copy and the cut keys itself, and it copies
+  what is on the screen: the lines a fold hides were left out of the
+  clipboard, and the cut removed only the visible part of the selection. The
+  re_editor renderer overrides those two actions with the package's own now,
+  so the clipboard holds the document, not the screen.
+- **The gutter paints its rows without the line numbers.** A gutter with
+  `showLineNumbers: false` read the height of the number painter, which is
+  never laid out when the numbers are hidden — the number column takes no
+  width, so the painter is never measured — and the row height came back
+  unlaid, which throws in debug.
+- **The gutter's folding handle of a line past the document is gone, not a
+  crash.** Asking for the handle of a line the document does not have indexed
+  the visible lines out of range and threw a `RangeError`. It returns null
+  now, like the handle of a line that is not on the screen.
+- **The autocomplete popup has a border without a text style.** The border's
+  colour was read from the code style, which a host that gives the field no
+  text style does not have, and the popup threw while it was built. It falls
+  back to the ambient text colour.
+
 ## 0.3.6
 
 ### Changed

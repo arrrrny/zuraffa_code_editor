@@ -9,7 +9,13 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: SizedBox(height: 200, child: CodeField(controller: controller)),
+          body: SizedBox(
+            height: 200,
+            child: CodeField(
+              renderer: CodeFieldRenderer.textField,
+              controller: controller,
+            ),
+          ),
         ),
       ),
     );

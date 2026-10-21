@@ -66,7 +66,11 @@ void main() {
     await wt.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: CodeField(controller: controller, gutterStyle: style),
+          body: CodeField(
+            renderer: CodeFieldRenderer.textField,
+            controller: controller,
+            gutterStyle: style,
+          ),
         ),
       ),
     );
@@ -150,6 +154,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: CodeField(
+              renderer: CodeFieldRenderer.textField,
               controller: controller,
               gutterStyle: GutterStyle(
                 errorPopupBuilder: (issue, textStyle, decoration) {

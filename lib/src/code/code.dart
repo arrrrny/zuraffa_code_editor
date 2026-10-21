@@ -77,8 +77,21 @@ class Code {
       readonlyCommentsByLine: commentParser.getIfReadonlyCommentByLine(),
     );
 
-    if (highlighted == null || language == null) {
+    if (language == null) {
       foldableBlocks = const [];
+    } else if (highlighted == null) {
+      // No highlight to read the structure from, so the blocks are found in
+      // the text itself. The parsers that need a node tree cannot run here.
+      final parser = FoldableBlockParserFactory.provideTextParser(language);
+
+      parser.parse(
+        highlighted: Result(relevance: 0, nodes: [Node(value: text)]),
+        serviceCommentsSources: serviceCommentsNodesSet,
+        lines: lines,
+      );
+
+      foldableBlocks = parser.blocks;
+      invalidBlocks = parser.invalidBlocks;
     } else {
       final parser = FoldableBlockParserFactory.provideParser(language);
 

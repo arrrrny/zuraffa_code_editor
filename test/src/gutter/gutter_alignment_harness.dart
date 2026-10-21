@@ -62,6 +62,7 @@ Future<CodeController> pumpGutterAlignmentEditor(
       theme: useMaterial3 ? ThemeData(useMaterial3: true) : null,
       home: Scaffold(
         body: CodeField(
+          renderer: CodeFieldRenderer.textField,
           controller: controller,
           textStyle: textStyle,
           gutterStyle: gutterStyle,

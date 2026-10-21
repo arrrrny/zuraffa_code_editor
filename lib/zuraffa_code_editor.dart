@@ -15,6 +15,8 @@ export 'src/code/tokens.dart';
 
 export 'src/code_field/code_controller.dart';
 export 'src/code_field/code_field.dart';
+export 'src/code_field/code_field_re.dart';
+export 'src/code_field/code_field_renderer.dart';
 export 'src/code_field/editor_params.dart';
 export 'src/code_field/js_workarounds/js_workarounds.dart'
     show disableBuiltInSearchIfWeb;
@@ -33,6 +35,8 @@ export 'src/folding/foldable_block.dart';
 export 'src/folding/foldable_block_type.dart';
 export 'src/folding/invalid_foldable_block.dart';
 export 'src/folding/parsers/highlight.dart';
+
+export 'src/gutter/code_gutter.dart';
 
 export 'src/line_numbers/gutter_style.dart';
 

@@ -54,8 +54,13 @@ class SpanBuilder {
     _visibleLineIndex = 0;
     _foldedKeptLines = _foldedKeptLineIndexes();
 
+    final highlighted = code.visibleHighlighted;
+    if (highlighted == null) {
+      return _buildPlain();
+    }
+
     final children = _buildList(
-      nodes: code.visibleHighlighted?.nodes ?? [],
+      nodes: highlighted.nodes ?? [],
       theme: theme,
       ancestorStyle: rootStyle,
     );
@@ -76,6 +81,49 @@ class SpanBuilder {
         TextSpan(text: _foldEllipsis, style: rootStyle),
       ],
     );
+  }
+
+  /// The span of a document that carries no highlight.
+  ///
+  /// Without a highlight there is no node tree to walk, so the visible text
+  /// itself is the span: one run per line, in the base style, with the fold
+  /// markers spliced in the way the tree version splices them — at the end of
+  /// the kept line's own content, before the newline that ends it.
+  TextSpan _buildPlain() {
+    final text = code.visibleText;
+
+    if (!withFoldEllipsis || _foldedKeptLines.isEmpty) {
+      return TextSpan(text: text, style: rootStyle);
+    }
+
+    final children = <TextSpan>[];
+    var lineIndex = 0;
+    var lineStart = 0;
+
+    for (var i = 0; i < text.length; i++) {
+      if (text[i] != '\n') {
+        continue;
+      }
+      if (_foldedKeptLines.contains(lineIndex)) {
+        children.add(
+          TextSpan(text: text.substring(lineStart, i), style: rootStyle),
+        );
+        children.add(TextSpan(text: _foldEllipsis, style: rootStyle));
+        lineStart = i;
+      }
+      lineIndex++;
+    }
+
+    // The last line of a document with no trailing newline has no newline to
+    // splice the marker in front of, so it is appended to the line instead.
+    if (_foldedKeptLines.contains(lineIndex)) {
+      children.add(TextSpan(text: text.substring(lineStart), style: rootStyle));
+      children.add(TextSpan(text: _foldEllipsis, style: rootStyle));
+    } else {
+      children.add(TextSpan(text: text.substring(lineStart), style: rootStyle));
+    }
+
+    return TextSpan(style: rootStyle, children: children);
   }
 
   List<TextSpan>? _buildList({

@@ -29,6 +29,7 @@ void main() {
     WidgetTester wt, {
     required String text,
     bool wrap = false,
+    CodeFieldRenderer renderer = CodeFieldRenderer.textField,
   }) async {
     final controller = createController(text);
     addTearDown(controller.dispose);
@@ -38,7 +39,11 @@ void main() {
           body: SizedBox(
             width: 300,
             height: 200,
-            child: CodeField(controller: controller, wrap: wrap),
+            child: CodeField(
+              renderer: renderer,
+              controller: controller,
+              wrap: wrap,
+            ),
           ),
         ),
       ),
@@ -53,7 +58,11 @@ void main() {
   group('the horizontal scrollbar (#91)', () {
     testWidgets('a code area that cannot scroll shows no thumb', (wt) async {
       // Content that fits the viewport: a bar would be a lie about reach.
-      await pumpCodeField(wt, text: 'int a = 1;\n');
+      await pumpCodeField(
+        renderer: CodeFieldRenderer.textField,
+        wt,
+        text: 'int a = 1;\n',
+      );
       expect(horizontalScrollable, findsOneWidget);
       expect(find.byType(Scrollbar), findsOneWidget);
 
@@ -68,7 +77,11 @@ void main() {
     testWidgets('a code area that overflows horizontally has a bar', (
       wt,
     ) async {
-      await pumpCodeField(wt, text: '$wideLine\nint a = 1;\n');
+      await pumpCodeField(
+        renderer: CodeFieldRenderer.textField,
+        wt,
+        text: '$wideLine\nint a = 1;\n',
+      );
 
       expect(find.byType(Scrollbar), findsOneWidget);
     });
@@ -76,7 +89,11 @@ void main() {
     testWidgets('the bar is laid out with the viewport, not the content', (
       wt,
     ) async {
-      await pumpCodeField(wt, text: '$wideLine\nint a = 1;\n');
+      await pumpCodeField(
+        renderer: CodeFieldRenderer.textField,
+        wt,
+        text: '$wideLine\nint a = 1;\n',
+      );
 
       // Exactly one bar: two would mean the bar was mounted somewhere it does
       // not belong, and the rect below would then measure the wrong one.
@@ -94,7 +111,11 @@ void main() {
     });
 
     testWidgets('the bar belongs to the field\'s own scroll view', (wt) async {
-      await pumpCodeField(wt, text: '$wideLine\nint a = 1;\n');
+      await pumpCodeField(
+        renderer: CodeFieldRenderer.textField,
+        wt,
+        text: '$wideLine\nint a = 1;\n',
+      );
 
       // The association is the whole point: a bar bound to some other scroll
       // view would scroll something else. The code area's horizontal scrollable
@@ -109,7 +130,11 @@ void main() {
     testWidgets('the bar is always visible, not only while scrolling', (
       wt,
     ) async {
-      await pumpCodeField(wt, text: '$wideLine\nint a = 1;\n');
+      await pumpCodeField(
+        renderer: CodeFieldRenderer.textField,
+        wt,
+        text: '$wideLine\nint a = 1;\n',
+      );
 
       final bar = wt.widget<Scrollbar>(find.byType(Scrollbar));
       expect(
@@ -125,7 +150,12 @@ void main() {
     testWidgets('wrap: true reflows instead of scrolling and has no bar', (
       wt,
     ) async {
-      await pumpCodeField(wt, text: '$wideLine\nint a = 1;\n', wrap: true);
+      await pumpCodeField(
+        renderer: CodeFieldRenderer.textField,
+        wt,
+        text: '$wideLine\nint a = 1;\n',
+        wrap: true,
+      );
 
       // Soft wrapping removes the horizontal extent, and `_wrapInScrollView`
       // returns before it ever builds a scroll view or a bar.
@@ -134,7 +164,11 @@ void main() {
     });
 
     testWidgets('the vertical scrollbar is unaffected', (wt) async {
-      await pumpCodeField(wt, text: 'int a = 1;\n');
+      await pumpCodeField(
+        renderer: CodeFieldRenderer.textField,
+        wt,
+        text: 'int a = 1;\n',
+      );
 
       // The fix is horizontal only: a short document's vertical scrollbar
       // situation must be exactly what it was.

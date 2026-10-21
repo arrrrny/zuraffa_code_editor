@@ -28,7 +28,10 @@ void main() {
     final field = SizedBox(
       height: 200,
       width: 400,
-      child: CodeField(controller: controller),
+      child: CodeField(
+        renderer: CodeFieldRenderer.textField,
+        controller: controller,
+      ),
     );
     await tester.pumpWidget(
       MaterialApp(

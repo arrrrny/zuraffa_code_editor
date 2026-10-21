@@ -197,6 +197,7 @@ int factorial(int n){
         MaterialApp(
           home: Scaffold(
             body: CodeField(
+              renderer: CodeFieldRenderer.textField,
               controller: controller,
               gutterStyle: const GutterStyle(showFoldingHandles: true),
             ),

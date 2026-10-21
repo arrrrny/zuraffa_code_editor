@@ -85,6 +85,7 @@ Future<CodeController> _pumpEditor(
     MaterialApp(
       home: Scaffold(
         body: CodeField(
+          renderer: CodeFieldRenderer.textField,
           controller: controller,
           textStyle: TextStyle(fontSize: fontSize, height: height),
         ),

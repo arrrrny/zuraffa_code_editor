@@ -53,7 +53,11 @@ void main() {
           body: SizedBox(
             height: 220,
             width: 400,
-            child: CodeField(controller: controller, wrap: wrap),
+            child: CodeField(
+              renderer: CodeFieldRenderer.textField,
+              controller: controller,
+              wrap: wrap,
+            ),
           ),
         ),
       ),

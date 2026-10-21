@@ -147,7 +147,12 @@ void main() {
       addTearDown(controller.dispose);
       await wt.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: CodeField(controller: controller)),
+          home: Scaffold(
+            body: CodeField(
+              renderer: CodeFieldRenderer.textField,
+              controller: controller,
+            ),
+          ),
         ),
       );
 
@@ -173,7 +178,12 @@ void main() {
       addTearDown(controller.dispose);
       await wt.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: CodeField(controller: controller)),
+          home: Scaffold(
+            body: CodeField(
+              renderer: CodeFieldRenderer.textField,
+              controller: controller,
+            ),
+          ),
         ),
       );
 
