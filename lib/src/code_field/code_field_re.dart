@@ -120,7 +120,7 @@ class CodeFieldRe extends StatefulWidget {
 }
 
 class _CodeFieldReState extends State<CodeFieldRe> {
-  late final ReEditorCodeController _line;
+  late ReEditorCodeController _line;
   late final bool _ownsLine;
 
   /// The scroll controller of the editor, read to place the autocomplete

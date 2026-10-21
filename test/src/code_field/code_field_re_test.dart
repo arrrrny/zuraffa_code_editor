@@ -204,4 +204,63 @@ void main() {
 
     controller.dispose();
   });
+
+  // appended coverage tests
+  testWidgets('CodeFieldRe reattaches when its controller is swapped', (tester) async {
+    final first = CodeController(text: 'first');
+    final second = CodeController(text: 'second');
+    final notifier = ValueNotifier<CodeController>(first);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ValueListenableBuilder<CodeController>(
+            valueListenable: notifier,
+            builder: (context, controller, _) =>
+                CodeFieldRe(controller: controller),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    notifier.value = second;
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CodeFieldRe), findsOneWidget);
+
+    notifier.dispose();
+    first.dispose();
+    second.dispose();
+  });
+
+  testWidgets('CodeFieldRe swaps a provided re_editor controller', (tester) async {
+    final controller = CodeController(text: 'abc');
+    final firstLine = ReEditorCodeController(text: 'abc');
+    final secondLine = ReEditorCodeController(text: 'abc');
+    final notifier = ValueNotifier<ReEditorCodeController>(firstLine);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ValueListenableBuilder<ReEditorCodeController>(
+            valueListenable: notifier,
+            builder: (context, line, _) =>
+                CodeFieldRe(controller: controller, lineController: line),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    notifier.value = secondLine;
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CodeFieldRe), findsOneWidget);
+
+    notifier.dispose();
+    controller.dispose();
+    firstLine.dispose();
+    secondLine.dispose();
+  });
 }
