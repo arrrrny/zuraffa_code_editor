@@ -206,7 +206,9 @@ void main() {
   });
 
   // appended coverage tests
-  testWidgets('CodeFieldRe reattaches when its controller is swapped', (tester) async {
+  testWidgets('CodeFieldRe reattaches when its controller is swapped', (
+    tester,
+  ) async {
     final first = CodeController(text: 'first');
     final second = CodeController(text: 'second');
     final notifier = ValueNotifier<CodeController>(first);
@@ -234,7 +236,9 @@ void main() {
     second.dispose();
   });
 
-  testWidgets('CodeFieldRe swaps a provided re_editor controller', (tester) async {
+  testWidgets('CodeFieldRe swaps a provided re_editor controller', (
+    tester,
+  ) async {
     final controller = CodeController(text: 'abc');
     final firstLine = ReEditorCodeController(text: 'abc');
     final secondLine = ReEditorCodeController(text: 'abc');
