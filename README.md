@@ -10,12 +10,15 @@ A maintained fork of
 [`flutter_code_editor`](https://pub.dev/packages/flutter_code_editor) 0.3.5 for
 the [Zuraffa](https://pub.dev/packages/zuraffa) ecosystem.
 
-> **Why a fork?** Upstream hid a folded block through the end of its last line,
-> so folding `parsers: [ ... ]` left a dangling `parsers: [` with no matching
-> `],`. This fork keeps the closing line visible: `parsers: [  ],`. See the
-> [changelog](CHANGELOG.md) for the full diff from upstream.
+> **Why a fork?** Two reasons. Upstream hid a folded block through the end of
+> its last line, so folding `parsers: [ ... ]` left a dangling `parsers: [` with
+> no matching `],`. This fork keeps the closing line visible:
+> `parsers: [  ],`. And since 0.4.0 the code is drawn by
+> [re_editor](https://pub.dev/packages/re_editor) rather than by a `TextField`,
+> so a document of any length costs the same to draw as a document of one
+> screen. See the [changelog](CHANGELOG.md) for the full diff from upstream.
 
-The API is unchanged, so migrating is a drop-in import swap:
+Migrating from `flutter_code_editor` is a drop-in import swap:
 
 ```dart
 // Before
@@ -23,6 +26,11 @@ import 'package:flutter_code_editor/flutter_code_editor.dart';
 // After
 import 'package:zuraffa_code_editor/zuraffa_code_editor.dart';
 ```
+
+The import swap is all that is needed for the API. The *behaviour* changed in
+0.4.0: the code is now drawn by `re_editor` instead of by a `TextField`, which
+makes large documents editable. See [Performance](#performance) and
+[Renderers](#renderers).
 
 Zuraffa Code Editor is a multi-platform code editor supporting:
 
@@ -82,6 +90,61 @@ class CodeEditor extends StatelessWidget {
 ```
 
 See the full runnable example [here](https://github.com/arrrrny/zuraffa_code_editor/blob/master/example/lib/02.code_field.dart).
+
+
+## Performance
+
+Since 0.4.0 the code is drawn by
+[re_editor](https://pub.dev/packages/re_editor), which lays out only the lines
+that are on screen. Before that, the editor built one paragraph for the whole
+document and re-laid it out on every keystroke, so a file of any real size
+stuttered.
+
+Measured on a 50 000-line document:
+
+| | before | after |
+|---|---|---|
+| `CodeController` construction | 47 000 ms | 743 ms |
+| one-character edit | 58 725 ms | 1 223 ms |
+
+The layout was only half of the problem. The controller also ran a
+whole-document [highlight](https://pub.dev/packages/highlight) parse on every
+text change, and that parse is quadratic. It is now off by default
+(`CodeController.highlightEnabled`), because the re_editor renderer highlights
+the code itself.
+
+
+## Renderers
+
+A `CodeField` draws the code with one of two renderers:
+
+```dart
+CodeField(
+  controller: controller,
+  renderer: CodeFieldRenderer.reEditor, // the default
+)
+```
+
+- **`CodeFieldRenderer.reEditor`** — the default. Draws only the visible lines,
+  so it is the one to use for large documents.
+- **`CodeFieldRenderer.textField`** — the old `TextField`-based renderer. It
+  is still there for the cases re_editor cannot cover.
+
+A field whose resolved text direction is right to left is drawn with the text
+field renderer, because re_editor 0.10.0 hardcodes `TextDirection.ltr`. Left to
+right is the fast path; right to left stays functional.
+
+### Differences on the re_editor renderer
+
+- **No fold marker.** The text field renderer draws ` …` at the end of a
+  folded block's kept line. The re path does not — the marker would have to be
+  injected into the visible text, which shifts every offset the bridge maps
+  through it. The chevron in the gutter is the affordance there.
+- **No per-line `lineBackgroundBuilder`.** re_editor has no per-line
+  background hook. `cursorLineColor` is wired.
+- **The mobile enter key.** On Android and iOS the enter key breaks the line
+  rather than committing the autocomplete suggestion or moving to the next
+  search match. Every other key keeps its usual meaning on both platforms.
 
 
 ## Languages
@@ -526,11 +589,22 @@ as it did before.
 
 ![comment out uncomment example](https://raw.githubusercontent.com/arrrrny/zuraffa_code_editor/master/example/images/comment_out_example.gif)
 
+The editor also handles the standard editing keys:
+
+- Undo (Control-Z)
+- Redo (Control-Shift-Z)
+- Copy (Control-C)
+- Cut (Control-X)
+- Find (Control-F)
+
+On macOS the usual Command key stands in for Control.
+
 
 ## Migration Guides
 
 - [Migrating from code_text_field to 0.1](https://github.com/arrrrny/zuraffa_code_editor/blob/master/doc/migrating/0.1.md)
 - [Migrating from 0.1 to 0.2](https://github.com/arrrrny/zuraffa_code_editor/blob/master/doc/migrating/0.2.md)
+- [Migrating to the re_editor renderer (0.4)](https://github.com/arrrrny/zuraffa_code_editor/blob/master/doc/migrating/re_editor_migration_plan.md)
 
 
 ## Contact Us
