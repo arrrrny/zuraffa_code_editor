@@ -190,10 +190,7 @@ class CodeGutterRenderObject extends RenderBox {
     }
 
     final widest = numbers.reduce((a, b) => a > b ? a : b);
-    _numberPainter.text = TextSpan(
-      text: '${widest + 1}',
-      style: _numberStyle,
-    );
+    _numberPainter.text = TextSpan(text: '${widest + 1}', style: _numberStyle);
     _numberPainter.layout();
     final width = _numberPainter.width;
     _numberPainter.text = const TextSpan(text: '');
