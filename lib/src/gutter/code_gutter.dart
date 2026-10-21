@@ -189,8 +189,9 @@ class CodeGutterRenderObject extends RenderBox {
       return 0.0;
     }
 
+    final widest = numbers.reduce((a, b) => a > b ? a : b);
     _numberPainter.text = TextSpan(
-      text: '${numbers.last + 1}',
+      text: '${widest + 1}',
       style: _numberStyle,
     );
     _numberPainter.layout();

@@ -261,6 +261,57 @@ class _CodeFieldReState extends State<CodeFieldRe> {
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(covariant CodeFieldRe oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final controllerChanged = oldWidget.controller != widget.controller;
+    if (controllerChanged) {
+      // Tear down listeners on the old controller.
+      oldWidget.controller.removeListener(_onControllerChanged);
+      oldWidget.controller.popupController.removeListener(_onPopupStateChanged);
+      final oldSearch = oldWidget.controller.searchController;
+      oldSearch.removeListener(_onSearchStateChanged);
+      oldSearch.settingsController.removeListener(_updateFindMatches);
+      oldSearch.navigationController.removeListener(_updateFindMatches);
+
+      // The new controller must not run the package's quadratic highlight.
+      widget.controller.setHighlightEnabledSilently(false);
+
+      // Recreate the re_editor-side controller when this state owns it.
+      if (_ownsLine) {
+        _line.removeListener(_onLineChanged);
+        _line.dispose();
+        _line = ReEditorCodeController(text: widget.controller.code.text);
+        _line.addListener(_onLineChanged);
+      }
+
+      // Re-attach listeners to the new controller.
+      widget.controller.addListener(_onControllerChanged);
+      widget.controller.popupController.addListener(_onPopupStateChanged);
+      final search = widget.controller.searchController;
+      search.addListener(_onSearchStateChanged);
+      search.settingsController.addListener(_updateFindMatches);
+      search.navigationController.addListener(_updateFindMatches);
+
+      // Invalidate the memoised actions: they close over the old controller.
+      _overrideActionsCache = null;
+
+      _pushVisibleText();
+      _updateFindMatches();
+    }
+
+    // A provided re_editor controller was swapped in.
+    if (oldWidget.lineController != widget.lineController &&
+        !_ownsLine &&
+        widget.lineController != null) {
+      _line.removeListener(_onLineChanged);
+      _line = widget.lineController!;
+      _line.addListener(_onLineChanged);
+      _pushVisibleText();
+    }
+  }
+
   /// The controller changed (a fold, an external write, an undo): re-render
   /// the visible text.
   void _onControllerChanged() {
@@ -454,9 +505,16 @@ class _CodeFieldReState extends State<CodeFieldRe> {
       return;
     }
 
+    // Only the text up to the caret is needed to locate it: laying out
+    // the whole visible document on every popup update is O(n) in the
+    // document's length.
+    final caretText = text.substring(
+      0,
+      (selection.baseOffset + 1).clamp(0, text.length),
+    );
     final painter = TextPainter(
       textDirection: TextDirection.ltr,
-      text: TextSpan(text: text, style: _codeStyle),
+      text: TextSpan(text: caretText, style: _codeStyle),
     )..layout();
     final caret = painter.getOffsetForCaret(selection.base, Rect.zero);
     final caretHeight = painter.getFullHeightForCaret(

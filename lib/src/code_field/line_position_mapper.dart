@@ -68,15 +68,22 @@ class LinePositionMapper {
 
   /// The global offset at which [line] ends (before its line break).
   int _lineEnd(int line) {
+    final start = _lineStarts[line];
     final next = line + 1 < _lineStarts.length
         ? _lineStarts[line + 1]
         : _text.length;
     var end = next;
-    if (end > 0 && end <= _text.length && _text[end - 1] == '\n') {
+    // Only trim a trailing line break when this line actually contains
+    // characters: an empty trailing line (start == end) has nothing to trim,
+    // and trimming would make `end < start`, which breaks `clamp`.
+    if (end > start && end <= _text.length && _text[end - 1] == '\n') {
       end--;
     }
-    if (end > 0 && end <= _text.length && _text[end - 1] == '\r') {
+    if (end > start && end <= _text.length && _text[end - 1] == '\r') {
       end--;
+    }
+    if (end < start) {
+      end = start;
     }
     return end;
   }
