@@ -83,6 +83,49 @@ class CodeController extends TextEditingController {
     setLanguage(language, analyzer: const DefaultLocalAnalyzer());
   }
 
+  /// Whether the document is parsed for syntax highlighting.
+  ///
+  /// Off by default, and the default is what makes a large document usable.
+  /// The parse is quadratic in the document's length — the highlighter merges
+  /// the text of a whole unmatched stretch into one node, and every merge
+  /// copies the string merged so far — so a fifty thousand line file takes
+  /// the better part of a minute to open, and every keystroke pays it again.
+  ///
+  /// Nothing needs it: the re_editor renderer highlights the code itself, and
+  /// the folding and the service comments are found in the raw text when
+  /// there is no highlight to read them from. The text field renderer does
+  /// need it, because it draws the code with the highlighted spans, so it
+  /// turns the flag on while it is mounted.
+  bool get highlightEnabled => _highlightEnabled;
+
+  bool _highlightEnabled;
+
+  set highlightEnabled(bool enabled) {
+    if (enabled == _highlightEnabled) {
+      return;
+    }
+
+    _highlightEnabled = enabled;
+    _updateCode(_code.text);
+    notifyListeners();
+  }
+
+  /// Turns the package's own highlight on or off without notifying anybody.
+  ///
+  /// A field that changes the flag while the framework is building — before
+  /// its first build, or in a dependency change — uses this. The build that
+  /// follows reads the new code, so there is nothing to notify, and a
+  /// notification would arrive while the framework is building, which it
+  /// refuses with "setState() or markNeedsBuild() called during build".
+  void setHighlightEnabledSilently(bool enabled) {
+    if (enabled == _highlightEnabled) {
+      return;
+    }
+
+    _highlightEnabled = enabled;
+    _updateCode(_code.text);
+  }
+
   /// `CodeController` uses [analyzer] to generate issues
   /// that are displayed in gutter widget.
   ///
@@ -286,6 +329,14 @@ class CodeController extends TextEditingController {
 
   bool _disposed = false;
 
+  /// Whether [dispose] has already run.
+  ///
+  /// A widget that changes the controller's settings after the frame it
+  /// scheduled them in must check this: the controller may have been disposed
+  /// in between, and it is the widget that owns the controller who disposes
+  /// it.
+  bool get isDisposed => _disposed;
+
   /// Whether typing replaces the character after the caret (overtype) instead
   /// of inserting in front of it.
   ///
@@ -343,7 +394,9 @@ class CodeController extends TextEditingController {
     this.readOnly = false,
     this.params = const EditorParams(),
     this.modifiers = defaultCodeModifiers,
+    bool highlightEnabled = false,
   }) : _analyzer = analyzer,
+       _highlightEnabled = highlightEnabled,
        _readOnlySectionNames = readOnlySectionNames,
        _code = Code.empty,
        _isTabReplacementEnabled = modifiers.any((e) => e is TabModifier) {
@@ -671,6 +724,22 @@ class CodeController extends TextEditingController {
 
     insertStr(' ' * params.tabSpaces);
   }
+
+  /// Copies the selection to the clipboard.
+  ///
+  /// The lines a fold hides are copied with it: the selection is recovered
+  /// over the hidden ranges first, so what lands on the clipboard is what
+  /// the document holds and not what is on the screen.
+  Future<void> copySelection() =>
+      CopyAction(controller: this).invoke(CopySelectionTextIntent.copy);
+
+  /// Copies the selection to the clipboard and removes it from the document.
+  ///
+  /// The lines a fold hides are removed with it, for the same reason they
+  /// are copied with it.
+  Future<void> cutSelection() => CopyAction(
+    controller: this,
+  ).invoke(const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard));
 
   /// Inserts the word selected from the list of completions
   void insertSelectedWord() {
@@ -1254,7 +1323,9 @@ class CodeController extends TextEditingController {
     return Code(
       text: text,
       language: language,
-      highlighted: highlight.parse(text, language: _languageId),
+      highlighted: _highlightEnabled
+          ? highlight.parse(text, language: _languageId)
+          : null,
       namedSectionParser: namedSectionParser,
       readOnlySectionNames: _readOnlySectionNames,
       visibleSectionNames: _visibleSectionNames,

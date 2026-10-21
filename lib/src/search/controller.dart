@@ -100,6 +100,20 @@ class CodeSearchController extends ChangeNotifier {
     return result;
   }
 
+  /// Performs the search on [text] with the given [settings].
+  ///
+  /// [search] searches the code's own text. This one searches any text, which
+  /// is what the re_editor renderer needs: it searches the *visible* text —
+  /// the one the editor shows — so that a folded block cannot shift a match
+  /// off the text it belongs to.
+  SearchResult searchText(String text, {required SearchSettings settings}) {
+    if (settings.pattern.isEmpty) {
+      return SearchResult.empty;
+    }
+
+    return getSearchStrategy(settings).searchPlain(text, settings: settings);
+  }
+
   @visibleForTesting
   SearchStrategy getSearchStrategy(SearchSettings settings) {
     if (settings.isRegExp) {

@@ -23,7 +23,11 @@ void main() {
   Widget app({required CodeController controller, VoidCallback? onTap}) {
     return MaterialApp(
       home: Scaffold(
-        body: CodeField(controller: controller, onTap: onTap),
+        body: CodeField(
+          renderer: CodeFieldRenderer.textField,
+          controller: controller,
+          onTap: onTap,
+        ),
       ),
     );
   }
@@ -70,6 +74,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: CodeField(
+              renderer: CodeFieldRenderer.textField,
               controller: controller,
               focusNode: focusNode,
               onTap: () {},

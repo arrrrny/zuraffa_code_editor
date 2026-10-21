@@ -30,7 +30,10 @@ void main() {
           body: TabBarView(
             children: [
               for (var i = 0; i < count; i++)
-                CodeField(controller: field('void main() {\n  int i$i;\n}\n')),
+                CodeField(
+                  renderer: CodeFieldRenderer.textField,
+                  controller: field('void main() {\n  int i$i;\n}\n'),
+                ),
             ],
           ),
         ),
@@ -78,7 +81,10 @@ void main() {
             body: TabBarView(
               children: [
                 for (var i = 0; i < 4; i++)
-                  CodeField(controller: field('int i$i;\n')),
+                  CodeField(
+                    renderer: CodeFieldRenderer.textField,
+                    controller: field('int i$i;\n'),
+                  ),
               ],
             ),
           ),
@@ -119,7 +125,12 @@ void main() {
               bottom: const TabBar(tabs: [Tab(text: 'Tab 0')]),
             ),
             body: TabBarView(
-              children: [CodeField(controller: field('a\nb\n'))],
+              children: [
+                CodeField(
+                  renderer: CodeFieldRenderer.textField,
+                  controller: field('a\nb\n'),
+                ),
+              ],
             ),
           ),
         ),

@@ -193,6 +193,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: CodeField(
+              renderer: CodeFieldRenderer.textField,
               controller: controller,
               gutterStyle: GutterStyle(
                 errorPopupTextStyle: _popupStyle,
@@ -248,6 +249,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: CodeField(
+              renderer: CodeFieldRenderer.textField,
               controller: controller,
               gutterStyle: GutterStyle(
                 errorPopupTextStyle: _popupStyle,

@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
 import '../code_theme/code_theme.dart';
@@ -12,107 +11,15 @@ import '../line_numbers/gutter_style.dart';
 import '../search/widget/search_widget.dart';
 import '../sizes.dart';
 import '../wip/autocomplete/popup.dart';
-import 'actions/comment_uncomment.dart';
-import 'actions/enter_key.dart';
-import 'actions/indent.dart';
-import 'actions/outdent.dart';
-import 'actions/overtype.dart';
+import '../wip/autocomplete/popup_controller.dart';
 import 'actions/page_scroll.dart';
-import 'actions/search.dart';
-import 'actions/tab.dart';
 import 'code_controller.dart';
+import 'code_field_re.dart';
+import 'code_field_renderer.dart';
+import 'shortcuts.dart';
 import 'default_styles.dart';
 import 'js_workarounds/js_workarounds.dart';
 import 'line_background.dart';
-
-final _shortcuts = <ShortcutActivator, Intent>{
-  // Copy
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyC):
-      CopySelectionTextIntent.copy,
-  const SingleActivator(LogicalKeyboardKey.keyC, meta: true):
-      CopySelectionTextIntent.copy,
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.insert):
-      CopySelectionTextIntent.copy,
-
-  // Cut
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyX):
-      const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
-  const SingleActivator(LogicalKeyboardKey.keyX, meta: true):
-      const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
-  LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.delete):
-      const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
-
-  // Undo
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyZ):
-      const UndoTextIntent(SelectionChangedCause.keyboard),
-  const SingleActivator(LogicalKeyboardKey.keyZ, meta: true):
-      const UndoTextIntent(SelectionChangedCause.keyboard),
-
-  // Redo
-  LogicalKeySet(
-    LogicalKeyboardKey.shift,
-    LogicalKeyboardKey.control,
-    LogicalKeyboardKey.keyZ,
-  ): const RedoTextIntent(
-    SelectionChangedCause.keyboard,
-  ),
-  LogicalKeySet(
-    LogicalKeyboardKey.shift,
-    LogicalKeyboardKey.meta,
-    LogicalKeyboardKey.keyZ,
-  ): const RedoTextIntent(
-    SelectionChangedCause.keyboard,
-  ),
-
-  // Indent
-  LogicalKeySet(LogicalKeyboardKey.tab): const IndentIntent(),
-
-  // Outdent
-  LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab):
-      const OutdentIntent(),
-
-  // Comment Uncomment
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.slash):
-      const CommentUncommentIntent(),
-  const SingleActivator(LogicalKeyboardKey.slash, meta: true):
-      const CommentUncommentIntent(),
-
-  // Search
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyF):
-      const SearchIntent(),
-  const SingleActivator(LogicalKeyboardKey.keyF, meta: true):
-      const SearchIntent(),
-
-  // Page Up / Down: scroll the editor by one viewport
-  const SingleActivator(LogicalKeyboardKey.pageDown): const PageScrollIntent(
-    forward: true,
-  ),
-  const SingleActivator(LogicalKeyboardKey.pageUp): const PageScrollIntent(
-    forward: false,
-  ),
-};
-
-// Shortcuts that must not fire while an IME composition is in progress,
-// as they would either drop the composition or act on the composing text.
-final _shortcutsIgnoredWhileComposing = <ShortcutActivator, Intent>{
-  // Dismiss
-  LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
-
-  // EnterKey
-  LogicalKeySet(LogicalKeyboardKey.enter): const EnterKeyIntent(),
-
-  // TabKey
-  LogicalKeySet(LogicalKeyboardKey.tab): const TabKeyIntent(),
-
-  // Overtype: bare Insert. Flutter has no overtype hook
-  // (flutter/flutter#122673) and `DefaultTextEditingShortcuts` binds only
-  // Ctrl-Insert (copy) and Shift-Insert (paste), so the bare key reaches here.
-  // A SingleActivator with no modifiers does not match a modified Insert, so
-  // the copy binding above keeps working. Ignored while composing for the same
-  // reason as Enter and Tab: the keystroke belongs to the IME.
-  const SingleActivator(LogicalKeyboardKey.insert):
-      const ToggleOvertypeIntent(),
-};
 
 /// The vertical insets both the editor's `TextField` (`contentPadding`, set
 /// below) and the gutter's outer `Padding` carry — two edges of
@@ -265,6 +172,20 @@ class CodeField extends StatefulWidget {
 
   final GutterStyle gutterStyle;
 
+  /// The renderer the code is drawn with.
+  ///
+  /// The re_editor renderer lays out only the lines that are on screen, so a
+  /// document of any length costs the same to draw as a document of one
+  /// screen. The text field renderer lays the whole document out on every
+  /// change, which is what a long document is slow on.
+  final CodeFieldRenderer renderer;
+
+  /// Whether the field takes the focus when it is mounted.
+  ///
+  /// Off by default. Only the re_editor renderer can honour it; the text
+  /// field renderer never focuses itself.
+  final bool autofocus;
+
   const CodeField({
     super.key,
     required this.controller,
@@ -292,6 +213,8 @@ class CodeField extends StatefulWidget {
     this.onChanged,
     this.onTap,
     this.textDirection,
+    this.renderer = CodeFieldRenderer.reEditor,
+    this.autofocus = false,
     @Deprecated('Use gutterStyle instead') this.lineNumbers,
     @Deprecated('Use gutterStyle instead')
     this.lineNumberStyle = const GutterStyle(),
@@ -423,9 +346,15 @@ class _CodeFieldState extends State<CodeField> {
     _codeScroll = _controllers?.addAndGet();
     _backgroundScroll = _controllers?.addAndGet();
 
+    // The renderer the field was asked for, before the ambient direction is
+    // known: the direction can only be read in a dependency change, and the
+    // first build that follows it corrects this.
+    _textFieldRenderer = widget.renderer == CodeFieldRenderer.textField;
+    _attachPopupListener();
+    widget.controller.setHighlightEnabledSilently(_textFieldRenderer);
+
     widget.controller.addListener(_onTextChanged);
     widget.controller.addListener(_updatePopupOffset);
-    widget.controller.popupController.addListener(_onPopupStateChanged);
     widget.controller.searchController.addListener(_onSearchControllerChange);
     _horizontalCodeScroll = ScrollController();
     _focusNode = widget.focusNode ?? FocusNode();
@@ -454,12 +383,88 @@ class _CodeFieldState extends State<CodeField> {
     return widget.controller.onKey(event);
   }
 
+  /// Whether the code is drawn with the text field renderer.
+  ///
+  /// Not the same as the renderer's own setting: the re_editor renderer lays
+  /// the code out left to right only — it hardcodes the direction in the
+  /// paragraph it builds and in the painter it measures the caret with, and
+  /// it has no parameter to change that — so a right to left field is drawn
+  /// with the text field renderer, which lays the paragraph out in the
+  /// direction it is given.
+  bool _textFieldRenderer = false;
+
+  /// The popup controller whose listener is attached.
+  ///
+  /// The field follows the controller it is given, and a host may hand it a
+  /// new one: the listener has to move with it, or the popup is never
+  /// positioned — the offsets it is positioned with are computed when the
+  /// popup's state changes.
+  PopupController? _popupListenerController;
+
+  /// Attaches the popup listener to the controller this field draws.
+  ///
+  /// The listener belongs to the text field renderer: the re_editor renderer
+  /// places its own popup.
+  void _attachPopupListener() {
+    final popup = widget.controller.popupController;
+    if (identical(_popupListenerController, popup) && _textFieldRenderer) {
+      return;
+    }
+    _popupListenerController?.removeListener(_onPopupStateChanged);
+    if (_textFieldRenderer) {
+      popup.addListener(_onPopupStateChanged);
+      _popupListenerController = popup;
+    } else {
+      _popupListenerController = null;
+    }
+  }
+
+  /// Brings the renderer in line with the direction the code is laid out in.
+  ///
+  /// The text field renderer draws the code with the highlighted spans, so it
+  /// needs the package's own highlight; the re_editor renderer highlights the
+  /// code itself and does not, and the package's highlight parse is quadratic
+  /// in the document's length.
+  ///
+  /// The highlight is switched without a notification: the build that follows
+  /// this one reads the new code, and a notification would arrive while the
+  /// framework is building, which it refuses.
+  void _syncEffectiveRenderer() {
+    final direction =
+        widget.textDirection ??
+        Directionality.maybeOf(context) ??
+        TextDirection.ltr;
+    final useTextField =
+        widget.renderer == CodeFieldRenderer.textField ||
+        direction == TextDirection.rtl;
+
+    if (useTextField == _textFieldRenderer) {
+      return;
+    }
+
+    _textFieldRenderer = useTextField;
+
+    _attachPopupListener();
+
+    widget.controller.setHighlightEnabledSilently(useTextField);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncEffectiveRenderer();
+  }
+
   @override
   void dispose() {
     widget.controller.searchController.codeFieldFocusNode = null;
     widget.controller.removeListener(_onTextChanged);
     widget.controller.removeListener(_updatePopupOffset);
     widget.controller.popupController.removeListener(_onPopupStateChanged);
+    _popupListenerController = null;
+    if (_textFieldRenderer) {
+      widget.controller.setHighlightEnabledSilently(false);
+    }
     _suggestionsPopup?.remove();
     widget.controller.searchController.removeListener(
       _onSearchControllerChange,
@@ -482,12 +487,19 @@ class _CodeFieldState extends State<CodeField> {
     oldWidget.controller.searchController.removeListener(
       _onSearchControllerChange,
     );
+    if (identical(
+      _popupListenerController,
+      oldWidget.controller.popupController,
+    )) {
+      _popupListenerController = null;
+    }
 
     widget.controller.searchController.codeFieldFocusNode = _focusNode;
     widget.controller.addListener(_onTextChanged);
     widget.controller.addListener(_updatePopupOffset);
-    widget.controller.popupController.addListener(_onPopupStateChanged);
     widget.controller.searchController.addListener(_onSearchControllerChange);
+    _syncEffectiveRenderer();
+    _attachPopupListener();
   }
 
   /// The old `_codeScroll != null` half of this guard was dead weight:
@@ -836,13 +848,17 @@ class _CodeFieldState extends State<CodeField> {
 
     textStyle = defaultTextStyle.merge(widget.textStyle);
 
+    _textDirection = widget.textDirection ?? Directionality.of(context);
+
+    if (!_textFieldRenderer) {
+      return _buildReEditor(context, textStyle);
+    }
+
     final isComposingText = widget.controller.hasActiveComposition;
     final shortcuts = {
-      ..._shortcuts,
-      if (!isComposingText) ..._shortcutsIgnoredWhileComposing,
+      ...codeFieldShortcuts,
+      if (!isComposingText) ...codeFieldShortcutsIgnoringComposition,
     };
-
-    _textDirection = widget.textDirection ?? Directionality.of(context);
 
     final codeField = TextField(
       focusNode: _focusNode,
@@ -984,6 +1000,40 @@ class _CodeFieldState extends State<CodeField> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  /// The code field drawn by re_editor.
+  ///
+  /// The gutter is part of the editor here: re_editor hands the field the
+  /// paragraphs it has laid out, so the gutter draws the rows that are on
+  /// screen and needs no scroll synchronisation of its own.
+  Widget _buildReEditor(BuildContext context, TextStyle textStyle) {
+    return Container(
+      decoration: widget.decoration,
+      color: _backgroundCol,
+      padding: const EdgeInsets.only(left: 8),
+      child: CodeFieldRe(
+        controller: widget.controller,
+        language: widget.controller.language,
+        theme: CodeTheme.of(context),
+        gutterStyle: widget.gutterStyle,
+        textStyle: textStyle,
+        padding: EdgeInsets.only(
+          top: codeFieldVerticalPadding + widget.padding.top,
+          left: widget.padding.left,
+          right: widget.padding.right,
+          bottom: widget.padding.bottom,
+        ),
+        cursorColor: widget.cursorColor ?? textStyle.color,
+        readOnly: widget.readOnly,
+        wordWrap: widget.wrap,
+        focusNode: widget.focusNode,
+        onChanged: widget.onChanged,
+        onTap: widget.onTap,
+        enabled: widget.enabled ?? true,
+        autofocus: widget.autofocus,
       ),
     );
   }

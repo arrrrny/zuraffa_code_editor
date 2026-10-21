@@ -18,6 +18,7 @@ Future<void> _pumpLongLine(WidgetTester tester, {required bool wrap}) async {
           width: 200,
           height: 300,
           child: CodeField(
+            renderer: CodeFieldRenderer.textField,
             controller: controller,
             wrap: wrap,
             textStyle: const TextStyle(fontSize: 14),
@@ -58,6 +59,7 @@ Future<void> _pumpNarrowWrappedText(WidgetTester tester) async {
           width: 200,
           height: 300,
           child: CodeField(
+            renderer: CodeFieldRenderer.textField,
             controller: controller,
             wrap: true,
             textStyle: const TextStyle(fontSize: 14),
@@ -219,6 +221,7 @@ void main() {
               width: 200,
               height: 300,
               child: CodeField(
+                renderer: CodeFieldRenderer.textField,
                 controller: controller,
                 textStyle: const TextStyle(fontSize: 14),
               ),

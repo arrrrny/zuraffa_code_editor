@@ -75,6 +75,7 @@ void main() {
                   // what this fix does, which is a separate pre-existing
                   // behaviour and not the crash reported in #32.
                   child: CodeField(
+                    renderer: CodeFieldRenderer.textField,
                     controller: controller,
                     focusNode: FocusNode(),
                     gutterStyle: GutterStyle.none,
@@ -114,6 +115,7 @@ void main() {
               ),
               Expanded(
                 child: CodeField(
+                  renderer: CodeFieldRenderer.textField,
                   controller: controller,
                   focusNode: FocusNode(),
                   gutterStyle: GutterStyle.none,

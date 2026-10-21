@@ -26,7 +26,13 @@ void main() {
         home: Scaffold(
           body: Column(
             children: [
-              Expanded(child: CodeField(controller: controller, expands: true)),
+              Expanded(
+                child: CodeField(
+                  renderer: CodeFieldRenderer.textField,
+                  controller: controller,
+                  expands: true,
+                ),
+              ),
             ],
           ),
         ),
@@ -51,7 +57,12 @@ void main() {
 
     await wt.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: CodeField(controller: controller)),
+        home: Scaffold(
+          body: CodeField(
+            renderer: CodeFieldRenderer.textField,
+            controller: controller,
+          ),
+        ),
       ),
     );
     await wt.pumpAndSettle();

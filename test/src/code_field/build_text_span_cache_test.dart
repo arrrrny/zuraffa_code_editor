@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zuraffa_code_editor/src/code_field/code_controller.dart';
 import 'package:zuraffa_code_editor/src/code_field/code_field.dart';
+import 'package:zuraffa_code_editor/src/code_field/code_field_renderer.dart';
 import 'package:zuraffa_code_editor/src/code_field/search_result_highlighted_builder.dart';
 import 'package:zuraffa_code_editor/src/code_theme/code_theme.dart';
 import 'package:zuraffa_code_editor/src/code_theme/code_theme_data.dart';
@@ -30,7 +31,11 @@ Future<(CodeController, BuildContext)> _pump(
   addTearDown(controller.dispose);
 
   focusNode = FocusNode();
-  final field = CodeField(controller: controller, focusNode: focusNode);
+  final field = CodeField(
+    renderer: CodeFieldRenderer.textField,
+    controller: controller,
+    focusNode: focusNode,
+  );
 
   await wt.pumpWidget(
     MaterialApp(
@@ -253,7 +258,11 @@ void main() {
             home: Scaffold(
               body: CodeTheme(
                 data: theme,
-                child: CodeField(controller: controller, focusNode: focusNode),
+                child: CodeField(
+                  renderer: CodeFieldRenderer.textField,
+                  controller: controller,
+                  focusNode: focusNode,
+                ),
               ),
             ),
           ),

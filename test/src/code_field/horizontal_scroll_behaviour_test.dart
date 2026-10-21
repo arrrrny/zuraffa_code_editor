@@ -47,6 +47,7 @@ Future<CodeController> _pumpField(
           width: 300,
           height: 200,
           child: CodeField(
+            renderer: CodeFieldRenderer.textField,
             controller: controller,
             wrap: wrap,
             focusNode: focusNode,

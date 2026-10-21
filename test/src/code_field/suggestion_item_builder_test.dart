@@ -23,6 +23,7 @@ Future<CodeController> _pumpFieldWithPopup(
     MaterialApp(
       home: Scaffold(
         body: CodeField(
+          renderer: CodeFieldRenderer.textField,
           controller: controller,
           focusNode: focusNode,
           suggestionItemBuilder: itemBuilder,

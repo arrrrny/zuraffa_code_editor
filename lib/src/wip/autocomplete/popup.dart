@@ -141,7 +141,16 @@ class PopupState extends State<Popup> {
           child: Container(
             decoration: BoxDecoration(
               color: widget.backgroundColor,
-              border: Border.all(color: widget.style.color!, width: 0.5),
+              // The code's own colour is the popup's border, but the code
+              // need not have one: a field that is given no text style has
+              // none, and the popup still has to be drawn.
+              border: Border.all(
+                color:
+                    widget.style.color ??
+                    DefaultTextStyle.of(context).style.color ??
+                    const Color(0xFF000000),
+                width: 0.5,
+              ),
             ),
             child: ScrollablePositionedList.builder(
               shrinkWrap: true,

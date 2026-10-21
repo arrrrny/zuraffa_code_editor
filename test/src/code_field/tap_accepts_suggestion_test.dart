@@ -128,7 +128,11 @@ void main() {
               child: SizedBox(
                 width: 390,
                 height: 80,
-                child: CodeField(controller: controller, focusNode: focusNode),
+                child: CodeField(
+                  renderer: CodeFieldRenderer.textField,
+                  controller: controller,
+                  focusNode: focusNode,
+                ),
               ),
             ),
           ),

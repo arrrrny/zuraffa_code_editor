@@ -40,6 +40,7 @@ Future<CodeController> _pumpField(
         body: CodeTheme(
           data: codeTheme,
           child: CodeField(
+            renderer: CodeFieldRenderer.textField,
             controller: controller,
             focusNode: focusNode,
             decoration: decoration,
