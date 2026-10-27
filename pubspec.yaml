@@ -2,7 +2,7 @@ name: zuraffa_code_editor
 description: >-
   A customizable Flutter code field supporting syntax highlighting, code
   folding with visible closing lines, autocompletion and themes.
-version: 0.4.0
+version: 7.2.0
 repository: https://github.com/arrrrny/zuraffa_code_editor
 homepage: https://zuraffa.com
 issue_tracker: https://github.com/arrrrny/zuraffa_code_editor/issues
@@ -54,3 +54,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+# Fleet-wide xml policy: pin the override to the latest xml so graphs that
+# still transitively pull the abandoned minio (xml 6.x) resolve cleanly.
+dependency_overrides:
+  xml: 7.1.0
