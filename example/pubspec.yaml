@@ -1,7 +1,7 @@
 name: example
 description: Example
 publish_to: 'none'
-version: 7.2.0
+version: 7.3.0
 
 environment:
   sdk: '>=3.11.0 <4.0.0'
