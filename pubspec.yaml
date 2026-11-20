@@ -17,7 +17,7 @@ environment:
   sdk: ">=3.11.0 <4.0.0"
   flutter: ">=3.41.0"
 
-# Every platform is genuinely supported — nothing in the graph reaches
+# Every platform is genuinely supported - nothing in the graph reaches
 # `dart:io` since `autotrie` was replaced (#23), which is what pana derives
 # these tags from. Declaring them keeps the claim from silently regressing the
 # next time a dependency that reaches `dart:io` is added.
